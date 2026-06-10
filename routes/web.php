@@ -1,0 +1,43 @@
+<?php
+
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\PackageController;
+use App\Http\Controllers\SessionController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', fn() => redirect()->route('dashboard'));
+
+Route::get('/lang/{locale}', function ($locale) {
+    if (in_array($locale, ['ru', 'kk'])) {
+        session(['locale' => $locale]);
+    }
+    return redirect(url()->previous(route('dashboard')));
+})->name('lang.switch');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/statistics', [\App\Http\Controllers\StatisticsController::class, 'index'])->name('statistics');
+
+    Route::resource('clients', ClientController::class);
+
+    Route::get('/clients/{client}/packages/create', [PackageController::class, 'create'])->name('packages.create');
+    Route::post('/clients/{client}/packages', [PackageController::class, 'store'])->name('packages.store');
+    Route::get('/packages/{package}/edit', [PackageController::class, 'edit'])->name('packages.edit');
+    Route::patch('/packages/{package}', [PackageController::class, 'update'])->name('packages.update');
+    Route::get('/packages/{package}/sessions', [PackageController::class, 'sessions'])->name('packages.sessions');
+    Route::post('/packages/{package}/sessions', [PackageController::class, 'addSession'])->name('packages.addSession');
+
+    Route::post('/sessions/bulk-update', [SessionController::class, 'bulkUpdate'])->name('sessions.bulkUpdate');
+    Route::delete('/sessions/bulk-delete', [SessionController::class, 'bulkDelete'])->name('sessions.bulkDelete');
+    Route::patch('/sessions/{session}', [SessionController::class, 'update'])->name('sessions.update');
+    Route::post('/sessions/{session}/reschedule', [SessionController::class, 'reschedule'])->name('sessions.reschedule');
+    Route::delete('/sessions/{session}', [SessionController::class, 'destroy'])->name('sessions.destroy');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
