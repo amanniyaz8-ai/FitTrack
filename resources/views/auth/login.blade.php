@@ -62,9 +62,6 @@
                 Нет аккаунта? <a href="{{ route('register') }}" class="font-medium hover:underline" style="color: #f97316;">Зарегистрироваться</a>
             </p>
 
-            <div class="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-400 text-center">
-                Demo: trainer@fittrack.kz / password
-            </div>
         </div>
     </div>
 <script>
