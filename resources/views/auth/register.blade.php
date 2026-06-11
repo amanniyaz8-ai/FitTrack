@@ -45,14 +45,24 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
-                        <input type="password" name="password" required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2"
-                            placeholder="Минимум 8 символов">
+                        <div class="relative">
+                            <input type="password" name="password" id="password" required
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-12 focus:outline-none focus:ring-2"
+                                placeholder="Минимум 8 символов">
+                            <button type="button" onclick="togglePassword('password','eyeIcon1')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i id="eyeIcon1" class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Подтвердите пароль</label>
-                        <input type="password" name="password_confirmation" required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2">
+                        <div class="relative">
+                            <input type="password" name="password_confirmation" id="password_confirmation" required
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-12 focus:outline-none focus:ring-2">
+                            <button type="button" onclick="togglePassword('password_confirmation','eyeIcon2')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i id="eyeIcon2" class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Специализация</label>
@@ -73,5 +83,18 @@
             </p>
         </div>
     </div>
+<script>
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+</script>
 </body>
 </html>
