@@ -10,10 +10,6 @@
 {{-- Last updated indicator --}}
 <div class="flex items-center justify-between mb-4">
     <h1 class="text-lg md:text-xl font-bold" style="color: #0f2035;">{{ __('app.dashboard_title') }}</h1>
-    <span class="text-xs text-gray-400 hidden sm:flex items-center gap-1">
-        <i class="fas fa-sync-alt"></i>
-        {{ app()->getLocale() === 'kk' ? 'Жаңартылды' : 'Обновлено' }}: {{ now()->format('H:i:s') }} · <span id="countdown">60</span> {{ app()->getLocale() === 'kk' ? 'сек' : 'сек' }}
-    </span>
 </div>
 <!-- Stats cards -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
