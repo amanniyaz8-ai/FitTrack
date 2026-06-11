@@ -16,7 +16,9 @@ Route::get('/lang/{locale}', function ($locale) {
     return redirect(url()->previous(route('dashboard')));
 })->name('lang.switch');
 
-Route::middleware(['auth'])->group(function () {
+Route::get('/trial-expired', fn() => view('trial-expired'))->name('trial.expired')->middleware('auth');
+
+Route::middleware(['auth', \App\Http\Middleware\CheckTrial::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/statistics', [\App\Http\Controllers\StatisticsController::class, 'index'])->name('statistics');
 
