@@ -246,6 +246,23 @@
     </div>
 </div>
 
+<!-- Trial banner -->
+@auth
+@if(auth()->user()->trial_ends_at)
+@php
+    $daysLeft = max(0, (int) now()->diffInDays(auth()->user()->trial_ends_at, false));
+@endphp
+<div style="background-color: {{ $daysLeft <= 3 ? '#dc2626' : '#f97316' }};" class="text-white text-center py-2 px-4 text-sm font-medium">
+    <i class="fas fa-clock mr-1"></i>
+    @if($daysLeft > 0)
+        Пробный период: осталось <strong>{{ $daysLeft }} {{ $daysLeft === 1 ? 'день' : ($daysLeft < 5 ? 'дня' : 'дней') }}</strong>
+    @else
+        Пробный период завершён
+    @endif
+</div>
+@endif
+@endauth
+
 <!-- Flash messages -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
     @if(session('success'))
