@@ -54,6 +54,14 @@
                         <input type="password" name="password_confirmation" required
                             class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2">
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Специализация</label>
+                        <select name="specialization" required class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2">
+                            <option value="fitness" {{ old('specialization')=='fitness' ? 'selected' : '' }}>Фитнес</option>
+                            <option value="running" {{ old('specialization')=='running' ? 'selected' : '' }}>Бег</option>
+                            <option value="swimming" {{ old('specialization')=='swimming' ? 'selected' : '' }}>Плавание</option>
+                        </select>
+                    </div>
                 </div>
                 <button type="submit" class="w-full mt-6 text-white py-3 rounded-lg font-semibold transition" style="background-color: #f97316;" onmouseover="this.style.backgroundColor='#ea580c'" onmouseout="this.style.backgroundColor='#f97316'">
                     Зарегистрироваться
