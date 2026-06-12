@@ -25,10 +25,15 @@
             <i class="fas fa-bullseye mr-1" style="color: #fb923c;"></i>{{ $client->goal }}
         </p>
         @endif
-        <div class="mt-3">
+        <div class="mt-3 flex items-center gap-2 flex-wrap">
             <p class="text-xs text-gray-400">
                 <i class="fas fa-calendar-week mr-1"></i>{{ $client->training_days_label }}
             </p>
+            @if($client->training_time)
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1" style="background:#fff7ed;color:#f97316;">
+                <i class="fas fa-clock text-xs"></i> {{ $client->training_time }}
+            </span>
+            @endif
         </div>
         @if(!$isActive)
         <div class="mt-3 flex items-center gap-1 text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-1.5">
