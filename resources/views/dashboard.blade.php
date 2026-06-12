@@ -109,7 +109,7 @@
             </a>
             <a href="{{ route('dashboard', ['filter' => 'week']) }}"
                class="px-3 py-1 rounded-md text-sm font-medium transition {{ $filter === 'week' ? 'bg-orange-500 text-white' : 'text-gray-300 hover:text-white' }}">
-               7 дней
+               Неделя
             </a>
             <a href="{{ route('dashboard', ['filter' => 'history']) }}"
                class="px-3 py-1 rounded-md text-sm font-medium transition {{ $filter === 'history' ? 'bg-blue-500 text-white' : 'text-gray-300 hover:text-white' }}">
