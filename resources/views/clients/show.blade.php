@@ -31,7 +31,14 @@
         <div class="space-y-3 text-sm">
             <div>
                 <span class="text-gray-400 block">Дни тренировок:</span>
-                <p class="font-medium" style="color: #0f2035;">{{ $client->training_days_label }}</p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <p class="font-medium" style="color: #0f2035;">{{ $client->training_days_label }}</p>
+                    @if($client->training_time)
+                    <span class="flex items-center gap-1 text-sm font-semibold px-2 py-0.5 rounded-full" style="background:#fff7ed;color:#f97316;">
+                        <i class="fas fa-clock text-xs"></i> {{ $client->training_time }}
+                    </span>
+                    @endif
+                </div>
             </div>
             @if($client->goal)
             <div>
