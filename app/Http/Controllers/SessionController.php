@@ -77,6 +77,21 @@ class SessionController extends Controller
         return redirect()->route('dashboard')->with('success', 'Удалено занятий: ' . count($request->session_ids));
     }
 
+    public function updatePackageTime(Request $request, Session $session)
+    {
+        $this->authorize('update', $session->package);
+
+        $request->validate(['scheduled_time' => 'required|date_format:H:i']);
+
+        // Update all future scheduled sessions in the same package
+        Session::where('package_id', $session->package_id)
+            ->where('status', 'scheduled')
+            ->whereDate('scheduled_date', '>=', today())
+            ->update(['scheduled_time' => $request->scheduled_time]);
+
+        return back()->with('success', 'Время обновлено для всех предстоящих тренировок.');
+    }
+
     public function destroy(Session $session)
     {
         $this->authorize('update', $session->package);

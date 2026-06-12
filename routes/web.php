@@ -34,6 +34,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckTrial::class])->group(funct
     Route::post('/sessions/bulk-update', [SessionController::class, 'bulkUpdate'])->name('sessions.bulkUpdate');
     Route::delete('/sessions/bulk-delete', [SessionController::class, 'bulkDelete'])->name('sessions.bulkDelete');
     Route::patch('/sessions/{session}', [SessionController::class, 'update'])->name('sessions.update');
+    Route::post('/sessions/{session}/update-package-time', [SessionController::class, 'updatePackageTime'])->name('sessions.updatePackageTime');
     Route::post('/sessions/{session}/reschedule', [SessionController::class, 'reschedule'])->name('sessions.reschedule');
     Route::delete('/sessions/{session}', [SessionController::class, 'destroy'])->name('sessions.destroy');
 

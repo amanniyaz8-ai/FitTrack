@@ -288,6 +288,30 @@
     @yield('content')
 </main>
 
+<!-- Time picker confirm modal -->
+<div id="gtp-confirm-modal" class="fixed inset-0 z-[3000] hidden flex items-center justify-center" style="background:rgba(0,0,0,0.5);">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 w-80 mx-4">
+        <div class="text-center mb-4">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style="background:#fff7ed;">
+                <i class="fas fa-clock text-xl" style="color:#f97316;"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-lg">Изменить время</h3>
+            <p class="text-gray-500 text-sm mt-1">Новое время: <strong id="gtp-confirm-time" style="color:#f97316;"></strong></p>
+        </div>
+        <div class="space-y-2">
+            <button id="gtp-confirm-all" class="w-full py-3 rounded-xl font-semibold text-white transition" style="background:#f97316;">
+                Изменить предстоящие тренировки
+            </button>
+            <button id="gtp-confirm-single" class="w-full py-3 rounded-xl font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 transition">
+                Только это занятие
+            </button>
+            <button onclick="document.getElementById('gtp-confirm-modal').classList.add('hidden')" class="w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition">
+                Отмена
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 function toggleTheme() {
     const html = document.documentElement;
@@ -352,7 +376,7 @@ function openTimePicker(btn, url, status, currentTime) {
                 <input type="hidden" name="status" value="${status}">
                 <input type="hidden" name="scheduled_time" id="gtp-value"
                     value="${String(_gpH).padStart(2,'0')}:${String(_gpM).padStart(2,'0')}">
-                <button type="submit" style="width:100%;background:#f97316;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">
+                <button type="button" onclick="gtpConfirm('${url}')" style="width:100%;background:#f97316;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">
                     ✓ OK
                 </button>
             </form>
@@ -403,6 +427,35 @@ function gtpSelect(type, val, el) {
     document.getElementById('gtp-preview').textContent = t;
 }
 // ============================================================
+
+// Time picker confirm popup
+function gtpConfirm(url) {
+    const time = document.getElementById('gtp-value').value;
+    const status = document.querySelector('#gtp-form [name=status]').value;
+    const token = document.querySelector('#gtp-form [name=_token]').value;
+
+    // Show confirm popup
+    const modal = document.getElementById('gtp-confirm-modal');
+    document.getElementById('gtp-confirm-time').textContent = time;
+    document.getElementById('gtp-confirm-single').onclick = function() {
+        // Submit just this session
+        const form = document.getElementById('gtp-form');
+        form.submit();
+        modal.classList.add('hidden');
+    };
+    document.getElementById('gtp-confirm-all').onclick = function() {
+        // Submit all future sessions in this package
+        const f = document.createElement('form');
+        f.method = 'POST';
+        f.action = url.replace('/sessions/', '/sessions/') + '/update-package-time';
+        f.innerHTML = `<input type="hidden" name="_token" value="${token}">
+                       <input type="hidden" name="scheduled_time" value="${time}">`;
+        document.body.appendChild(f);
+        f.submit();
+        modal.classList.add('hidden');
+    };
+    modal.classList.remove('hidden');
+}
 
 // Set correct icon on load
 document.addEventListener('DOMContentLoaded', function() {
