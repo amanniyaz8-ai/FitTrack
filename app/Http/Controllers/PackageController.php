@@ -27,7 +27,7 @@ class PackageController extends Controller
         $package = $client->packages()->create($data);
 
         // Auto-generate sessions based on training_days
-        $this->generateSessionsPublic($package, $client);
+        $this->generateSessionsPublic($package, $client, 0, $client->training_time);
 
         $upcomingCount = $package->sessions()
             ->where(fn($q) => $q->whereDate('scheduled_date', today())->orWhereDate('scheduled_date', today()->addDay()))

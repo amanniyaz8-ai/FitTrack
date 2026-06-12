@@ -47,15 +47,7 @@
     </div>
 
     <div>
-        <div class="flex items-center justify-between mb-2">
-            <label class="block text-sm font-medium text-gray-700">Дни тренировок <span class="text-red-500">*</span></label>
-            <div class="flex items-center gap-2">
-                <i class="fas fa-clock text-orange-400 text-sm"></i>
-                <input type="time" name="pkg_training_time" value="{{ old('pkg_training_time') }}"
-                    class="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    placeholder="Время">
-            </div>
-        </div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Дни тренировок <span class="text-red-500">*</span></label>
         <div class="flex flex-wrap gap-2">
             @foreach($days as $value => $label)
             <label class="flex items-center cursor-pointer">
@@ -76,6 +68,16 @@
         @error('training_days')
             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
         @enderror
+    </div>
+
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-clock text-orange-400 mr-1"></i> Время тренировок
+        </label>
+        <input type="time" name="training_time" value="{{ old('training_time', $client->training_time ?? '') }}"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
+            placeholder="Например: 10:00">
+        <p class="text-xs text-gray-400 mt-1">Закрепите время — оно будет отображаться в мониторинге</p>
     </div>
 </div>
 

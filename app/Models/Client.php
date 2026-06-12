@@ -19,6 +19,7 @@ class Client extends Model
         'goal',
         'contraindications',
         'training_days',
+        'training_time',
     ];
 
     protected $casts = [

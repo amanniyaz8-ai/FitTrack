@@ -17,6 +17,7 @@ class StoreClientRequest extends FormRequest
             'contraindications' => 'nullable|string|max:1000',
             'training_days'     => 'required|array|min:1',
             'training_days.*'   => 'in:Mon,Tue,Wed,Thu,Fri,Sat,Sun',
+            'training_time'     => 'nullable|date_format:H:i',
         ];
     }
 
