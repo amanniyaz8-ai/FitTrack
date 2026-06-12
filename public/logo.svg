@@ -1,0 +1,79 @@
+<svg width="100%" viewBox="0 0 680 230" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>FitTrack Logo</title>
+  <desc>Логотип FitTrack с рунами на штанге</desc>
+  <defs>
+    <style>
+      .logo-text { font-family: system-ui, sans-serif; font-weight: 700; fill: #f97316; letter-spacing: -1px; }
+      .bar   { fill: #f97316; }
+      .plate { fill: #ea580c; }
+      .rune  { fill: none; stroke: #c8440a; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+      .rune-w { fill: none; stroke: #fbbf7a; stroke-width: 1.3; stroke-linecap: round; opacity: 0.65; }
+    </style>
+  </defs>
+
+  <!-- LEFT BIG PLATE -->
+  <rect x="178" y="72" width="28" height="76" rx="6" class="plate"/>
+  <line x1="188" y1="84" x2="188" y2="136" class="rune-w"/>
+  <line x1="188" y1="88" x2="196" y2="96" class="rune-w"/>
+  <line x1="188" y1="100" x2="196" y2="108" class="rune-w"/>
+
+  <!-- LEFT SMALL PLATE -->
+  <rect x="210" y="82" width="16" height="56" rx="4" class="bar"/>
+  <line x1="218" y1="90" x2="218" y2="130" class="rune"/>
+  <line x1="218" y1="90" x2="224" y2="98" class="rune"/>
+  <line x1="224" y1="98" x2="218" y2="106" class="rune"/>
+  <line x1="218" y1="106" x2="224" y2="116" class="rune"/>
+
+  <!-- BAR -->
+  <rect x="226" y="100" width="228" height="20" rx="3" class="bar"/>
+
+  <!-- ᛖ Ehwaz -->
+  <line x1="260" y1="103" x2="260" y2="117" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="260" y1="103" x2="268" y2="103" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="260" y1="110" x2="267" y2="110" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="260" y1="117" x2="268" y2="117" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- ᛚ Laguz -->
+  <line x1="283" y1="103" x2="283" y2="117" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="283" y1="117" x2="290" y2="112" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- ᛋ Sowilo -->
+  <polyline points="305,103 311,107 305,112 311,117" fill="none" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <circle cx="328" cy="110" r="2" fill="#c8440a"/>
+
+  <!-- ᛁ Isa -->
+  <line x1="340" y1="103" x2="340" y2="117" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+
+  <circle cx="353" cy="110" r="2" fill="#c8440a"/>
+
+  <!-- ᚠ Fehu -->
+  <line x1="366" y1="103" x2="366" y2="117" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="366" y1="104" x2="373" y2="108" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="366" y1="109" x2="373" y2="113" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- ᚱ Raidho -->
+  <line x1="388" y1="103" x2="388" y2="117" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="388" y1="103" x2="394" y2="108" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="394" y1="108" x2="388" y2="112" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="388" y1="112" x2="394" y2="117" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- ᛖ Ehwaz -->
+  <line x1="410" y1="103" x2="410" y2="117" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="410" y1="103" x2="418" y2="103" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="410" y1="110" x2="417" y2="110" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="410" y1="117" x2="418" y2="117" stroke="#c8440a" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- RIGHT SMALL PLATE -->
+  <rect x="454" y="82" width="16" height="56" rx="4" class="bar"/>
+  <line x1="462" y1="90" x2="462" y2="130" class="rune"/>
+  <line x1="462" y1="130" x2="469" y2="122" class="rune"/>
+
+  <!-- RIGHT BIG PLATE -->
+  <rect x="474" y="72" width="28" height="76" rx="6" class="plate"/>
+  <line x1="488" y1="84" x2="488" y2="136" class="rune-w"/>
+  <polyline points="480,92 486,100 480,108 486,116 480,124" fill="none" class="rune-w"/>
+
+  <!-- WORDMARK -->
+  <text x="340" y="185" text-anchor="middle" font-size="62" class="logo-text">FitTrack</text>
+</svg>
