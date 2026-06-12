@@ -5,6 +5,8 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PromoCodeController;
+use App\Http\Controllers\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route('dashboard'));
@@ -15,6 +17,16 @@ Route::get('/lang/{locale}', function ($locale) {
     }
     return redirect(url()->previous(route('dashboard')));
 })->name('lang.switch');
+
+// Public pages (no auth required)
+Route::get('/pricing', [SubscriptionController::class, 'pricing'])->name('pricing');
+Route::get('/oferta', fn() => view('oferta'))->name('oferta');
+
+// Checkout and promo require auth but not active subscription
+Route::middleware('auth')->group(function () {
+    Route::get('/pricing/checkout/{plan}', [SubscriptionController::class, 'checkout'])->name('subscription.checkout');
+    Route::post('/promo/validate', [PromoCodeController::class, 'validate'])->name('promo.validate');
+});
 
 Route::get('/trial-expired', fn() => view('trial-expired'))->name('trial.expired')->middleware('auth');
 

@@ -61,6 +61,9 @@
             <p class="mt-4 text-center text-sm text-gray-500">
                 Нет аккаунта? <a href="{{ route('register') }}" class="font-medium hover:underline" style="color: #f97316;">Зарегистрироваться</a>
             </p>
+            <p class="mt-2 text-center text-xs text-gray-400">
+                <a href="/pricing" class="hover:underline" style="color: #f97316;">Посмотреть тарифы →</a>
+            </p>
 
         </div>
     </div>

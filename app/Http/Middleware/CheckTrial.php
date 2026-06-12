@@ -12,7 +12,7 @@ class CheckTrial
     {
         $user = $request->user();
 
-        if ($user && $user->trial_ends_at && now()->isAfter($user->trial_ends_at)) {
+        if ($user && !$user->hasActiveAccess()) {
             if (!$request->routeIs('trial.expired') && !$request->routeIs('logout')) {
                 return redirect()->route('trial.expired');
             }

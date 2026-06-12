@@ -17,7 +17,15 @@
                 <i class="fas fa-lock text-2xl" style="color: #f97316;"></i>
             </div>
             <h2 class="text-xl font-bold text-gray-800 mb-3">Пробный период завершён</h2>
-            <p class="text-gray-500 text-sm mb-6">Ваш 14-дневный пробный период закончился. Для продолжения работы свяжитесь с нами для оформления подписки.</p>
+            <p class="text-gray-500 text-sm mb-6">Ваш 14-дневный пробный период закончился. Оформите подписку, чтобы продолжить работу с FitTrack.</p>
+
+            <a href="{{ route('pricing') }}"
+               class="block w-full text-white py-3 rounded-lg font-semibold mb-3 transition"
+               style="background-color: #f97316;"
+               onmouseover="this.style.backgroundColor='#ea6c10'"
+               onmouseout="this.style.backgroundColor='#f97316'">
+                <i class="fas fa-crown mr-2"></i>Выбрать тариф
+            </a>
 
             <a href="https://wa.me/77775387496" target="_blank"
                class="block w-full text-white py-3 rounded-lg font-semibold mb-3 transition"

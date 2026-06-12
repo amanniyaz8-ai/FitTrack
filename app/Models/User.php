@@ -17,6 +17,7 @@ class User extends Authenticatable
         'password',
         'specialization',
         'trial_ends_at',
+        'subscription_ends_at',
     ];
 
     protected $hidden = [
@@ -27,10 +28,29 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'trial_ends_at' => 'datetime',
+            'email_verified_at'    => 'datetime',
+            'password'             => 'hashed',
+            'trial_ends_at'        => 'datetime',
+            'subscription_ends_at' => 'datetime',
         ];
+    }
+
+    /**
+     * True if the user currently has access (trial OR paid subscription).
+     */
+    public function hasActiveAccess(): bool
+    {
+        // NULL trial_ends_at = unrestricted (owner/admin account)
+        if ($this->trial_ends_at === null && $this->subscription_ends_at === null) {
+            return true;
+        }
+        if ($this->subscription_ends_at && now()->isBefore($this->subscription_ends_at)) {
+            return true;
+        }
+        if ($this->trial_ends_at && now()->isBefore($this->trial_ends_at)) {
+            return true;
+        }
+        return false;
     }
 
     public function clients(): HasMany
