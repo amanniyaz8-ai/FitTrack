@@ -716,23 +716,12 @@
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.time_optional') }}</label>
-                <div class="flex items-center gap-2">
-                    <select id="dash-add-hour"
-                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                        <option value="">— час —</option>
-                        @for($h = 6; $h <= 22; $h++)
-                            <option value="{{ str_pad($h, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($h, 2, '0', STR_PAD_LEFT) }}:00</option>
-                        @endfor
-                    </select>
-                    <select id="dash-add-min"
-                        class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
-                        <option value="00">: 00</option>
-                        <option value="15">: 15</option>
-                        <option value="30">: 30</option>
-                        <option value="45">: 45</option>
-                    </select>
-                </div>
                 <input type="hidden" name="scheduled_time" id="dash-add-time">
+                <button type="button" id="dash-add-time-btn" onclick="openDashTimePicker(this)"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-left flex items-center justify-between hover:border-orange-400 transition text-sm bg-white">
+                    <span id="dash-add-time-label" class="text-gray-400">Выбрать время</span>
+                    <i class="fas fa-clock text-gray-400 text-xs"></i>
+                </button>
             </div>
             <div class="flex gap-3">
                 <button type="button" onclick="submitDashAdd()"
@@ -928,9 +917,9 @@ function openDashAddModal(day) {
     const sel = document.getElementById('dash-add-client');
     sel.value = '';
     sel.style.borderColor = '';
-    document.getElementById('dash-add-hour').value  = '';
-    document.getElementById('dash-add-min').value   = '00';
-    document.getElementById('dash-add-time').value  = '';
+    document.getElementById('dash-add-time').value = '';
+    const lbl = document.getElementById('dash-add-time-label');
+    lbl.textContent = 'Выбрать время'; lbl.style.color = '';
     document.getElementById('dash-add-form').action = '';
     document.getElementById('dash-add-modal').classList.remove('hidden');
 }
@@ -947,6 +936,76 @@ function dashClientChanged(sel) {
     }
 }
 
+function openDashTimePicker(btn) {
+    if (window._gTimePicker) { window._gTimePicker.remove(); window._gTimePicker = null; }
+    const current = document.getElementById('dash-add-time').value;
+    let _h = current ? parseInt(current.split(':')[0]) : 9;
+    let _m = current ? parseInt(current.split(':')[1]) : 0;
+    const hours = Array.from({length:24}, (_,i) => i);
+    const minutes = [0,5,10,15,20,25,30,35,40,45,50,55];
+    const colStyle = 'flex:1;overflow-y:auto;text-align:center;padding:4px 8px;';
+    const iS = (sel) => `padding:8px 0;font-size:17px;font-weight:${sel?'700':'400'};color:${sel?'#f97316':'#374151'};cursor:pointer;border-radius:6px;background:${sel?'#fff7ed':'transparent'};`;
+    const popup = document.createElement('div');
+    popup.id = '_gTimePicker';
+    popup.style.cssText = 'position:fixed;z-index:3000;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);overflow:hidden;width:200px;';
+    popup.innerHTML = `
+        <div style="background:#0f2035;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="color:#fff;font-size:13px;font-weight:600;">Время занятия</span>
+            <span id="datp-preview" style="color:#fb923c;font-size:15px;font-weight:700;">${String(_h).padStart(2,'0')}:${String(_m).padStart(2,'0')}</span>
+        </div>
+        <div style="display:flex;border-bottom:1px solid #f3f4f6;">
+            <div style="flex:1;text-align:center;padding:4px 0;font-size:11px;color:#9ca3af;border-right:1px solid #f3f4f6;">Часы</div>
+            <div style="flex:1;text-align:center;padding:4px 0;font-size:11px;color:#9ca3af;">Минуты</div>
+        </div>
+        <div style="display:flex;height:210px;">
+            <div id="datp-hours" style="${colStyle}border-right:1px solid #f3f4f6;">
+                ${hours.map(v=>`<div data-v="${v}" onclick="datpSelect('h',${v},this)" style="${iS(v===_h)}">${String(v).padStart(2,'0')}</div>`).join('')}
+            </div>
+            <div id="datp-mins" style="${colStyle}">
+                ${minutes.map(v=>`<div data-v="${v}" onclick="datpSelect('m',${v},this)" style="${iS(v===_m)}">${String(v).padStart(2,'0')}</div>`).join('')}
+            </div>
+        </div>
+        <div style="padding:10px 12px;">
+            <button type="button" onclick="datpConfirm()" style="width:100%;background:#f97316;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">✓ Сохранить</button>
+        </div>`;
+    document.body.appendChild(popup);
+    window._gTimePicker = popup;
+    window._datpH = _h; window._datpM = _m;
+    const rect = btn.getBoundingClientRect();
+    let top = rect.bottom + 6;
+    if (top + 340 > window.innerHeight - 10) top = rect.top - 340 - 6;
+    let left = rect.left;
+    if (left + 200 > window.innerWidth - 10) left = window.innerWidth - 210;
+    if (left < 8) left = 8;
+    popup.style.top = top + 'px'; popup.style.left = left + 'px';
+    setTimeout(() => {
+        popup.querySelector(`#datp-hours [data-v="${_h}"]`)?.scrollIntoView({block:'center'});
+        popup.querySelector(`#datp-mins [data-v="${_m}"]`)?.scrollIntoView({block:'center'});
+    }, 10);
+    setTimeout(() => {
+        document.addEventListener('click', function _h(e) {
+            if (!popup.contains(e.target) && !btn.contains(e.target)) {
+                popup.remove(); window._gTimePicker = null;
+                document.removeEventListener('click', _h);
+            }
+        });
+    }, 100);
+}
+function datpSelect(type, val, el) {
+    const colId = type === 'h' ? 'datp-hours' : 'datp-mins';
+    document.querySelectorAll('#'+colId+' div').forEach(d => { d.style.fontWeight='400'; d.style.color='#374151'; d.style.background='transparent'; });
+    el.style.fontWeight='700'; el.style.color='#f97316'; el.style.background='#fff7ed';
+    if (type==='h') window._datpH=val; else window._datpM=val;
+    document.getElementById('datp-preview').textContent = String(window._datpH).padStart(2,'0')+':'+String(window._datpM).padStart(2,'0');
+}
+function datpConfirm() {
+    const t = String(window._datpH).padStart(2,'0')+':'+String(window._datpM).padStart(2,'0');
+    document.getElementById('dash-add-time').value = t;
+    const lbl = document.getElementById('dash-add-time-label');
+    lbl.textContent = t; lbl.style.color = '#f97316';
+    if (window._gTimePicker) { window._gTimePicker.remove(); window._gTimePicker = null; }
+}
+
 function submitDashAdd() {
     const sel  = document.getElementById('dash-add-client');
     const form = document.getElementById('dash-add-form');
@@ -955,11 +1014,6 @@ function submitDashAdd() {
         sel.focus();
         return;
     }
-    // Собираем время из двух дропдаунов
-    const hour = document.getElementById('dash-add-hour').value;
-    const min  = document.getElementById('dash-add-min').value;
-    document.getElementById('dash-add-time').value = hour ? (hour + ':' + min) : '';
-
     form.action = '/packages/' + sel.value + '/sessions';
     form.submit();
 }
