@@ -36,24 +36,34 @@ class DashboardController extends Controller
             ->get()
             ->filter(fn($p) => $p->scheduled_count > 0 && $p->scheduled_count <= 2);
 
-        // Filter: today | tomorrow | week
+        // Filter: today | tomorrow | week | history
         $filter = $request->get('filter', 'today');
 
         $sessionsQuery = Session::with(['client', 'package'])
-            ->whereIn('client_id', $clientIds)
-            ->orderBy('scheduled_date')
-            ->orderByRaw('CASE WHEN scheduled_time IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('scheduled_time');
+            ->whereIn('client_id', $clientIds);
 
         if ($filter === 'tomorrow') {
-            $sessionsQuery->whereDate('scheduled_date', Carbon::tomorrow());
+            $sessionsQuery->whereDate('scheduled_date', Carbon::tomorrow())
+                ->orderBy('scheduled_date')
+                ->orderByRaw('CASE WHEN scheduled_time IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('scheduled_time');
         } elseif ($filter === 'week') {
             $sessionsQuery->whereBetween('scheduled_date', [
-                Carbon::now()->startOfWeek(Carbon::MONDAY)->toDateString(),
-                Carbon::now()->endOfWeek(Carbon::SUNDAY)->toDateString(),
-            ]);
+                Carbon::today()->toDateString(),
+                Carbon::today()->addDays(6)->toDateString(),
+            ])->orderBy('scheduled_date')
+              ->orderByRaw('CASE WHEN scheduled_time IS NULL THEN 1 ELSE 0 END')
+              ->orderBy('scheduled_time');
+        } elseif ($filter === 'history') {
+            $sessionsQuery->whereDate('scheduled_date', '<', Carbon::today())
+                ->orderBy('scheduled_date', 'desc')
+                ->orderByRaw('CASE WHEN scheduled_time IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('scheduled_time', 'desc');
         } else {
-            $sessionsQuery->whereDate('scheduled_date', Carbon::today());
+            $sessionsQuery->whereDate('scheduled_date', Carbon::today())
+                ->orderBy('scheduled_date')
+                ->orderByRaw('CASE WHEN scheduled_time IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('scheduled_time');
         }
 
         $upcomingSessions = $sessionsQuery->get();

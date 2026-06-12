@@ -98,7 +98,7 @@
             <i class="fas fa-calendar-alt mr-2" style="color: #fb923c;"></i>{{ __('app.upcoming_sessions') }}
         </h2>
         {{-- Filter tabs --}}
-        <div class="flex items-center gap-1 bg-white/10 rounded-lg p-1">
+        <div class="flex items-center gap-1 bg-white/10 rounded-lg p-1 flex-wrap">
             <a href="{{ route('dashboard', ['filter' => 'today']) }}"
                class="px-3 py-1 rounded-md text-sm font-medium transition {{ $filter === 'today' ? 'bg-orange-500 text-white' : 'text-gray-300 hover:text-white' }}">
                Сегодня
@@ -109,7 +109,11 @@
             </a>
             <a href="{{ route('dashboard', ['filter' => 'week']) }}"
                class="px-3 py-1 rounded-md text-sm font-medium transition {{ $filter === 'week' ? 'bg-orange-500 text-white' : 'text-gray-300 hover:text-white' }}">
-               Неделя
+               7 дней
+            </a>
+            <a href="{{ route('dashboard', ['filter' => 'history']) }}"
+               class="px-3 py-1 rounded-md text-sm font-medium transition {{ $filter === 'history' ? 'bg-blue-500 text-white' : 'text-gray-300 hover:text-white' }}">
+               История
             </a>
         </div>
     </div>
@@ -420,6 +424,71 @@
         </div>
         @endforeach
     </div>
+    @endif
+
+    {{-- История --}}
+    @if($filter === 'history')
+    @php
+        $historyGrouped = $upcomingSessions->groupBy(fn($s) => $s->scheduled_date->toDateString());
+        $ruDaysH = ['Mon'=>'Пн','Tue'=>'Вт','Wed'=>'Ср','Thu'=>'Чт','Fri'=>'Пт','Sat'=>'Сб','Sun'=>'Вс'];
+    @endphp
+    @foreach($historyGrouped as $dateStr => $daySessions)
+    @php $date = \Carbon\Carbon::parse($dateStr); @endphp
+    <div class="px-4 py-2 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            {{ $ruDaysH[$date->format('D')] ?? '' }}, {{ $date->format('d.m.Y') }}
+        </span>
+        <span class="text-xs text-gray-400">{{ $daySessions->count() }} занятий</span>
+    </div>
+    <div class="divide-y divide-gray-50">
+        @foreach($daySessions as $session)
+        <div class="px-4 py-3 flex items-center gap-3 {{ $session->status === 'completed' ? 'bg-green-50' : ($session->status === 'missed' ? 'bg-red-50' : 'hover:bg-gray-50') }}">
+            {{-- Статус иконка --}}
+            <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0
+                {{ $session->status === 'completed' ? '' : ($session->status === 'missed' ? 'border-2 border-red-300' : 'border-2 border-gray-200') }}"
+                style="{{ $session->status === 'completed' ? 'background:#16a34a;' : '' }}">
+                @if($session->status === 'completed')
+                    <i class="fas fa-check text-white text-sm"></i>
+                @elseif($session->status === 'missed')
+                    <i class="fas fa-times text-red-400 text-sm"></i>
+                @else
+                    <i class="fas fa-circle text-gray-300 text-xs"></i>
+                @endif
+            </div>
+            {{-- Время --}}
+            <div class="shrink-0 text-center" style="width:56px;">
+                <p class="text-sm font-bold tabular-nums" style="color:{{ $session->scheduled_time ? '#94a3b8' : '#cbd5e1' }};">
+                    {{ $session->scheduled_time ? \Carbon\Carbon::parse($session->scheduled_time)->format('H:i') : '—:—' }}
+                </p>
+            </div>
+            <div class="w-px h-10 bg-gray-200 shrink-0"></div>
+            {{-- Клиент --}}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('clients.show', $session->client) }}"
+                       class="font-medium hover:text-orange-500 transition truncate {{ $session->status === 'completed' ? 'line-through text-gray-400' : 'text-gray-700' }}">
+                        {{ $session->client->full_name }}
+                    </a>
+                    @php $pkg = $session->package; $pps = ($pkg && $pkg->total_sessions > 0) ? round($pkg->price / $pkg->total_sessions) : 0; @endphp
+                    @if($pps > 0)
+                    <span class="text-xs font-semibold shrink-0 hidden sm:inline {{ $session->status === 'completed' ? 'text-green-600' : 'text-gray-400' }}">
+                        {{ number_format($pps, 0, '.', ' ') }} ₸
+                    </span>
+                    @endif
+                    <span class="text-xs px-2 py-0.5 rounded-full shrink-0
+                        {{ $session->status === 'completed' ? 'bg-green-100 text-green-700' : ($session->status === 'missed' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500') }}">
+                        {{ $session->status === 'completed' ? 'Пришёл' : ($session->status === 'missed' ? 'Пропуск' : 'Отменено') }}
+                    </span>
+                </div>
+            </div>
+            <a href="{{ route('packages.sessions', $session->package) }}"
+               class="w-7 h-7 rounded-lg border border-gray-200 text-gray-400 hover:border-orange-400 hover:text-orange-500 transition flex items-center justify-center shrink-0">
+                <i class="fas fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+        @endforeach
+    </div>
+    @endforeach
     @endif
 
     {{-- Неделя --}}
