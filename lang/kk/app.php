@@ -26,7 +26,7 @@ return [
     'done'                  => 'Дайын',
     'came'                  => 'Келді',
     'missed_short'          => 'Қатыспады',
-    'cancelled_short'       => 'Болдырмады',
+    'cancelled_short'       => 'Басқа күнге ауыстырды',
     'per_session'           => 'сабақ үшін',
     'no_sessions_today'     => 'Бүгін жаттығу жоқ',
     'no_sessions_tomorrow'  => 'Ертең жаттығу жоқ',
