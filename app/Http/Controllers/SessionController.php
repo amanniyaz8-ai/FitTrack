@@ -92,7 +92,8 @@ class SessionController extends Controller
         // Also update the client's default training time
         $session->package->client->update(['training_time' => $request->scheduled_time]);
 
-        return redirect()->route('dashboard')->with('success', 'Время обновлено для всех предстоящих тренировок.');
+        $filter = $request->input('redirect_filter', 'today');
+        return redirect()->route('dashboard', ['filter' => $filter])->with('success', 'Время обновлено для всех предстоящих тренировок.');
     }
 
     public function destroy(Session $session)

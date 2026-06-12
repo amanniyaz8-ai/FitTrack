@@ -445,11 +445,14 @@ function gtpConfirm(url) {
     };
     document.getElementById('gtp-confirm-all').onclick = function() {
         // Submit all future sessions in this package
+        const params = new URLSearchParams(window.location.search);
+        const filter = params.get('filter') || 'today';
         const f = document.createElement('form');
         f.method = 'POST';
-        f.action = url.replace('/sessions/', '/sessions/') + '/update-package-time';
+        f.action = url + '/update-package-time';
         f.innerHTML = `<input type="hidden" name="_token" value="${token}">
-                       <input type="hidden" name="scheduled_time" value="${time}">`;
+                       <input type="hidden" name="scheduled_time" value="${time}">
+                       <input type="hidden" name="redirect_filter" value="${filter}">`;
         document.body.appendChild(f);
         f.submit();
         modal.classList.add('hidden');
