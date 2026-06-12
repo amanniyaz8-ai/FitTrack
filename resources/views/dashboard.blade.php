@@ -786,15 +786,14 @@ function openWeekAddModal(dateVal, dateFmt) {
     const badge = document.getElementById('dash-date-badge');
     const label = document.getElementById('dash-date-label');
     const today = new Date().toISOString().split('T')[0];
-    const isTomorrow = new Date(dateVal) > new Date(today);
     label.textContent = dateVal === today ? 'Сегодня' : dateFmt;
     label.style.color = '#f97316';
     badge.style.background = '#fff7ed';
     const sel = document.getElementById('dash-add-client');
     sel.value = ''; sel.style.borderColor = '';
-    document.getElementById('dash-add-hour').value = '';
-    document.getElementById('dash-add-min').value = '00';
     document.getElementById('dash-add-time').value = '';
+    const lbl = document.getElementById('dash-add-time-label');
+    lbl.textContent = 'Выбрать время'; lbl.style.color = '';
     document.getElementById('dash-add-form').action = '';
     document.getElementById('dash-add-modal').classList.remove('hidden');
 }
