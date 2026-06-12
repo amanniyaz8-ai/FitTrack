@@ -8,24 +8,19 @@
 </div>
 
 {{-- === 3 КАРТОЧКИ === --}}
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
     <div class="bg-white rounded-xl shadow p-5 border-l-4" style="border-color:#f97316;">
         <p class="text-gray-500 text-sm mb-1">{{ __('app.paid_this_month') }}</p>
         <p class="text-4xl font-bold" style="color:#f97316;">{{ number_format($paidThisMonth, 0, '.', ' ') }} ₸</p>
         <p class="text-xs text-gray-400 mt-2">{{ now()->locale(app()->getLocale() === 'kk' ? 'kk' : 'ru')->translatedFormat('F Y') }}</p>
     </div>
     <div class="bg-white rounded-xl shadow p-5 border-l-4 border-green-500">
-        <p class="text-gray-500 text-sm mb-1">{{ __('app.worked_this_month') }}</p>
+        <p class="text-gray-500 text-sm mb-1">Проведено тренировок в этом месяце</p>
         <p class="text-4xl font-bold text-green-600">{{ $sessionsThisMonth }}</p>
         <p class="text-xs mt-2 {{ $sessionsThisMonth >= $sessionsLastMonth ? 'text-green-500' : 'text-red-400' }}">
             <i class="fas fa-{{ $sessionsThisMonth >= $sessionsLastMonth ? 'arrow-up' : 'arrow-down' }} mr-1"></i>
             {{ $sessionsLastMonth }} {{ __('app.last_month') }}
         </p>
-    </div>
-    <div class="bg-white rounded-xl shadow p-5 border-l-4 border-blue-500">
-        <p class="text-gray-500 text-sm mb-1">{{ __('app.earned_this_year') }}</p>
-        <p class="text-4xl font-bold text-blue-600">{{ number_format($earningsYear, 0, '.', ' ') }} ₸</p>
-        <p class="text-xs text-gray-400 mt-2">{{ now()->format('Y') }}</p>
     </div>
 </div>
 
