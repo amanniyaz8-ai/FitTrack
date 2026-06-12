@@ -130,8 +130,8 @@
         $dayNames = ['Mon'=>'Пн','Tue'=>'Вт','Wed'=>'Ср','Thu'=>'Чт','Fri'=>'Пт','Sat'=>'Сб','Sun'=>'Вс'];
     @endphp
 
-    {{-- Сегодня --}}
-    @if($todaySessions2->isNotEmpty())
+    {{-- Сегодня (только не в режиме недели) --}}
+    @if($filter !== 'week' && $todaySessions2->isNotEmpty())
     <div class="px-4 py-2 bg-orange-50 border-b border-orange-100 flex items-center justify-between">
         <span class="text-xs font-semibold text-orange-500 uppercase tracking-wide">{{ __('app.today') }} — {{ now()->format('d.m.Y') }}</span>
         <div class="flex items-center gap-2">
@@ -491,43 +491,53 @@
     @endforeach
     @endif
 
-    {{-- Неделя --}}
+    {{-- Неделя: все 7 дней начиная с сегодня --}}
     @if($filter === 'week')
     @php
-        $ruDays = ['Mon'=>'Понедельник','Tue'=>'Вторник','Wed'=>'Среда','Thu'=>'Четверг','Fri'=>'Пятница','Sat'=>'Суббота','Sun'=>'Воскресенье'];
+        $ruDaysFull = ['Mon'=>'Понедельник','Tue'=>'Вторник','Wed'=>'Среда','Thu'=>'Четверг','Fri'=>'Пятница','Sat'=>'Суббота','Sun'=>'Воскресенье'];
         $dayColors = ['Mon'=>'#3b82f6','Tue'=>'#8b5cf6','Wed'=>'#10b981','Thu'=>'#f59e0b','Fri'=>'#f97316','Sat'=>'#ec4899','Sun'=>'#6366f1'];
+        $weekDates = collect(range(0,6))->map(fn($i) => \Carbon\Carbon::today()->addDays($i));
     @endphp
-    @foreach($groupedByDay as $dateStr => $daySessions)
+    @foreach($weekDates as $date)
     @php
-        $date = \Carbon\Carbon::parse($dateStr);
+        $dateStr = $date->toDateString();
         $dayKey = $date->format('D');
-        $dayName = $ruDays[$dayKey] ?? $dayKey;
+        $dayName = $ruDaysFull[$dayKey] ?? $dayKey;
         $dayColor = $dayColors[$dayKey] ?? '#6b7280';
         $isToday = $date->isToday();
+        $daySessions = $groupedByDay->get($dateStr, collect());
     @endphp
     <div class="px-4 py-2 border-b flex items-center justify-between"
-         style="background: {{ $isToday ? '#fff7ed' : '#f9fafb' }}; border-color: {{ $isToday ? '#fed7aa' : '#f3f4f6' }};">
+         style="background:{{ $isToday ? '#fff7ed' : '#f9fafb' }};border-color:{{ $isToday ? '#fed7aa' : '#f3f4f6' }};">
         <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full inline-block" style="background:{{ $dayColor }};"></span>
-            <span class="text-xs font-semibold uppercase tracking-wide" style="color:{{ $dayColor }};">
-                {{ $dayName }}
-            </span>
+            <span class="text-xs font-semibold uppercase tracking-wide" style="color:{{ $dayColor }};">{{ $dayName }}</span>
             <span class="text-xs text-gray-400">— {{ $date->format('d.m.Y') }}</span>
             @if($isToday)<span class="text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded-full ml-1">сегодня</span>@endif
         </div>
-        <span class="text-xs text-gray-400">{{ $daySessions->count() }} занятий</span>
+        <div class="flex items-center gap-2">
+            @if($daySessions->count() > 0)
+                <span class="text-xs text-gray-400">{{ $daySessions->count() }} занятий</span>
+            @endif
+            <button onclick="openWeekAddModal('{{ $dateStr }}', '{{ $date->format('d.m.Y') }}')"
+                class="text-xs px-2 py-1 rounded-lg border border-dashed border-gray-300 text-gray-400 hover:border-orange-400 hover:text-orange-500 transition flex items-center gap-1">
+                <i class="fas fa-plus text-xs"></i> Добавить
+            </button>
+        </div>
     </div>
+    @if($daySessions->isEmpty())
+    <div class="px-4 py-3 text-center text-xs text-gray-300 border-b border-gray-50">
+        <i class="fas fa-calendar-day mr-1"></i> Нет занятий
+    </div>
+    @else
     <div class="divide-y divide-gray-50">
         @foreach($daySessions as $session)
         @php
-            $isToday = $session->scheduled_date->isToday();
-            $dayLabel = $isToday ? 'Сегодня' : $ruDays[$session->scheduled_date->format('D')] ?? '';
+            $dayLabel = $isToday ? 'Сегодня' : $ruDaysFull[$session->scheduled_date->format('D')] ?? '';
             $dateLabel = $session->scheduled_date->format('d.m.Y');
         @endphp
         <div id="session-row-week-{{ $session->id }}"
              class="px-4 py-3 flex items-center gap-3 transition {{ $session->status === 'completed' ? 'bg-green-50' : 'hover:bg-gray-50' }}">
-
-            {{-- Галочка --}}
             @if($session->status === 'completed')
                 <form method="POST" action="{{ route('sessions.update', $session) }}" class="shrink-0">
                     @csrf @method('PATCH')
@@ -553,23 +563,16 @@
                     </button>
                 </form>
             @endif
-
-            {{-- Время --}}
             <button type="button"
                 onclick="openTimePicker(this, '{{ route('sessions.update', $session) }}', '{{ $session->status }}', '{{ $session->scheduled_time ? \Carbon\Carbon::parse($session->scheduled_time)->format('H:i') : '' }}')"
                 class="shrink-0 text-center group cursor-pointer" style="width:56px;">
                 <p class="text-sm font-bold tabular-nums group-hover:opacity-70 transition"
-                   style="letter-spacing:0.02em; {{ $session->scheduled_time ? 'color:#f97316;' : 'color:#94a3b8;' }}">
+                   style="letter-spacing:0.02em;{{ $session->scheduled_time ? 'color:#f97316;' : 'color:#94a3b8;' }}">
                     {{ $session->scheduled_time ? \Carbon\Carbon::parse($session->scheduled_time)->format('H:i') : '—:—' }}
                 </p>
-                <p class="text-xs {{ $isToday ? 'font-semibold' : 'text-gray-400' }}" style="{{ $isToday ? 'color:#f97316;' : '' }}">
-                    {{ $dayLabel }}
-                </p>
+                <p class="text-xs {{ $isToday ? 'font-semibold' : 'text-gray-400' }}" style="{{ $isToday ? 'color:#f97316;' : '' }}">{{ $dayLabel }}</p>
             </button>
-
             <div class="w-px h-10 bg-gray-200 shrink-0"></div>
-
-            {{-- Клиент + кнопки --}}
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-1.5">
                     <a href="{{ route('clients.show', $session->client) }}"
@@ -577,13 +580,10 @@
                        style="{{ $session->status !== 'completed' ? 'color:#0f2035;' : '' }}">
                         {{ $session->client->full_name }}
                     </a>
-                    @php
-                        $pkg = $session->package;
-                        $pricePerSession = ($pkg && $pkg->total_sessions > 0) ? round($pkg->price / $pkg->total_sessions) : 0;
-                    @endphp
-                    @if($pricePerSession > 0)
-                    <span class="text-xs font-semibold shrink-0 hidden sm:inline {{ $session->status === 'completed' ? 'text-green-600' : 'text-gray-400' }}">
-                        {{ number_format($pricePerSession, 0, '.', ' ') }} ₸
+                    @php $pkg=$session->package; $pps=($pkg&&$pkg->total_sessions>0)?round($pkg->price/$pkg->total_sessions):0; @endphp
+                    @if($pps > 0)
+                    <span class="text-xs font-semibold shrink-0 hidden sm:inline {{ $session->status==='completed'?'text-green-600':'text-gray-400' }}">
+                        {{ number_format($pps,0,'.', ' ') }} ₸
                     </span>
                     @endif
                     <div class="flex items-center gap-1 shrink-0">
@@ -592,8 +592,7 @@
                                 @csrf @method('PATCH')
                                 <input type="hidden" name="status" value="missed">
                                 <button type="submit" class="w-7 h-7 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded-lg border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition flex items-center justify-center gap-1 text-xs">
-                                    <i class="fas fa-user-times text-xs"></i>
-                                    <span class="hidden md:inline">Пропуск</span>
+                                    <i class="fas fa-user-times text-xs"></i><span class="hidden md:inline">Пропуск</span>
                                 </button>
                             </form>
                         @elseif($session->status === 'completed')
@@ -601,9 +600,7 @@
                                 <i class="fas fa-check mr-1"></i><span class="hidden sm:inline">Пришёл</span>
                             </span>
                         @elseif($session->status === 'missed')
-                            <span class="text-xs px-1.5 py-1 rounded-full bg-red-100 text-red-600 font-medium">
-                                <i class="fas fa-times"></i>
-                            </span>
+                            <span class="text-xs px-1.5 py-1 rounded-full bg-red-100 text-red-600 font-medium"><i class="fas fa-times"></i></span>
                         @endif
                         <a href="{{ route('packages.sessions', $session->package) }}"
                            class="w-7 h-7 rounded-lg border border-gray-200 text-gray-400 hover:border-orange-400 hover:text-orange-500 transition flex items-center justify-center">
@@ -616,6 +613,7 @@
         </div>
         @endforeach
     </div>
+    @endif
     @endforeach
     @endif
 
@@ -793,6 +791,25 @@
 </div>
 
 <script>
+function openWeekAddModal(dateVal, dateFmt) {
+    document.getElementById('dash-add-date').value = dateVal;
+    document.getElementById('dash-date-value').textContent = dateFmt;
+    const badge = document.getElementById('dash-date-badge');
+    const label = document.getElementById('dash-date-label');
+    const today = new Date().toISOString().split('T')[0];
+    const isTomorrow = new Date(dateVal) > new Date(today);
+    label.textContent = dateVal === today ? 'Сегодня' : dateFmt;
+    label.style.color = '#f97316';
+    badge.style.background = '#fff7ed';
+    const sel = document.getElementById('dash-add-client');
+    sel.value = ''; sel.style.borderColor = '';
+    document.getElementById('dash-add-hour').value = '';
+    document.getElementById('dash-add-min').value = '00';
+    document.getElementById('dash-add-time').value = '';
+    document.getElementById('dash-add-form').action = '';
+    document.getElementById('dash-add-modal').classList.remove('hidden');
+}
+
 function openDashReschedule(sessionId, dateLabel) {
     document.getElementById('dash-reschedule-form').action = '/sessions/' + sessionId + '/reschedule';
     document.getElementById('dash-modal-subtitle').textContent = 'Клиент отменил занятие от ' + dateLabel;
