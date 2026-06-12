@@ -36,17 +36,27 @@ class DashboardController extends Controller
             ->get()
             ->filter(fn($p) => $p->scheduled_count > 0 && $p->scheduled_count <= 2);
 
-        // Upcoming sessions today and tomorrow (all statuses, sorted by time)
-        $upcomingSessions = Session::with(['client', 'package'])
+        // Filter: today | tomorrow | week
+        $filter = $request->get('filter', 'today');
+
+        $sessionsQuery = Session::with(['client', 'package'])
             ->whereIn('client_id', $clientIds)
-            ->where(function ($q) {
-                $q->whereDate('scheduled_date', Carbon::today())
-                  ->orWhereDate('scheduled_date', Carbon::tomorrow());
-            })
             ->orderBy('scheduled_date')
             ->orderByRaw('CASE WHEN scheduled_time IS NULL THEN 1 ELSE 0 END')
-            ->orderBy('scheduled_time')
-            ->get();
+            ->orderBy('scheduled_time');
+
+        if ($filter === 'tomorrow') {
+            $sessionsQuery->whereDate('scheduled_date', Carbon::tomorrow());
+        } elseif ($filter === 'week') {
+            $sessionsQuery->whereBetween('scheduled_date', [
+                Carbon::now()->startOfWeek(Carbon::MONDAY)->toDateString(),
+                Carbon::now()->endOfWeek(Carbon::SUNDAY)->toDateString(),
+            ]);
+        } else {
+            $sessionsQuery->whereDate('scheduled_date', Carbon::today());
+        }
+
+        $upcomingSessions = $sessionsQuery->get();
 
         // Daily earnings: sum of price-per-session for completed sessions today
         $todayCompleted = Session::with('package')
@@ -73,7 +83,7 @@ class DashboardController extends Controller
         return view('dashboard', compact(
             'totalClients', 'activePackages', 'todaySessions',
             'expiringPackages', 'upcomingSessions',
-            'todayEarnings', 'todayCompletedCount', 'addClients'
+            'todayEarnings', 'todayCompletedCount', 'addClients', 'filter'
         ));
     }
 }
