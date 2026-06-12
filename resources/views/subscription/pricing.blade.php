@@ -17,23 +17,6 @@
         <p class="text-gray-400 mt-2">Выберите подходящий тариф</p>
     </div>
 
-    {{-- Promo code input --}}
-    <div class="max-w-md mx-auto mb-8">
-        <div class="flex gap-2">
-            <input id="promoInput" type="text" placeholder="Промокод (необязательно)"
-                   class="flex-1 px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:border-orange-500"
-                   style="font-size:14px;">
-            <button onclick="applyPromo()"
-                    class="px-5 py-3 rounded-lg font-semibold text-white transition"
-                    style="background:#f97316;"
-                    onmouseover="this.style.background='#ea6c10'"
-                    onmouseout="this.style.background='#f97316'">
-                Применить
-            </button>
-        </div>
-        <p id="promoMsg" class="mt-2 text-sm hidden"></p>
-    </div>
-
     {{-- Plan cards --}}
     <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
 
@@ -112,6 +95,24 @@
             </a>
         </div>
 
+    </div>
+
+    {{-- Promo code input --}}
+    <div class="max-w-md mx-auto mt-8">
+        <p class="text-gray-400 text-sm text-center mb-3">Есть промокод?</p>
+        <div class="flex gap-2">
+            <input id="promoInput" type="text" placeholder="Введите промокод"
+                   class="flex-1 px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:border-orange-500"
+                   style="font-size:14px;">
+            <button onclick="applyPromo()"
+                    class="px-5 py-3 rounded-lg font-semibold text-white transition"
+                    style="background:#f97316;"
+                    onmouseover="this.style.background='#ea6c10'"
+                    onmouseout="this.style.background='#f97316'">
+                Применить
+            </button>
+        </div>
+        <p id="promoMsg" class="mt-2 text-sm hidden"></p>
     </div>
 
     {{-- Back link --}}
