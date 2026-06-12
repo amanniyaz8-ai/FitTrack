@@ -101,19 +101,19 @@
         <div class="flex items-center gap-1 bg-white/10 rounded-lg p-1 flex-wrap">
             <a href="{{ route('dashboard', ['filter' => 'today']) }}"
                class="px-3 py-1 rounded-md text-sm font-medium transition {{ $filter === 'today' ? 'bg-orange-500 text-white' : 'text-gray-300 hover:text-white' }}">
-               Сегодня
+               {{ __('app.filter_today') }}
             </a>
             <a href="{{ route('dashboard', ['filter' => 'tomorrow']) }}"
                class="px-3 py-1 rounded-md text-sm font-medium transition {{ $filter === 'tomorrow' ? 'bg-orange-500 text-white' : 'text-gray-300 hover:text-white' }}">
-               Завтра
+               {{ __('app.filter_tomorrow') }}
             </a>
             <a href="{{ route('dashboard', ['filter' => 'week']) }}"
                class="px-3 py-1 rounded-md text-sm font-medium transition {{ $filter === 'week' ? 'bg-orange-500 text-white' : 'text-gray-300 hover:text-white' }}">
-               Неделя
+               {{ __('app.filter_week') }}
             </a>
             <a href="{{ route('dashboard', ['filter' => 'history']) }}"
                class="px-3 py-1 rounded-md text-sm font-medium transition {{ $filter === 'history' ? 'bg-blue-500 text-white' : 'text-gray-300 hover:text-white' }}">
-               История
+               {{ __('app.filter_history') }}
             </a>
         </div>
     </div>
