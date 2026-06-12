@@ -205,6 +205,14 @@
                     <i id="theme-icon" class="fas fa-moon text-sm"></i>
                 </button>
 
+                {{-- Админка — только для владельца --}}
+                @if(auth()->user()->trial_ends_at === null)
+                <a href="{{ route('admin.users') }}" class="text-gray-300 text-sm hidden md:flex items-center gap-1.5 hover:text-orange-400 transition">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Админ</span>
+                </a>
+                @endif
+
                 {{-- Профиль — только на десктопе --}}
                 <a href="{{ route('profile.edit') }}" class="text-gray-300 text-sm hidden md:flex items-center gap-1.5 hover:text-white transition">
                     <i class="fas fa-user-circle"></i>
