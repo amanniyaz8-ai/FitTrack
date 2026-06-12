@@ -41,7 +41,7 @@ class PackageController extends Controller
         return redirect()->route('dashboard')->with('success', $msg);
     }
 
-    public function generateSessionsPublic(Package $package, Client $client): void
+    public function generateSessionsPublic(Package $package, Client $client, int $completedCount = 0): void
     {
         $days = $client->training_days ?? [];
         if (empty($days)) return;
@@ -49,10 +49,54 @@ class PackageController extends Controller
         $dayMap = ['Sun' => 0, 'Mon' => 1, 'Tue' => 2, 'Wed' => 3, 'Thu' => 4, 'Fri' => 5, 'Sat' => 6];
         $dayNumbers = array_map(fn($d) => $dayMap[$d] ?? -1, $days);
 
+        $total = $package->total_sessions;
+        $completedCount = min($completedCount, $total);
+        $scheduledCount = $total - $completedCount;
+
+        // Create completed sessions in the past
+        if ($completedCount > 0) {
+            $past = Carbon::today()->subDays(1);
+            $pastGenerated = 0;
+            $pastDates = [];
+
+            // Go back to find enough past training days
+            $lookback = Carbon::today()->subDays($completedCount * 7 + 30);
+            $current = clone $lookback;
+            while ($current->lessThan(Carbon::today())) {
+                if (in_array($current->dayOfWeek, $dayNumbers)) {
+                    $pastDates[] = $current->toDateString();
+                }
+                $current->addDay();
+            }
+
+            // Take the last N dates
+            $pastDates = array_slice($pastDates, -$completedCount);
+            foreach ($pastDates as $date) {
+                Session::create([
+                    'package_id'     => $package->id,
+                    'client_id'      => $client->id,
+                    'scheduled_date' => $date,
+                    'status'         => 'completed',
+                ]);
+            }
+
+            // If not enough past training days found, create with today's date minus days
+            $missing = $completedCount - count($pastDates);
+            for ($i = 0; $i < $missing; $i++) {
+                Session::create([
+                    'package_id'     => $package->id,
+                    'client_id'      => $client->id,
+                    'scheduled_date' => Carbon::today()->subDays($missing - $i)->toDateString(),
+                    'status'         => 'completed',
+                ]);
+            }
+        }
+
+        // Create scheduled sessions in the future
         $current = Carbon::today();
         $generated = 0;
 
-        while ($generated < $package->total_sessions) {
+        while ($generated < $scheduledCount) {
             if (in_array($current->dayOfWeek, $dayNumbers)) {
                 Session::create([
                     'package_id'     => $package->id,

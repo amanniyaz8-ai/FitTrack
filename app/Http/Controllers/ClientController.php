@@ -61,7 +61,8 @@ class ClientController extends Controller
                 'is_paid'        => $request->boolean('pkg_is_paid'),
             ]);
 
-            app(\App\Http\Controllers\PackageController::class)->generateSessionsPublic($package, $client);
+            $completedSessions = (int) $request->input('pkg_completed_sessions', 0);
+            app(\App\Http\Controllers\PackageController::class)->generateSessionsPublic($package, $client, $completedSessions);
 
             // Count upcoming sessions for flash message
             $upcomingCount = $package->sessions()

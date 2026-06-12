@@ -88,7 +88,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Количество тренировок</label>
-                <input type="number" name="pkg_total_sessions" value="{{ old('pkg_total_sessions', 10) }}" min="1" max="100"
+                <input type="number" name="pkg_total_sessions" id="pkg_total_sessions" value="{{ old('pkg_total_sessions', 10) }}" min="1" max="100"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
             </div>
             <div>
@@ -99,6 +99,18 @@
                     <span class="absolute right-3 top-2.5 text-gray-400 text-sm">₸</span>
                 </div>
             </div>
+        </div>
+
+        {{-- Перенос клиента --}}
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                <i class="fas fa-history text-blue-400 mr-1"></i> Уже отходил тренировок
+                <span class="text-gray-400 font-normal">(при переносе существующего клиента)</span>
+            </label>
+            <input type="number" name="pkg_completed_sessions" id="pkg_completed_sessions" value="{{ old('pkg_completed_sessions', 0) }}" min="0" max="100"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                placeholder="0">
+            <p id="completed-hint" class="text-xs text-blue-500 mt-1 hidden"></p>
         </div>
         {{-- Стоимость одной тренировки --}}
         <div class="flex items-center justify-between gap-2 px-3 py-2 bg-white border border-orange-200 rounded-lg text-sm">
@@ -136,12 +148,31 @@
         const el = document.getElementById('price-per-session-create');
         if (el) el.textContent = per > 0 ? per.toLocaleString('ru-RU') + ' ₸' : '—';
     }
+    function updateCompletedHint() {
+        const total = parseInt(document.getElementById('pkg_total_sessions')?.value) || 0;
+        const completed = parseInt(document.getElementById('pkg_completed_sessions')?.value) || 0;
+        const hint = document.getElementById('completed-hint');
+        if (!hint) return;
+        if (completed > 0) {
+            const remaining = total - completed;
+            hint.textContent = remaining > 0
+                ? `Будет создано ${completed} завершённых + ${remaining} предстоящих занятий`
+                : `Все ${total} занятий будут отмечены как завершённые`;
+            hint.classList.remove('hidden');
+        } else {
+            hint.classList.add('hidden');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        const priceInput    = document.querySelector('[name=pkg_price]');
-        const sessionInput  = document.querySelector('[name=pkg_total_sessions]');
-        if (priceInput)   priceInput.addEventListener('input', recalcCreate);
-        if (sessionInput) sessionInput.addEventListener('input', recalcCreate);
+        const priceInput     = document.querySelector('[name=pkg_price]');
+        const sessionInput   = document.getElementById('pkg_total_sessions');
+        const completedInput = document.getElementById('pkg_completed_sessions');
+        if (priceInput)     priceInput.addEventListener('input', recalcCreate);
+        if (sessionInput)   sessionInput.addEventListener('input', () => { recalcCreate(); updateCompletedHint(); });
+        if (completedInput) completedInput.addEventListener('input', updateCompletedHint);
         recalcCreate();
+        updateCompletedHint();
     });
 })();
 </script>
