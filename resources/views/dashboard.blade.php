@@ -495,6 +495,7 @@
     @if($filter === 'week')
     @php
         $ruDaysFull = ['Mon'=>'Понедельник','Tue'=>'Вторник','Wed'=>'Среда','Thu'=>'Четверг','Fri'=>'Пятница','Sat'=>'Суббота','Sun'=>'Воскресенье'];
+        $ruDaysShort = ['Mon'=>'Пн','Tue'=>'Вт','Wed'=>'Ср','Thu'=>'Чт','Fri'=>'Пт','Sat'=>'Сб','Sun'=>'Вс'];
         $dayColors = ['Mon'=>'#3b82f6','Tue'=>'#8b5cf6','Wed'=>'#10b981','Thu'=>'#f59e0b','Fri'=>'#f97316','Sat'=>'#ec4899','Sun'=>'#6366f1'];
         $weekDates = collect(range(0,6))->map(fn($i) => \Carbon\Carbon::today()->addDays($i));
     @endphp
@@ -533,7 +534,7 @@
     <div class="divide-y divide-gray-50">
         @foreach($daySessions as $session)
         @php
-            $dayLabel = $isToday ? 'Сегодня' : $ruDaysFull[$session->scheduled_date->format('D')] ?? '';
+            $dayLabel = $isToday ? 'Сегодня' : ($ruDaysShort[$session->scheduled_date->format('D')] ?? '');
             $dateLabel = $session->scheduled_date->format('d.m.Y');
         @endphp
         <div id="session-row-week-{{ $session->id }}"
