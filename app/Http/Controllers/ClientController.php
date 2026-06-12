@@ -62,7 +62,8 @@ class ClientController extends Controller
             ]);
 
             $completedSessions = (int) $request->input('pkg_completed_sessions', 0);
-            app(\App\Http\Controllers\PackageController::class)->generateSessionsPublic($package, $client, $completedSessions);
+            $trainingTime = $request->input('pkg_training_time');
+            app(\App\Http\Controllers\PackageController::class)->generateSessionsPublic($package, $client, $completedSessions, $trainingTime);
 
             // Count upcoming sessions for flash message
             $upcomingCount = $package->sessions()

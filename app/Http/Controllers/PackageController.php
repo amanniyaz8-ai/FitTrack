@@ -41,7 +41,7 @@ class PackageController extends Controller
         return redirect()->route('dashboard')->with('success', $msg);
     }
 
-    public function generateSessionsPublic(Package $package, Client $client, int $completedCount = 0): void
+    public function generateSessionsPublic(Package $package, Client $client, int $completedCount = 0, ?string $trainingTime = null): void
     {
         $days = $client->training_days ?? [];
         if (empty($days)) return;
@@ -76,6 +76,7 @@ class PackageController extends Controller
                     'package_id'     => $package->id,
                     'client_id'      => $client->id,
                     'scheduled_date' => $date,
+                    'scheduled_time' => $trainingTime,
                     'status'         => 'completed',
                 ]);
             }
@@ -87,6 +88,7 @@ class PackageController extends Controller
                     'package_id'     => $package->id,
                     'client_id'      => $client->id,
                     'scheduled_date' => Carbon::today()->subDays($missing - $i)->toDateString(),
+                    'scheduled_time' => $trainingTime,
                     'status'         => 'completed',
                 ]);
             }
@@ -102,6 +104,7 @@ class PackageController extends Controller
                     'package_id'     => $package->id,
                     'client_id'      => $client->id,
                     'scheduled_date' => $current->toDateString(),
+                    'scheduled_time' => $trainingTime,
                     'status'         => 'scheduled',
                 ]);
                 $generated++;
