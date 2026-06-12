@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\PackageController;
@@ -17,6 +18,13 @@ Route::get('/lang/{locale}', function ($locale) {
     }
     return redirect(url()->previous(route('dashboard')));
 })->name('lang.switch');
+
+// Admin (owner only — trial_ends_at is NULL)
+Route::middleware(['auth', \App\Http\Middleware\AdminOnly::class])->prefix('admin')->group(function () {
+    Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::post('/users/{user}/grant', [AdminController::class, 'grantAccess'])->name('admin.grant');
+    Route::post('/users/{user}/revoke', [AdminController::class, 'revokeAccess'])->name('admin.revoke');
+});
 
 // Public pages (no auth required)
 Route::get('/pricing', [SubscriptionController::class, 'pricing'])->name('pricing');
