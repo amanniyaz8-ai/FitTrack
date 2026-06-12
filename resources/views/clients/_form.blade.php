@@ -74,11 +74,111 @@
         <label class="block text-sm font-medium text-gray-700 mb-2">
             <i class="fas fa-clock text-orange-400 mr-1"></i> Время тренировок
         </label>
-        <input type="time" name="training_time" value="{{ old('training_time', $client->training_time ?? '') }}"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
-            placeholder="Например: 10:00">
+        <input type="hidden" name="training_time" id="client_training_time_val" value="{{ old('training_time', $client->training_time ?? '') }}">
+        <button type="button" id="client_time_btn"
+            onclick="openClientTimePicker(this)"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-left flex items-center justify-between hover:border-orange-400 transition focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
+            <span id="client_time_label" class="text-sm font-semibold" style="color:{{ old('training_time', $client->training_time ?? '') ? '#f97316' : '#9ca3af' }};">
+                {{ old('training_time', $client->training_time ?? '') ?: 'Выбрать время' }}
+            </span>
+            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+        </button>
         <p class="text-xs text-gray-400 mt-1">Закрепите время — оно будет отображаться в мониторинге</p>
     </div>
+
+<script>
+function openClientTimePicker(btn) {
+    if (window._gTimePicker) { window._gTimePicker.remove(); window._gTimePicker = null; }
+
+    const current = document.getElementById('client_training_time_val').value;
+    let _h = current ? parseInt(current.split(':')[0]) : 9;
+    let _m = current ? parseInt(current.split(':')[1]) : 0;
+
+    const hours   = Array.from({length:24}, (_,i) => i);
+    const minutes = [0,5,10,15,20,25,30,35,40,45,50,55];
+    const colStyle = 'flex:1;overflow-y:auto;text-align:center;padding:4px 8px;';
+    const itemStyle = (sel) => `padding:8px 0;font-size:17px;font-weight:${sel?'700':'400'};color:${sel?'#f97316':'#374151'};cursor:pointer;border-radius:6px;background:${sel?'#fff7ed':'transparent'};`;
+
+    const popup = document.createElement('div');
+    popup.id = '_gTimePicker';
+    popup.style.cssText = 'position:fixed;z-index:2000;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);overflow:hidden;width:200px;';
+
+    popup.innerHTML = `
+        <div style="background:#0f2035;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="color:#fff;font-size:13px;font-weight:600;">Время тренировок</span>
+            <span id="ctp-preview" style="color:#fb923c;font-size:15px;font-weight:700;">
+                ${String(_h).padStart(2,'0')}:${String(_m).padStart(2,'0')}
+            </span>
+        </div>
+        <div style="display:flex;border-bottom:1px solid #f3f4f6;">
+            <div style="flex:1;text-align:center;padding:4px 0;font-size:11px;color:#9ca3af;border-right:1px solid #f3f4f6;">Часы</div>
+            <div style="flex:1;text-align:center;padding:4px 0;font-size:11px;color:#9ca3af;">Минуты</div>
+        </div>
+        <div style="display:flex;height:210px;">
+            <div id="ctp-hours" style="${colStyle}border-right:1px solid #f3f4f6;">
+                ${hours.map(v=>`<div data-v="${v}" onclick="ctpSelect('h',${v},this)" style="${itemStyle(v===_h)}">${String(v).padStart(2,'0')}</div>`).join('')}
+            </div>
+            <div id="ctp-mins" style="${colStyle}">
+                ${minutes.map(v=>`<div data-v="${v}" onclick="ctpSelect('m',${v},this)" style="${itemStyle(v===_m)}">${String(v).padStart(2,'0')}</div>`).join('')}
+            </div>
+        </div>
+        <div style="padding:10px 12px;">
+            <button type="button" onclick="ctpConfirm()" style="width:100%;background:#f97316;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">
+                ✓ Сохранить
+            </button>
+        </div>`;
+
+    document.body.appendChild(popup);
+    window._gTimePicker = popup;
+    window._ctpH = _h; window._ctpM = _m;
+
+    const rect = btn.getBoundingClientRect();
+    const pw = 200;
+    let top = rect.bottom + 6;
+    if (top + 340 > window.innerHeight - 10) top = rect.top - 340 - 6;
+    let left = rect.left;
+    if (left + pw > window.innerWidth - 10) left = window.innerWidth - pw - 10;
+    if (left < 8) left = 8;
+    popup.style.top = top + 'px';
+    popup.style.left = left + 'px';
+
+    setTimeout(() => {
+        const hEl = popup.querySelector(`#ctp-hours [data-v="${_h}"]`);
+        const mEl = popup.querySelector(`#ctp-mins [data-v="${_m}"]`);
+        if (hEl) hEl.scrollIntoView({block:'center'});
+        if (mEl) mEl.scrollIntoView({block:'center'});
+    }, 10);
+
+    setTimeout(() => {
+        document.addEventListener('click', function _ctpOuter(e) {
+            if (!popup.contains(e.target) && !btn.contains(e.target)) {
+                popup.remove(); window._gTimePicker = null;
+                document.removeEventListener('click', _ctpOuter);
+            }
+        });
+    }, 100);
+}
+
+function ctpSelect(type, val, el) {
+    const colId = type === 'h' ? 'ctp-hours' : 'ctp-mins';
+    document.querySelectorAll('#' + colId + ' div').forEach(d => {
+        d.style.fontWeight = '400'; d.style.color = '#374151'; d.style.background = 'transparent';
+    });
+    el.style.fontWeight = '700'; el.style.color = '#f97316'; el.style.background = '#fff7ed';
+    if (type === 'h') window._ctpH = val; else window._ctpM = val;
+    const t = String(window._ctpH).padStart(2,'0') + ':' + String(window._ctpM).padStart(2,'0');
+    document.getElementById('ctp-preview').textContent = t;
+}
+
+function ctpConfirm() {
+    const t = String(window._ctpH).padStart(2,'0') + ':' + String(window._ctpM).padStart(2,'0');
+    document.getElementById('client_training_time_val').value = t;
+    const lbl = document.getElementById('client_time_label');
+    lbl.textContent = t;
+    lbl.style.color = '#f97316';
+    if (window._gTimePicker) { window._gTimePicker.remove(); window._gTimePicker = null; }
+}
+</script>
 </div>
 
 @if(!isset($client->id))
