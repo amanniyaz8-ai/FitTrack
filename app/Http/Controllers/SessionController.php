@@ -89,6 +89,9 @@ class SessionController extends Controller
             ->whereDate('scheduled_date', '>=', today())
             ->update(['scheduled_time' => $request->scheduled_time]);
 
+        // Also update the client's default training time
+        $session->package->client->update(['training_time' => $request->scheduled_time]);
+
         return back()->with('success', 'Время обновлено для всех предстоящих тренировок.');
     }
 
