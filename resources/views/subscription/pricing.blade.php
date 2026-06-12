@@ -34,7 +34,8 @@
                 <li><i class="fas fa-check text-green-500 mr-2"></i>Трекинг тренировок</li>
                 <li><i class="fas fa-check text-green-500 mr-2"></i>Статистика и аналитика</li>
             </ul>
-            <a id="btn_monthly" href="/pricing/checkout/monthly"
+            <a id="btn_monthly" href="https://wa.me/77082767310?text=Хочу%20оформить%20тариф%20FitTrack%3A%201%20месяц%20—%204%20990%20₸"
+               target="_blank"
                class="block text-center py-3 rounded-lg text-white font-semibold transition"
                style="background:#f97316;"
                onmouseover="this.style.background='#ea6c10'"
@@ -61,7 +62,8 @@
                 <li><i class="fas fa-check mr-2"></i>Статистика и аналитика</li>
                 <li><i class="fas fa-check mr-2"></i>Приоритетная поддержка</li>
             </ul>
-            <a id="btn_halfyear" href="/pricing/checkout/halfyear"
+            <a id="btn_halfyear" href="https://wa.me/77082767310?text=Хочу%20оформить%20тариф%20FitTrack%3A%206%20месяцев%20—%2019%20990%20₸"
+               target="_blank"
                class="block text-center py-3 rounded-lg text-orange-600 font-semibold bg-white transition hover:bg-orange-50">
                 Купить
             </a>
@@ -86,7 +88,8 @@
                 <li><i class="fas fa-check text-green-500 mr-2"></i>Приоритетная поддержка</li>
                 <li><i class="fas fa-check text-green-500 mr-2"></i>Ранний доступ к новым функциям</li>
             </ul>
-            <a id="btn_annual" href="/pricing/checkout/annual"
+            <a id="btn_annual" href="https://wa.me/77082767310?text=Хочу%20оформить%20тариф%20FitTrack%3A%201%20год%20—%2023%20990%20₸"
+               target="_blank"
                class="block text-center py-3 rounded-lg text-white font-semibold transition"
                style="background:#f97316;"
                onmouseover="this.style.background='#ea6c10'"
