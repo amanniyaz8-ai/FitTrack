@@ -29,11 +29,11 @@ Route::middleware(['auth', \App\Http\Middleware\AdminOnly::class])->prefix('admi
 // Public pages (no auth required)
 Route::get('/pricing', [SubscriptionController::class, 'pricing'])->name('pricing');
 Route::get('/oferta', fn() => view('oferta'))->name('oferta');
+Route::post('/promo/validate', [PromoCodeController::class, 'validate'])->name('promo.validate');
 
-// Checkout and promo require auth but not active subscription
+// Checkout requires auth but not active subscription
 Route::middleware('auth')->group(function () {
     Route::get('/pricing/checkout/{plan}', [SubscriptionController::class, 'checkout'])->name('subscription.checkout');
-    Route::post('/promo/validate', [PromoCodeController::class, 'validate'])->name('promo.validate');
 });
 
 Route::get('/trial-expired', fn() => view('trial-expired'))->name('trial.expired')->middleware('auth');
