@@ -89,8 +89,8 @@
                     <i class="fas fa-dumbbell text-white text-sm"></i>
                 </div>
                 <div>
-                    <p class="text-xl font-bold text-green-700">{{ $sessionsCustom }} <span class="text-sm font-medium text-green-600">{{ __('app.sessions_done') }}</span></p>
-                    <p class="text-xs text-green-500">выполненных тренировок за период</p>
+                    <p class="text-xl font-bold text-green-700">{{ $sessionsCustom }} <span class="text-sm font-medium text-green-600">тренировок</span></p>
+                    <p class="text-xs text-green-500">выполнено за период</p>
                 </div>
             </div>
         </div>
