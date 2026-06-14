@@ -90,7 +90,7 @@
                 </div>
                 <div>
                     <p class="text-xl font-bold text-green-700">{{ $sessionsCustom }} <span class="text-sm font-medium text-green-600">тренировок</span></p>
-                    <p class="text-xs text-green-500">выполнено за период</p>
+                    <p class="text-xs text-green-500">проведено за период</p>
                 </div>
             </div>
         </div>
