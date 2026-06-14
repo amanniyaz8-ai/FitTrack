@@ -173,45 +173,74 @@ function recalc() {
 document.querySelector('[name=price]').addEventListener('input', recalc);
 document.querySelector('[name=total_sessions]').addEventListener('input', recalc);
 
-// Time picker for package edit
-function openPkgTimePicker() {
-    document.getElementById('pkg-time-modal').classList.remove('hidden');
+// Time picker for package edit (drum-roll style like dashboard)
+function openPkgTimePicker(btn) {
+    if (window._pkgTimePicker) { window._pkgTimePicker.remove(); window._pkgTimePicker = null; }
+    const current = document.getElementById('pkg_edit_time_val').value;
+    let _h = current ? parseInt(current.split(':')[0]) : 9;
+    let _m = current ? parseInt(current.split(':')[1]) : 0;
+    const hours = Array.from({length:24}, (_,i) => i);
+    const minutes = [0,5,10,15,20,25,30,35,40,45,50,55];
+    const colStyle = 'flex:1;overflow-y:auto;text-align:center;padding:4px 8px;';
+    const iS = (sel) => `padding:8px 0;font-size:17px;font-weight:${sel?'700':'400'};color:${sel?'#f97316':'#374151'};cursor:pointer;border-radius:6px;background:${sel?'#fff7ed':'transparent'};`;
+    const popup = document.createElement('div');
+    popup.style.cssText = 'position:fixed;z-index:3000;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);overflow:hidden;width:200px;';
+    popup.innerHTML = `
+        <div style="background:#0f2035;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="color:#fff;font-size:13px;font-weight:600;">Время занятия</span>
+            <span id="pkgtp-preview" style="color:#fb923c;font-size:15px;font-weight:700;">${String(_h).padStart(2,'0')}:${String(_m).padStart(2,'0')}</span>
+        </div>
+        <div style="display:flex;border-bottom:1px solid #f3f4f6;">
+            <div style="flex:1;text-align:center;padding:4px 0;font-size:11px;color:#9ca3af;border-right:1px solid #f3f4f6;">Часы</div>
+            <div style="flex:1;text-align:center;padding:4px 0;font-size:11px;color:#9ca3af;">Минуты</div>
+        </div>
+        <div style="display:flex;height:210px;">
+            <div id="pkgtp-hours" style="${colStyle}border-right:1px solid #f3f4f6;">
+                ${hours.map(v=>`<div data-v="${v}" onclick="pkgtpSelect('h',${v},this)" style="${iS(v===_h)}">${String(v).padStart(2,'0')}</div>`).join('')}
+            </div>
+            <div id="pkgtp-mins" style="${colStyle}">
+                ${minutes.map(v=>`<div data-v="${v}" onclick="pkgtpSelect('m',${v},this)" style="${iS(v===_m)}">${String(v).padStart(2,'0')}</div>`).join('')}
+            </div>
+        </div>
+        <div style="padding:10px 12px;">
+            <button type="button" onclick="pkgtpConfirm()" style="width:100%;background:#f97316;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">✓ OK</button>
+        </div>`;
+    document.body.appendChild(popup);
+    window._pkgTimePicker = popup;
+    window._pkgtpH = _h; window._pkgtpM = _m;
+    const rect = btn.getBoundingClientRect();
+    let top = rect.bottom + 6;
+    if (top + 340 > window.innerHeight - 10) top = rect.top - 340 - 6;
+    let left = rect.left;
+    if (left + 200 > window.innerWidth - 10) left = window.innerWidth - 210;
+    if (left < 8) left = 8;
+    popup.style.top = top + 'px'; popup.style.left = left + 'px';
+    setTimeout(() => {
+        popup.querySelector(`#pkgtp-hours [data-v="${_h}"]`)?.scrollIntoView({block:'center'});
+        popup.querySelector(`#pkgtp-mins [data-v="${_m}"]`)?.scrollIntoView({block:'center'});
+    }, 10);
+    setTimeout(() => {
+        document.addEventListener('click', function _cl(e) {
+            if (!popup.contains(e.target) && !btn.contains(e.target)) {
+                popup.remove(); window._pkgTimePicker = null;
+                document.removeEventListener('click', _cl);
+            }
+        });
+    }, 100);
 }
-function closePkgTimePicker() {
-    document.getElementById('pkg-time-modal').classList.add('hidden');
+function pkgtpSelect(type, val, el) {
+    const colId = type === 'h' ? 'pkgtp-hours' : 'pkgtp-mins';
+    document.querySelectorAll('#'+colId+' div').forEach(d => { d.style.fontWeight='400'; d.style.color='#374151'; d.style.background='transparent'; });
+    el.style.fontWeight='700'; el.style.color='#f97316'; el.style.background='#fff7ed';
+    if (type==='h') window._pkgtpH=val; else window._pkgtpM=val;
+    document.getElementById('pkgtp-preview').textContent = String(window._pkgtpH).padStart(2,'0')+':'+String(window._pkgtpM).padStart(2,'0');
 }
-function selectPkgTime(time) {
-    document.getElementById('pkg_edit_time_val').value = time;
-    const label = document.getElementById('pkg_edit_time_label');
-    label.textContent = time || '—';
-    closePkgTimePicker();
+function pkgtpConfirm() {
+    const t = String(window._pkgtpH).padStart(2,'0')+':'+String(window._pkgtpM).padStart(2,'0');
+    document.getElementById('pkg_edit_time_val').value = t;
+    document.getElementById('pkg_edit_time_label').textContent = t;
+    if (window._pkgTimePicker) { window._pkgTimePicker.remove(); window._pkgTimePicker = null; }
 }
 </script>
 
-{{-- Time picker modal --}}
-<div id="pkg-time-modal" class="hidden fixed inset-0 z-50 flex items-end justify-center" style="background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closePkgTimePicker()">
-    <div class="bg-white rounded-t-2xl w-full max-w-lg p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-gray-800">Выбрать время</h3>
-            <button onclick="closePkgTimePicker()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="grid grid-cols-4 gap-2 max-h-72 overflow-y-auto">
-            @php
-                $times = [];
-                for ($h = 6; $h <= 22; $h++) {
-                    $times[] = sprintf('%02d:00', $h);
-                    $times[] = sprintf('%02d:30', $h);
-                }
-            @endphp
-            @foreach($times as $t)
-            <button type="button" onclick="selectPkgTime('{{ $t }}')"
-                class="py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-orange-50 hover:border-orange-400 hover:text-orange-500 transition">
-                {{ $t }}
-            </button>
-            @endforeach
-        </div>
-        <button type="button" onclick="selectPkgTime(''); document.getElementById('pkg_edit_time_label').textContent='Выбрать время'; document.getElementById('pkg_edit_time_label').style.color='#9ca3af'; closePkgTimePicker();"
-            class="mt-3 w-full text-sm text-gray-400 hover:text-gray-600 py-2">Без времени</button>
-    </div>
-</div>
 @endsection
