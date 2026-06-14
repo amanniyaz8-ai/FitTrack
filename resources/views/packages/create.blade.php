@@ -49,7 +49,7 @@
                     <input type="hidden" name="payment_date" id="payment_date_val" value="{{ old('payment_date', date('Y-m-d')) }}">
                     <div class="grid grid-cols-2 gap-3">
                         {{-- Оплачен --}}
-                        <button type="button" id="btn_paid" onclick="setPaidStatus('paid')"
+                        <button type="button" id="btn_paid" onclick="event.preventDefault();setPaidStatus('paid')"
                             class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition text-left
                             {{ old('is_paid', '1') == '1' ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white' }}">
                             <div id="icon_paid" class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition
@@ -62,7 +62,7 @@
                             </div>
                         </button>
                         {{-- Оплатит после --}}
-                        <button type="button" id="btn_later" onclick="setPaidStatus('later')"
+                        <button type="button" id="btn_later" onclick="event.preventDefault();setPaidStatus('later')"
                             class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition text-left
                             {{ old('is_paid', '1') != '1' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 bg-white' }}">
                             <div id="icon_later" class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition
