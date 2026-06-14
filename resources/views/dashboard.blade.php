@@ -230,7 +230,11 @@
                             </a>
                             @if(($session->client->training_type ?? 'personal') === 'mini_group')
                             <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
-                                <i class="fas fa-users text-xs"></i>
+                                <i class="fas fa-users text-xs"></i> Мини-группа
+                            </span>
+                            @else
+                            <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600">
+                                <i class="fas fa-user text-xs"></i> Персональная
                             </span>
                             @endif
                         </div>
@@ -378,6 +382,15 @@
                        style="{{ $session->status !== 'completed' ? 'color:#0f2035;' : '' }}">
                         {{ $session->client->full_name }}
                     </a>
+                    @if(($session->client->training_type ?? 'personal') === 'mini_group')
+                    <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                        <i class="fas fa-users text-xs"></i> Мини-группа
+                    </span>
+                    @else
+                    <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600">
+                        <i class="fas fa-user text-xs"></i> Персональная
+                    </span>
+                    @endif
                     {{-- Стоимость --}}
                     @php
                         $pkg = $session->package;
@@ -476,6 +489,15 @@
                        class="font-medium hover:text-orange-500 transition truncate {{ $session->status === 'completed' ? 'line-through text-gray-400' : 'text-gray-700' }}">
                         {{ $session->client->full_name }}
                     </a>
+                    @if(($session->client->training_type ?? 'personal') === 'mini_group')
+                    <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                        <i class="fas fa-users text-xs"></i> Мини-группа
+                    </span>
+                    @else
+                    <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600">
+                        <i class="fas fa-user text-xs"></i> Персональная
+                    </span>
+                    @endif
                     @php $pkg = $session->package; $pps = ($pkg && $pkg->total_sessions > 0) ? round($pkg->price / $pkg->total_sessions) : 0; @endphp
                     @if($pps > 0)
                     <span class="text-xs font-semibold shrink-0 hidden sm:inline {{ $session->status === 'completed' ? 'text-green-600' : 'text-gray-400' }}">
