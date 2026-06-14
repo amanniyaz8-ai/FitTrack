@@ -222,18 +222,18 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-1.5">
                         {{-- Имя --}}
-                        <div class="flex-1 min-w-0 flex items-center gap-2">
+                        <div class="flex-1 min-w-0 flex flex-col gap-0.5">
                             <a href="{{ route('clients.show', $session->client) }}"
-                               class="font-medium hover:text-orange-500 transition truncate {{ $session->status === 'completed' ? 'line-through text-gray-400' : '' }}"
+                               class="font-medium hover:text-orange-500 transition {{ $session->status === 'completed' ? 'line-through text-gray-400' : '' }}"
                                style="{{ $session->status !== 'completed' ? 'color:#0f2035;' : '' }}">
                                 {{ $session->client->full_name }}
                             </a>
                             @if(($session->client->training_type ?? 'personal') === 'mini_group')
-                            <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                            <span class="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 w-fit">
                                 <i class="fas fa-users text-xs"></i> Мини-группа
                             </span>
                             @else
-                            <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600">
+                            <span class="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 w-fit">
                                 <i class="fas fa-user text-xs"></i> Персональная
                             </span>
                             @endif
@@ -377,20 +377,22 @@
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-1.5">
                     {{-- Имя --}}
-                    <a href="{{ route('clients.show', $session->client) }}"
-                       class="flex-1 min-w-0 font-medium hover:text-orange-500 transition truncate {{ $session->status === 'completed' ? 'line-through text-gray-400' : '' }}"
-                       style="{{ $session->status !== 'completed' ? 'color:#0f2035;' : '' }}">
-                        {{ $session->client->full_name }}
-                    </a>
-                    @if(($session->client->training_type ?? 'personal') === 'mini_group')
-                    <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
-                        <i class="fas fa-users text-xs"></i> Мини-группа
-                    </span>
-                    @else
-                    <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600">
-                        <i class="fas fa-user text-xs"></i> Персональная
-                    </span>
-                    @endif
+                    <div class="flex-1 min-w-0 flex flex-col gap-0.5">
+                        <a href="{{ route('clients.show', $session->client) }}"
+                           class="font-medium hover:text-orange-500 transition {{ $session->status === 'completed' ? 'line-through text-gray-400' : '' }}"
+                           style="{{ $session->status !== 'completed' ? 'color:#0f2035;' : '' }}">
+                            {{ $session->client->full_name }}
+                        </a>
+                        @if(($session->client->training_type ?? 'personal') === 'mini_group')
+                        <span class="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 w-fit">
+                            <i class="fas fa-users text-xs"></i> Мини-группа
+                        </span>
+                        @else
+                        <span class="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 w-fit">
+                            <i class="fas fa-user text-xs"></i> Персональная
+                        </span>
+                        @endif
+                    </div>
                     {{-- Стоимость --}}
                     @php
                         $pkg = $session->package;
@@ -485,19 +487,21 @@
             {{-- Клиент --}}
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('clients.show', $session->client) }}"
-                       class="font-medium hover:text-orange-500 transition truncate {{ $session->status === 'completed' ? 'line-through text-gray-400' : 'text-gray-700' }}">
-                        {{ $session->client->full_name }}
-                    </a>
-                    @if(($session->client->training_type ?? 'personal') === 'mini_group')
-                    <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
-                        <i class="fas fa-users text-xs"></i> Мини-группа
-                    </span>
-                    @else
-                    <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600">
-                        <i class="fas fa-user text-xs"></i> Персональная
-                    </span>
-                    @endif
+                    <div class="flex-1 min-w-0 flex flex-col gap-0.5">
+                        <a href="{{ route('clients.show', $session->client) }}"
+                           class="font-medium hover:text-orange-500 transition {{ $session->status === 'completed' ? 'line-through text-gray-400' : 'text-gray-700' }}">
+                            {{ $session->client->full_name }}
+                        </a>
+                        @if(($session->client->training_type ?? 'personal') === 'mini_group')
+                        <span class="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 w-fit">
+                            <i class="fas fa-users text-xs"></i> Мини-группа
+                        </span>
+                        @else
+                        <span class="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 w-fit">
+                            <i class="fas fa-user text-xs"></i> Персональная
+                        </span>
+                        @endif
+                    </div>
                     @php $pkg = $session->package; $pps = ($pkg && $pkg->total_sessions > 0) ? round($pkg->price / $pkg->total_sessions) : 0; @endphp
                     @if($pps > 0)
                     <span class="text-xs font-semibold shrink-0 hidden sm:inline {{ $session->status === 'completed' ? 'text-green-600' : 'text-gray-400' }}">
