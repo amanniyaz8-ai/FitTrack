@@ -15,6 +15,10 @@ class StorePackageRequest extends FormRequest
             'price'          => 'required|numeric|min:0',
             'payment_date'   => 'required|date',
             'is_paid'        => 'boolean',
+            'training_type'  => 'nullable|in:personal,mini_group',
+            'training_days'  => 'nullable|array',
+            'training_days.*'=> 'in:Mon,Tue,Wed,Thu,Fri,Sat,Sun',
+            'training_time'  => 'nullable|date_format:H:i',
         ];
     }
 

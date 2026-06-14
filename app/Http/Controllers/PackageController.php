@@ -24,7 +24,20 @@ class PackageController extends Controller
         $data = $request->validated();
         $data['is_paid'] = $request->boolean('is_paid');
 
-        $package = $client->packages()->create($data);
+        // Update client fields if provided
+        $clientData = [];
+        if (!empty($data['training_type'])) $clientData['training_type'] = $data['training_type'];
+        if (!empty($data['training_days'])) $clientData['training_days'] = $data['training_days'];
+        if (isset($data['training_time'])) $clientData['training_time'] = $data['training_time'] ?: null;
+        if (!empty($clientData)) $client->update($clientData);
+        $client->refresh();
+
+        $package = $client->packages()->create([
+            'total_sessions' => $data['total_sessions'],
+            'price'          => $data['price'],
+            'payment_date'   => $data['payment_date'],
+            'is_paid'        => $data['is_paid'],
+        ]);
 
         // Auto-generate sessions based on training_days
         $this->generateSessionsPublic($package, $client, 0, $client->training_time);
