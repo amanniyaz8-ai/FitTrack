@@ -12,15 +12,16 @@ class DashboardController extends Controller
     {
         $trainer = $request->user();
 
-        $totalClients = $trainer->clients()->count();
-
         $clientIds = $trainer->clients()->pluck('id');
 
-        $activePackages = \App\Models\Package::whereIn('client_id', $clientIds)
+        $totalClients = $clientIds->count();
+
+        $allPackages = \App\Models\Package::whereIn('client_id', $clientIds)
+            ->with('client')
             ->withCount(['sessions as scheduled_count' => fn($q) => $q->where('status', 'scheduled')])
-            ->get()
-            ->filter(fn($p) => $p->scheduled_count > 0)
-            ->count();
+            ->get();
+
+        $activePackages = $allPackages->filter(fn($p) => $p->scheduled_count > 0)->count();
 
         // Count all today's sessions (any status)
         $todaySessions = Session::whereIn('client_id', $clientIds)
@@ -28,13 +29,7 @@ class DashboardController extends Controller
             ->count();
 
         // Expiring packages: ≤2 scheduled sessions left
-        $expiringPackages = \App\Models\Package::whereIn('client_id', $clientIds)
-            ->with('client')
-            ->withCount([
-                'sessions as scheduled_count' => fn($q) => $q->where('status', 'scheduled'),
-            ])
-            ->get()
-            ->filter(fn($p) => $p->scheduled_count > 0 && $p->scheduled_count <= 2);
+        $expiringPackages = $allPackages->filter(fn($p) => $p->scheduled_count > 0 && $p->scheduled_count <= 2);
 
         // Filter: today | tomorrow | week | history
         $filter = $request->get('filter', 'today');
@@ -68,12 +63,14 @@ class DashboardController extends Controller
 
         $upcomingSessions = $sessionsQuery->get();
 
-        // Daily earnings: sum of price-per-session for completed sessions today
-        $todayCompleted = Session::with('package')
-            ->whereIn('client_id', $clientIds)
-            ->whereDate('scheduled_date', Carbon::today())
-            ->where('status', 'completed')
-            ->get();
+        // Daily earnings from already-loaded sessions (avoid extra query)
+        $todayCompleted = ($filter === 'today')
+            ? $upcomingSessions->where('status', 'completed')
+            : Session::with('package')
+                ->whereIn('client_id', $clientIds)
+                ->whereDate('scheduled_date', Carbon::today())
+                ->where('status', 'completed')
+                ->get();
 
         $todayEarnings = $todayCompleted->sum(function ($session) {
             $pkg = $session->package;

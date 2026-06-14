@@ -101,6 +101,11 @@
                     <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full font-medium">Архив</span>
                 @else
                     <span class="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-medium">Активный</span>
+                    @if($client->training_type === 'mini_group')
+                        <span class="text-xs px-2 py-1 rounded-full font-medium bg-blue-50 text-blue-600"><i class="fas fa-users mr-1"></i>Мини-группа</span>
+                    @else
+                        <span class="text-xs px-2 py-1 rounded-full font-medium bg-green-50 text-green-600"><i class="fas fa-user mr-1"></i>Персональные</span>
+                    @endif
                 @endif
                 <span class="font-medium" style="color: #0f2035;">{{ $pkg->total_sessions }} тренировок</span>
                 <span class="text-gray-400 text-sm">{{ $formattedPrice }}</span>
