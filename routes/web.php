@@ -8,6 +8,7 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route('dashboard'));
@@ -24,12 +25,16 @@ Route::middleware(['auth', \App\Http\Middleware\AdminOnly::class])->prefix('admi
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
     Route::post('/users/{user}/grant', [AdminController::class, 'grantAccess'])->name('admin.grant');
     Route::post('/users/{user}/revoke', [AdminController::class, 'revokeAccess'])->name('admin.revoke');
+    Route::get('/tickets', [AdminController::class, 'tickets'])->name('admin.tickets');
+    Route::patch('/tickets/{ticket}/status', [AdminController::class, 'updateTicketStatus'])->name('admin.tickets.status');
 });
 
 // Public pages (no auth required)
 Route::get('/pricing', [SubscriptionController::class, 'pricing'])->name('pricing');
 Route::get('/oferta', fn() => view('oferta'))->name('oferta');
 Route::post('/promo/validate', [PromoCodeController::class, 'validate'])->name('promo.validate');
+Route::get('/support', [SupportController::class, 'show'])->name('support');
+Route::post('/support', [SupportController::class, 'store'])->name('support.store');
 
 // Checkout requires auth but not active subscription
 Route::middleware('auth')->group(function () {

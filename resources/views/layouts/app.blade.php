@@ -213,6 +213,14 @@
                     <i class="fas fa-shield-alt"></i>
                     <span>Админ</span>
                 </a>
+                <a href="{{ route('admin.tickets') }}" class="text-gray-300 text-sm hidden md:flex items-center gap-1.5 hover:text-orange-400 transition">
+                    <i class="fas fa-headset"></i>
+                    <span>Обращения</span>
+                    @php $newTickets = \App\Models\SupportTicket::where('status','new')->count(); @endphp
+                    @if($newTickets > 0)
+                    <span class="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 leading-none">{{ $newTickets }}</span>
+                    @endif
+                </a>
                 @endif
 
                 {{-- Профиль — только на десктопе --}}

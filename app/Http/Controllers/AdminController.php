@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\SupportTicket;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -36,5 +37,20 @@ class AdminController extends Controller
     {
         $user->update(['subscription_ends_at' => now()->subDay()]);
         return back()->with('success', "Доступ отозван у {$user->name}.");
+    }
+
+    public function tickets()
+    {
+        $tickets = SupportTicket::orderByRaw("FIELD(status,'new','in_progress','resolved')")
+            ->orderByDesc('created_at')
+            ->get();
+        return view('admin.tickets', compact('tickets'));
+    }
+
+    public function updateTicketStatus(Request $request, SupportTicket $ticket)
+    {
+        $request->validate(['status' => 'required|in:new,in_progress,resolved']);
+        $ticket->update(['status' => $request->status]);
+        return back();
     }
 }
