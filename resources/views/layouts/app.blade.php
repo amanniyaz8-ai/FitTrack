@@ -306,26 +306,20 @@
 @php
     $clientIds = auth()->user()->clients()->pluck('id');
     $today = \Carbon\Carbon::today();
-    $overduePackages = \App\Models\Package::whereIn('client_id', $clientIds)
-        ->where('is_paid', false)
-        ->whereDate('payment_date', '<', $today)
-        ->with('client')
-        ->get();
     $dueTodayPackages = \App\Models\Package::whereIn('client_id', $clientIds)
         ->where('is_paid', false)
         ->whereDate('payment_date', $today)
         ->with('client')
         ->get();
 @endphp
-@if($dueTodayPackages->count() > 0 || $overduePackages->count() > 0)
-<div id="payment-reminder-banner" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-    @if($dueTodayPackages->count() > 0)
-    <div class="flex items-start gap-3 bg-orange-50 border border-orange-300 rounded-xl px-4 py-3 mb-2 relative">
+@if($dueTodayPackages->count() > 0)
+<div id="payment-reminder-banner" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" style="display:none;">
+    <div class="flex items-start gap-3 bg-orange-50 border border-orange-300 rounded-xl px-4 py-3">
         <div class="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0 mt-0.5">
             <i class="fas fa-bell text-white text-sm"></i>
         </div>
         <div class="flex-1 min-w-0">
-            <p class="font-semibold text-orange-800 text-sm">Оплата сегодня</p>
+            <p class="font-semibold text-orange-800 text-sm">Напоминание об оплате</p>
             <p class="text-orange-700 text-xs mt-0.5">
                 @foreach($dueTodayPackages as $pkg)
                     <a href="{{ route('clients.show', $pkg->client) }}" class="font-semibold hover:underline">{{ $pkg->client->full_name }}</a>
@@ -333,31 +327,27 @@
                 @endforeach
             </p>
         </div>
-        <button onclick="this.closest('.flex').remove()" class="text-orange-400 hover:text-orange-600 flex-shrink-0 mt-0.5">
+        <button onclick="dismissPaymentReminder()" class="text-orange-400 hover:text-orange-600 flex-shrink-0 mt-0.5">
             <i class="fas fa-times text-sm"></i>
         </button>
     </div>
-    @endif
-    @if($overduePackages->count() > 0)
-    <div class="flex items-start gap-3 bg-red-50 border border-red-300 rounded-xl px-4 py-3 mb-2 relative">
-        <div class="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <i class="fas fa-exclamation text-white text-sm"></i>
-        </div>
-        <div class="flex-1 min-w-0">
-            <p class="font-semibold text-red-800 text-sm">Просроченная оплата ({{ $overduePackages->count() }})</p>
-            <p class="text-red-700 text-xs mt-0.5">
-                @foreach($overduePackages as $pkg)
-                    <a href="{{ route('clients.show', $pkg->client) }}" class="font-semibold hover:underline">{{ $pkg->client->full_name }}</a>
-                    — {{ number_format($pkg->price, 0, '.', ' ') }} ₸ (до {{ \Carbon\Carbon::parse($pkg->payment_date)->format('d.m') }})@if(!$loop->last), @endif
-                @endforeach
-            </p>
-        </div>
-        <button onclick="this.closest('.flex').remove()" class="text-red-400 hover:text-red-600 flex-shrink-0 mt-0.5">
-            <i class="fas fa-times text-sm"></i>
-        </button>
-    </div>
-    @endif
 </div>
+<script>
+(function() {
+    var today = '{{ $today->toDateString() }}';
+    var key = 'payment_reminder_dismissed_{{ auth()->id() }}';
+    var dismissed = localStorage.getItem(key);
+    if (dismissed !== today) {
+        document.getElementById('payment-reminder-banner').style.display = 'block';
+    }
+})();
+function dismissPaymentReminder() {
+    var today = '{{ $today->toDateString() }}';
+    var key = 'payment_reminder_dismissed_{{ auth()->id() }}';
+    localStorage.setItem(key, today);
+    document.getElementById('payment-reminder-banner').style.display = 'none';
+}
+</script>
 @endif
 @endauth
 
