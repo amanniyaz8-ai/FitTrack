@@ -70,6 +70,33 @@
         @enderror
     </div>
 
+    {{-- Тип тренировок --}}
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+            <i class="fas fa-layer-group text-orange-400 mr-1"></i> Тип тренировок
+        </label>
+        <div class="flex gap-3">
+            <label class="flex-1 cursor-pointer">
+                <input type="radio" name="training_type" value="personal"
+                    {{ old('training_type', $client->training_type ?? 'personal') === 'personal' ? 'checked' : '' }}
+                    class="sr-only peer">
+                <div class="w-full text-center py-2.5 rounded-lg border-2 border-gray-200 text-sm font-semibold text-gray-500 transition
+                    peer-checked:border-orange-500 peer-checked:text-orange-500 peer-checked:bg-orange-50">
+                    <i class="fas fa-user mr-1"></i> Персональные
+                </div>
+            </label>
+            <label class="flex-1 cursor-pointer">
+                <input type="radio" name="training_type" value="mini_group"
+                    {{ old('training_type', $client->training_type ?? '') === 'mini_group' ? 'checked' : '' }}
+                    class="sr-only peer">
+                <div class="w-full text-center py-2.5 rounded-lg border-2 border-gray-200 text-sm font-semibold text-gray-500 transition
+                    peer-checked:border-orange-500 peer-checked:text-orange-500 peer-checked:bg-orange-50">
+                    <i class="fas fa-users mr-1"></i> Мини-группа
+                </div>
+            </label>
+        </div>
+    </div>
+
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
             <i class="fas fa-clock text-orange-400 mr-1"></i> Время тренировок

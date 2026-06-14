@@ -34,6 +34,15 @@
                 <i class="fas fa-clock text-xs"></i> {{ $client->training_time }}
             </span>
             @endif
+            @if($client->training_type === 'mini_group')
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 bg-blue-50 text-blue-600">
+                <i class="fas fa-users text-xs"></i> Мини-группа
+            </span>
+            @else
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 bg-green-50 text-green-600">
+                <i class="fas fa-user text-xs"></i> Персональные
+            </span>
+            @endif
         </div>
         @if(!$isActive)
         <div class="mt-3 flex items-center gap-1 text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-1.5">

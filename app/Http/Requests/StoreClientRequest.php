@@ -18,6 +18,7 @@ class StoreClientRequest extends FormRequest
             'training_days'     => 'required|array|min:1',
             'training_days.*'   => 'in:Mon,Tue,Wed,Thu,Fri,Sat,Sun',
             'training_time'     => 'nullable|date_format:H:i',
+            'training_type'     => 'required|in:personal,mini_group',
         ];
     }
 

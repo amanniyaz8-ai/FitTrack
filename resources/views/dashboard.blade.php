@@ -222,11 +222,18 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-1.5">
                         {{-- Имя --}}
-                        <a href="{{ route('clients.show', $session->client) }}"
-                           class="flex-1 min-w-0 font-medium hover:text-orange-500 transition truncate {{ $session->status === 'completed' ? 'line-through text-gray-400' : '' }}"
-                           style="{{ $session->status !== 'completed' ? 'color:#0f2035;' : '' }}">
-                            {{ $session->client->full_name }}
-                        </a>
+                        <div class="flex-1 min-w-0 flex items-center gap-2">
+                            <a href="{{ route('clients.show', $session->client) }}"
+                               class="font-medium hover:text-orange-500 transition truncate {{ $session->status === 'completed' ? 'line-through text-gray-400' : '' }}"
+                               style="{{ $session->status !== 'completed' ? 'color:#0f2035;' : '' }}">
+                                {{ $session->client->full_name }}
+                            </a>
+                            @if(($session->client->training_type ?? 'personal') === 'mini_group')
+                            <span class="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                                <i class="fas fa-users text-xs"></i>
+                            </span>
+                            @endif
+                        </div>
                         {{-- Стоимость --}}
                         @php
                             $pkg = $session->package;
