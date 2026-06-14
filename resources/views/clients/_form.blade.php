@@ -1,7 +1,7 @@
 @php
     $days = [
-        'Mon' => 'Пн', 'Tue' => 'Вт', 'Wed' => 'Ср', 'Thu' => 'Чт',
-        'Fri' => 'Пт', 'Sat' => 'Сб', 'Sun' => 'Вс',
+        'Mon' => __('app.day_mon'), 'Tue' => __('app.day_tue'), 'Wed' => __('app.day_wed'), 'Thu' => __('app.day_thu'),
+        'Fri' => __('app.day_fri'), 'Sat' => __('app.day_sat'), 'Sun' => __('app.day_sun'),
     ];
     $selectedDays = old('training_days', $client->training_days ?? []);
 @endphp
@@ -18,7 +18,7 @@
 
 <div class="space-y-4">
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">ФИО <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.field_full_name') }} <span class="text-red-500">*</span></label>
         <input type="text" name="full_name" value="{{ old('full_name', $client->full_name ?? '') }}"
             class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 {{ $errors->has('full_name') ? 'border-red-400' : 'border-gray-300' }}"
             style="--tw-ring-color: #fb923c;"
@@ -26,28 +26,28 @@
     </div>
 
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Телефон</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.field_phone') }}</label>
         <input type="text" name="phone" value="{{ old('phone', $client->phone ?? '') }}"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
             placeholder="+7 777 123 4567">
     </div>
 
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Цель тренировок</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.field_goal') }}</label>
         <textarea name="goal" rows="3"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
-            placeholder="Например: похудеть на 10 кг, набрать мышечную массу...">{{ old('goal', $client->goal ?? '') }}</textarea>
+            placeholder="{{ __('app.field_goal_placeholder') }}">{{ old('goal', $client->goal ?? '') }}</textarea>
     </div>
 
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Противопоказания</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.field_contraindications') }}</label>
         <textarea name="contraindications" rows="2"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
-            placeholder="Укажите если есть противопоказания...">{{ old('contraindications', $client->contraindications ?? '') }}</textarea>
+            placeholder="{{ __('app.field_contra_placeholder') }}">{{ old('contraindications', $client->contraindications ?? '') }}</textarea>
     </div>
 
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Дни тренировок <span class="text-red-500">*</span></label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('app.field_training_days') }} <span class="text-red-500">*</span></label>
         <div class="flex flex-wrap gap-2">
             @foreach($days as $value => $label)
             <label class="flex items-center cursor-pointer">
@@ -73,7 +73,7 @@
     {{-- Тип тренировок --}}
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
-            <i class="fas fa-layer-group text-orange-400 mr-1"></i> Тип тренировок
+            <i class="fas fa-layer-group text-orange-400 mr-1"></i> {{ __('app.field_training_type') }}
         </label>
         <div class="flex gap-3">
             <label class="flex-1 cursor-pointer">
@@ -82,7 +82,7 @@
                     class="sr-only peer">
                 <div class="w-full text-center py-2.5 rounded-lg border-2 border-gray-200 text-sm font-semibold text-gray-500 transition
                     peer-checked:border-orange-500 peer-checked:text-orange-500 peer-checked:bg-orange-50">
-                    <i class="fas fa-user mr-1"></i> Персональные
+                    <i class="fas fa-user mr-1"></i> {{ __('app.type_personal') }}
                 </div>
             </label>
             <label class="flex-1 cursor-pointer">
@@ -91,7 +91,7 @@
                     class="sr-only peer">
                 <div class="w-full text-center py-2.5 rounded-lg border-2 border-gray-200 text-sm font-semibold text-gray-500 transition
                     peer-checked:border-orange-500 peer-checked:text-orange-500 peer-checked:bg-orange-50">
-                    <i class="fas fa-users mr-1"></i> Мини-группа
+                    <i class="fas fa-users mr-1"></i> {{ __('app.type_mini_group') }}
                 </div>
             </label>
         </div>
@@ -99,18 +99,18 @@
 
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
-            <i class="fas fa-clock text-orange-400 mr-1"></i> Время тренировок
+            <i class="fas fa-clock text-orange-400 mr-1"></i> {{ __('app.field_training_time') }}
         </label>
         <input type="hidden" name="training_time" id="client_training_time_val" value="{{ old('training_time', $client->training_time ?? '') }}">
         <button type="button" id="client_time_btn"
             onclick="openClientTimePicker(this)"
             class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-left flex items-center justify-between hover:border-orange-400 transition focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
             <span id="client_time_label" class="text-sm font-semibold" style="color:{{ old('training_time', $client->training_time ?? '') ? '#f97316' : '#9ca3af' }};">
-                {{ old('training_time', $client->training_time ?? '') ?: 'Выбрать время' }}
+                {{ old('training_time', $client->training_time ?? '') ?: __('app.select_time') }}
             </span>
             <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
         </button>
-        <p class="text-xs text-gray-400 mt-1">Закрепите время — оно будет отображаться в мониторинге</p>
+        <p class="text-xs text-gray-400 mt-1">{{ __('app.time_hint') }}</p>
     </div>
 
 <script>
@@ -132,7 +132,7 @@ function openClientTimePicker(btn) {
 
     popup.innerHTML = `
         <div style="background:#0f2035;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
-            <span style="color:#fff;font-size:13px;font-weight:600;">Время тренировок</span>
+            <span style="color:#fff;font-size:13px;font-weight:600;">{{ __('app.time_picker_title') }}</span>
             <span id="ctp-preview" style="color:#fb923c;font-size:15px;font-weight:700;">
                 ${String(_h).padStart(2,'0')}:${String(_m).padStart(2,'0')}
             </span>
@@ -151,7 +151,7 @@ function openClientTimePicker(btn) {
         </div>
         <div style="padding:10px 12px;">
             <button type="button" onclick="ctpConfirm()" style="width:100%;background:#f97316;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;">
-                ✓ Сохранить
+                ✓ {{ __('app.save') }}
             </button>
         </div>`;
 
@@ -217,19 +217,19 @@ function ctpConfirm() {
             class="w-4 h-4 rounded" style="accent-color: #f97316;"
             onchange="document.getElementById('package-fields').classList.toggle('hidden', !this.checked)">
         <label for="create_package" class="text-sm font-semibold text-gray-700 cursor-pointer">
-            <i class="fas fa-box text-orange-400 mr-1"></i> Сразу создать пакет (абонемент)
+            <i class="fas fa-box text-orange-400 mr-1"></i> {{ __('app.create_package_label') }}
         </label>
     </div>
 
     <div id="package-fields" class="{{ old('create_package') ? '' : 'hidden' }} space-y-4 bg-orange-50 border border-orange-200 rounded-xl p-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Количество тренировок</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.pkg_sessions_count') }}</label>
                 <input type="number" name="pkg_total_sessions" id="pkg_total_sessions" value="{{ old('pkg_total_sessions', 10) }}" min="1" max="100"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Стоимость (₸)</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.pkg_price') }}</label>
                 <div class="relative">
                     <input type="number" name="pkg_price" value="{{ old('pkg_price', 60000) }}" min="0"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-7 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
@@ -241,8 +241,8 @@ function ctpConfirm() {
         {{-- Перенос клиента --}}
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <label class="block text-sm font-medium text-gray-700 mb-1">
-                <i class="fas fa-history text-blue-400 mr-1"></i> Уже отходил тренировок
-                <span class="text-gray-400 font-normal">(при переносе существующего клиента)</span>
+                <i class="fas fa-history text-blue-400 mr-1"></i> {{ __('app.already_attended') }}
+                <span class="text-gray-400 font-normal">{{ __('app.already_attended_hint') }}</span>
             </label>
             <input type="number" name="pkg_completed_sessions" id="pkg_completed_sessions" value="{{ old('pkg_completed_sessions', 0) }}" min="0" max="100"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
@@ -253,14 +253,14 @@ function ctpConfirm() {
         <div class="flex items-center justify-between gap-2 px-3 py-2 bg-white border border-orange-200 rounded-lg text-sm">
             <div class="flex items-center gap-2 min-w-0">
                 <i class="fas fa-tag text-orange-400 shrink-0"></i>
-                <span class="text-gray-500">Стоимость одной тренировки:</span>
+                <span class="text-gray-500">{{ __('app.price_per_session') }}</span>
             </div>
             <span id="price-per-session-create" class="font-bold whitespace-nowrap shrink-0" style="color:#f97316;">—</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Дата оплаты</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.payment_date_label') }}</label>
                 <input type="date" name="pkg_payment_date" value="{{ old('pkg_payment_date', date('Y-m-d')) }}"
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white">
             </div>
@@ -268,7 +268,7 @@ function ctpConfirm() {
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="pkg_is_paid" value="1" {{ old('pkg_is_paid') ? 'checked' : '' }}
                         class="w-4 h-4 rounded" style="accent-color: #f97316;">
-                    <span class="text-sm font-medium text-gray-700">Оплачен</span>
+                    <span class="text-sm font-medium text-gray-700">{{ __('app.is_paid') }}</span>
                 </label>
             </div>
         </div>

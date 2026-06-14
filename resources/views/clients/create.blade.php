@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Новый клиент')
+@section('title', __('app.new_client'))
 
 @section('content')
 <div class="max-w-2xl mx-auto">
@@ -7,7 +7,7 @@
         <a href="{{ route('clients.index') }}" class="text-gray-400 hover:text-gray-700 transition">
             <i class="fas fa-arrow-left"></i>
         </a>
-        <h1 class="text-2xl font-bold" style="color: #0f2035;">Новый клиент</h1>
+        <h1 class="text-2xl font-bold" style="color: #0f2035;">{{ __('app.new_client') }}</h1>
     </div>
 
     <div class="bg-white rounded-xl shadow p-6">
@@ -17,9 +17,9 @@
             @include('clients._form')
             <div class="mt-6 flex gap-3">
                 <button type="submit" class="text-white px-6 py-2 rounded-lg font-medium transition" style="background-color: #f97316;" onmouseover="this.style.backgroundColor='#ea580c'" onmouseout="this.style.backgroundColor='#f97316'">
-                    <i class="fas fa-save mr-2"></i>Создать клиента
+                    <i class="fas fa-save mr-2"></i>{{ __('app.new_client') }}
                 </button>
-                <a href="{{ route('clients.index') }}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">Отмена</a>
+                <a href="{{ route('clients.index') }}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition">{{ __('app.cancel') }}</a>
             </div>
         </form>
     </div>
