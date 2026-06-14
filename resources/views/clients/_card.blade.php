@@ -55,7 +55,7 @@
                style="background-color: #0f2035;"
                onmouseover="this.style.backgroundColor='#162d4a'"
                onmouseout="this.style.backgroundColor='#0f2035'">
-                <i class="fas fa-user"></i> Профиль клиента
+                <i class="fas fa-user"></i> {{ __('app.client_profile') }}
             </a>
             @if(!$isActive)
             <a href="{{ route('packages.create', $client) }}"

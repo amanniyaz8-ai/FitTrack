@@ -48,7 +48,7 @@ return [
     'active_clients'        => 'Белсенді клиенттер',
     'inactive_clients'      => 'Белсенді емес клиенттер',
     'unpaid_clients'        => 'Төленбеген',
-    'client_profile'        => 'Клиент профилі',
+    'client_profile'        => 'Клиенттің профилі',
     'packages'              => 'пак.',
     'no_active_clients'     => 'Белсенді клиенттер жоқ',
     'no_inactive_clients'   => 'Белсенді емес клиенттер жоқ',
