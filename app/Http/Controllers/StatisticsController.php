@@ -44,38 +44,26 @@ class StatisticsController extends Controller
             ->whereDate('scheduled_date', '<=', $lastMonthEnd)
             ->count();
 
-        // --- Все выполненные сессии с пакетами (для заработка) ---
-        $allCompleted = Session::with('package')
-            ->whereIn('client_id', $clientIds)
-            ->where('status', 'completed')
-            ->get();
+        // --- Заработок = сумма оплаченных пакетов за период ---
+        $calcPaidInPeriod = fn($from, $to) => Package::whereIn('client_id', $clientIds)
+            ->where('is_paid', true)
+            ->whereDate('payment_date', '>=', $from)
+            ->whereDate('payment_date', '<=', $to)
+            ->sum('price');
 
-        $calcEarnings = fn($sessions) => $sessions->sum(function ($s) {
-            $p = $s->package;
-            return ($p && $p->total_sessions > 0) ? round($p->price / $p->total_sessions) : 0;
-        });
+        $earningsWeek  = $calcPaidInPeriod($thisWeekStart, $today);
+        $earningsMonth = $calcPaidInPeriod($thisMonthStart, $today);
+        $earningsYear  = $calcPaidInPeriod($thisYearStart, $today);
 
-        $earningsWeek  = $calcEarnings($allCompleted->filter(
-            fn($s) => $s->scheduled_date->format('Y-m-d') >= $thisWeekStart
-        ));
-        $earningsMonth = $calcEarnings($allCompleted->filter(
-            fn($s) => $s->scheduled_date->format('Y-m-d') >= $thisMonthStart
-        ));
-        $earningsYear  = $calcEarnings($allCompleted->filter(
-            fn($s) => $s->scheduled_date->format('Y-m-d') >= $thisYearStart
-        ));
-
-        // --- Фильтр заработка по произвольным датам ---
+        // --- Фильтр по произвольным датам ---
         $filterFrom = $request->input('from', $thisMonthStart);
         $filterTo   = $request->input('to', $today);
-        $earningsCustom = $calcEarnings($allCompleted->filter(
-            fn($s) => $s->scheduled_date->format('Y-m-d') >= $filterFrom
-                   && $s->scheduled_date->format('Y-m-d') <= $filterTo
-        ));
-        $sessionsCustom = $allCompleted->filter(
-            fn($s) => $s->scheduled_date->format('Y-m-d') >= $filterFrom
-                   && $s->scheduled_date->format('Y-m-d') <= $filterTo
-        )->count();
+        $earningsCustom = $calcPaidInPeriod($filterFrom, $filterTo);
+        $sessionsCustom = Session::whereIn('client_id', $clientIds)
+            ->where('status', 'completed')
+            ->whereDate('scheduled_date', '>=', $filterFrom)
+            ->whereDate('scheduled_date', '<=', $filterTo)
+            ->count();
 
         // --- Динамика по месяцам (последние 6) ---
         $monthlyStats    = collect();
@@ -91,10 +79,7 @@ class StatisticsController extends Controller
                 ->whereDate('scheduled_date', '<=', $me)
                 ->count();
 
-            $earned = $calcEarnings($allCompleted->filter(
-                fn($s) => $s->scheduled_date->format('Y-m-d') >= $ms
-                       && $s->scheduled_date->format('Y-m-d') <= $me
-            ));
+            $earned = $calcPaidInPeriod($ms, $me);
 
             $locale = in_array(app()->getLocale(), ['kk', 'ru']) ? app()->getLocale() : 'ru';
             $label = $month->locale($locale)->translatedFormat('M Y');

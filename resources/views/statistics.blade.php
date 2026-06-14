@@ -70,18 +70,28 @@
         </form>
 
         {{-- Результат фильтра --}}
-        <div class="mt-4 p-4 rounded-xl flex items-center justify-between gap-6" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);">
-            <div>
-                <p class="text-xs text-gray-500">
-                    Период: <span class="font-medium text-gray-700">
-                        {{ \Carbon\Carbon::parse($filterFrom)->format('d.m.Y') }} — {{ \Carbon\Carbon::parse($filterTo)->format('d.m.Y') }}
-                    </span>
-                </p>
-                <p class="text-xs text-gray-400 mt-0.5">{{ $sessionsCustom }} {{ __('app.sessions_done') }}</p>
+        <div class="mt-4 rounded-xl overflow-hidden border border-orange-100">
+            <div class="p-4 flex items-center justify-between gap-6" style="background:linear-gradient(135deg,#fff7ed,#fef3c7);">
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">
+                        Период: <span class="font-semibold text-gray-700">
+                            {{ \Carbon\Carbon::parse($filterFrom)->format('d.m.Y') }} — {{ \Carbon\Carbon::parse($filterTo)->format('d.m.Y') }}
+                        </span>
+                    </p>
+                    <p class="text-xs text-gray-400">{{ __('app.earned') }} (оплаченные пакеты)</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-3xl md:text-4xl font-bold whitespace-nowrap" style="color:#f97316;">{{ number_format($earningsCustom, 0, '.', ' ') }} ₸</p>
+                </div>
             </div>
-            <div class="text-right">
-                <p class="text-xs text-gray-400">{{ __('app.earned') }}</p>
-                <p class="text-2xl md:text-3xl font-bold whitespace-nowrap" style="color:#f97316;">{{ number_format($earningsCustom, 0, '.', ' ') }} ₸</p>
+            <div class="px-4 py-3 flex items-center gap-3" style="background:#f0fdf4; border-top:1px solid #bbf7d0;">
+                <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                    <i class="fas fa-dumbbell text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-xl font-bold text-green-700">{{ $sessionsCustom }} <span class="text-sm font-medium text-green-600">{{ __('app.sessions_done') }}</span></p>
+                    <p class="text-xs text-green-500">выполненных тренировок за период</p>
+                </div>
             </div>
         </div>
     </div>
