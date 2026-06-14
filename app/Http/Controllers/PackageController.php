@@ -131,6 +131,8 @@ class PackageController extends Controller
             'is_paid'        => 'boolean',
             'training_days'  => 'nullable|array',
             'training_days.*'=> 'in:Mon,Tue,Wed,Thu,Fri,Sat,Sun',
+            'training_type'  => 'nullable|in:personal,mini_group',
+            'training_time'  => 'nullable|date_format:H:i',
         ]);
 
         $package->update([
@@ -140,9 +142,26 @@ class PackageController extends Controller
             'is_paid'        => $request->boolean('is_paid'),
         ]);
 
-        // Update client training days if changed
+        $clientData = [];
         if (!empty($data['training_days'])) {
-            $package->client->update(['training_days' => $data['training_days']]);
+            $clientData['training_days'] = $data['training_days'];
+        }
+        if (isset($data['training_type'])) {
+            $clientData['training_type'] = $data['training_type'];
+        }
+        if (array_key_exists('training_time', $data)) {
+            $clientData['training_time'] = $data['training_time'] ?: null;
+        }
+        if (!empty($clientData)) {
+            $package->client->update($clientData);
+        }
+
+        // Sync new training_time to all future scheduled sessions
+        if (array_key_exists('training_time', $data)) {
+            Session::whereHas('package', fn($q) => $q->where('client_id', $package->client_id))
+                ->where('status', 'scheduled')
+                ->whereDate('scheduled_date', '>=', today())
+                ->update(['scheduled_time' => $data['training_time'] ?: null]);
         }
 
         return redirect()->route('clients.show', $package->client)
