@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Package;
+use App\Models\Session;
 use App\Http\Requests\StoreClientRequest;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -105,7 +106,18 @@ class ClientController extends Controller
     public function update(StoreClientRequest $request, Client $client)
     {
         $this->authorize('update', $client);
-        $client->update($request->validated());
+
+        $data = $request->validated();
+        $client->update($data);
+
+        // Sync training_time to all future scheduled sessions
+        if (isset($data['training_time'])) {
+            Session::whereHas('package', fn($q) => $q->where('client_id', $client->id))
+                ->where('status', 'scheduled')
+                ->whereDate('scheduled_date', '>=', today())
+                ->update(['scheduled_time' => $data['training_time'] ?: null]);
+        }
+
         return redirect()->route('clients.show', $client)->with('success', 'Данные клиента обновлены!');
     }
 
