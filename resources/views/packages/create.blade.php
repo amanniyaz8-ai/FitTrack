@@ -42,16 +42,46 @@
                     </div>
                 </div>
 
+                {{-- Статус оплаты --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Дата оплаты <span class="text-red-500">*</span></label>
-                    <input type="date" name="payment_date" value="{{ old('payment_date', date('Y-m-d')) }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2">
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <input type="checkbox" name="is_paid" id="is_paid" value="1" {{ old('is_paid') ? 'checked' : '' }}
-                        class="w-4 h-4 rounded" style="accent-color: #f97316;">
-                    <label for="is_paid" class="text-sm font-medium text-gray-700">Пакет оплачен</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Статус оплаты</label>
+                    <input type="hidden" name="is_paid" id="is_paid_val" value="{{ old('is_paid', '0') }}">
+                    <input type="hidden" name="payment_date" id="payment_date_val" value="{{ old('payment_date', date('Y-m-d')) }}">
+                    <div class="grid grid-cols-2 gap-3">
+                        {{-- Оплачен --}}
+                        <button type="button" id="btn_paid" onclick="setPaidStatus('paid')"
+                            class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition text-left
+                            {{ old('is_paid', '1') == '1' ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white' }}">
+                            <div id="icon_paid" class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition
+                                {{ old('is_paid', '1') == '1' ? 'bg-green-500' : 'bg-gray-200' }}">
+                                <i class="fas fa-check text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Статус</p>
+                                <p class="font-semibold text-sm" style="color:#0f2035">Оплачен</p>
+                            </div>
+                        </button>
+                        {{-- Оплатит после --}}
+                        <button type="button" id="btn_later" onclick="setPaidStatus('later')"
+                            class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition text-left
+                            {{ old('is_paid', '1') != '1' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 bg-white' }}">
+                            <div id="icon_later" class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition
+                                {{ old('is_paid', '1') != '1' ? 'bg-orange-500' : 'bg-gray-200' }}">
+                                <i class="fas fa-calendar-alt text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Статус</p>
+                                <p class="font-semibold text-sm" style="color:#0f2035">Оплатит после</p>
+                            </div>
+                        </button>
+                    </div>
+                    {{-- Дата оплаты (показывается всегда) --}}
+                    <div class="mt-3">
+                        <label class="block text-xs text-gray-500 mb-1"><i class="fas fa-calendar mr-1 text-orange-400"></i>Дата оплаты</label>
+                        <input type="date" id="payment_date_input" value="{{ old('payment_date', date('Y-m-d')) }}"
+                            onchange="document.getElementById('payment_date_val').value = this.value"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm">
+                    </div>
                 </div>
             </div>
 
@@ -137,6 +167,34 @@
     </div>
 </div>
 <script>
+// Payment status toggle
+function setPaidStatus(status) {
+    const isPaid = status === 'paid';
+    document.getElementById('is_paid_val').value = isPaid ? '1' : '0';
+
+    const btnPaid  = document.getElementById('btn_paid');
+    const btnLater = document.getElementById('btn_later');
+    const iconPaid  = document.getElementById('icon_paid');
+    const iconLater = document.getElementById('icon_later');
+
+    if (isPaid) {
+        btnPaid.className  = btnPaid.className.replace('border-gray-200 bg-white','').replace('border-green-500 bg-green-50','') + ' border-green-500 bg-green-50';
+        btnLater.className = btnLater.className.replace('border-orange-500 bg-orange-50','').replace('border-gray-200 bg-white','') + ' border-gray-200 bg-white';
+        iconPaid.className  = iconPaid.className.replace('bg-gray-200','').replace('bg-green-500','') + ' bg-green-500';
+        iconLater.className = iconLater.className.replace('bg-orange-500','').replace('bg-gray-200','') + ' bg-gray-200';
+    } else {
+        btnLater.className = btnLater.className.replace('border-gray-200 bg-white','').replace('border-orange-500 bg-orange-50','') + ' border-orange-500 bg-orange-50';
+        btnPaid.className  = btnPaid.className.replace('border-green-500 bg-green-50','').replace('border-gray-200 bg-white','') + ' border-gray-200 bg-white';
+        iconLater.className = iconLater.className.replace('bg-gray-200','').replace('bg-orange-500','') + ' bg-orange-500';
+        iconPaid.className  = iconPaid.className.replace('bg-green-500','').replace('bg-gray-200','') + ' bg-gray-200';
+    }
+}
+// Init on load
+document.addEventListener('DOMContentLoaded', function() {
+    const val = document.getElementById('is_paid_val').value;
+    setPaidStatus(val === '1' ? 'paid' : 'later');
+});
+
 function openPkgCreateTimePicker(btn) {
     if (window._pkgCrTimePicker) { window._pkgCrTimePicker.remove(); window._pkgCrTimePicker = null; }
     const current = document.getElementById('pkg_create_time_val').value;
