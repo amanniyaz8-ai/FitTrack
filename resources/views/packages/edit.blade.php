@@ -102,7 +102,7 @@
                 <p class="text-xs text-gray-400">При сохранении обновится на всех будущих занятиях клиента</p>
                 <input type="hidden" name="training_time" id="pkg_edit_time_val" value="{{ old('training_time', $package->client->training_time ?? '') }}">
                 @php $curTime = old('training_time', $package->client->training_time ?? ''); @endphp
-                <button type="button" onclick="openPkgTimePicker()"
+                <button type="button" onclick="openPkgTimePicker(this)"
                     class="flex items-center gap-3 w-full bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 hover:bg-orange-100 transition text-left focus:outline-none group">
                     <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-600 transition">
                         <i class="fas fa-clock text-white text-sm"></i>
