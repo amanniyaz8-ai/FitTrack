@@ -57,4 +57,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Client::class, 'trainer_id');
     }
+
+    public function expense()
+    {
+        return $this->hasOne(TrainerExpense::class);
+    }
 }

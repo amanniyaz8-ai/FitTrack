@@ -46,6 +46,7 @@ Route::get('/trial-expired', fn() => view('trial-expired'))->name('trial.expired
 Route::middleware(['auth', \App\Http\Middleware\CheckTrial::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/statistics', [\App\Http\Controllers\StatisticsController::class, 'index'])->name('statistics');
+    Route::post('/expenses', [\App\Http\Controllers\ExpenseController::class, 'store'])->name('expenses.store');
 
     Route::resource('clients', ClientController::class);
 

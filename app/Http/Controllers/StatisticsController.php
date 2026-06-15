@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Session;
 use App\Models\Client;
 use App\Models\Package;
+use App\Models\TrainerExpense;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -118,6 +119,9 @@ class StatisticsController extends Controller
         $bestClient  = $clientScores->first();
         $clientRanks = $clientScores->values()->take(5);
 
+        $expense   = TrainerExpense::where('user_id', Auth::id())->first();
+        $totalPaid = $paidThisMonth;
+
         return view('statistics', compact(
             'paidThisMonth',
             'sessionsThisMonth', 'sessionsLastMonth',
@@ -125,7 +129,8 @@ class StatisticsController extends Controller
             'earningsWeek', 'earningsMonth', 'earningsYear',
             'earningsCustom', 'sessionsCustom',
             'filterFrom', 'filterTo',
-            'bestClient', 'clientRanks'
+            'bestClient', 'clientRanks',
+            'expense', 'totalPaid'
         ));
     }
 }
