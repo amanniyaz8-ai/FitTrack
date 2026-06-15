@@ -27,6 +27,16 @@
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
         }
+        // Restore scroll position immediately before render
+        var _scrollKey = 'scroll_pos_' + location.pathname;
+        var _scrollVal = sessionStorage.getItem(_scrollKey);
+        if (_scrollVal) {
+            document.documentElement.style.scrollBehavior = 'auto';
+            window.addEventListener('load', function() {
+                window.scrollTo(0, parseInt(_scrollVal));
+                sessionStorage.removeItem(_scrollKey);
+            });
+        }
     </script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -507,12 +517,14 @@ function gtpConfirm(url) {
     document.getElementById('gtp-confirm-time').textContent = time;
     document.getElementById('gtp-confirm-single').onclick = function() {
         // Submit just this session
+        sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
         const form = document.getElementById('gtp-form');
         form.submit();
         modal.classList.add('hidden');
     };
     document.getElementById('gtp-confirm-all').onclick = function() {
         // Submit all future sessions in this package
+        sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
         const params = new URLSearchParams(window.location.search);
         const filter = params.get('filter') || 'today';
         const f = document.createElement('form');
@@ -536,14 +548,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Restore scroll position after form submit
+// Save scroll position before form submit
 (function() {
-    var key = 'scroll_' + location.pathname;
-    var saved = sessionStorage.getItem(key);
-    if (saved) { window.scrollTo(0, parseInt(saved)); sessionStorage.removeItem(key); }
     document.querySelectorAll('form').forEach(function(form) {
         form.addEventListener('submit', function() {
-            sessionStorage.setItem('scroll_' + location.pathname, window.scrollY);
+            sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
         });
     });
 })();
