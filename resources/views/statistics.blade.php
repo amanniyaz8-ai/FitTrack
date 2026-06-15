@@ -97,6 +97,121 @@
     </div>
 </div>
 
+{{-- Расходы --}}
+<div class="bg-white rounded-xl shadow mt-6 overflow-hidden">
+    <div class="px-6 py-4 flex items-center gap-3" style="background:#0f2035;">
+        <i class="fas fa-wallet text-orange-400"></i>
+        <h2 class="font-semibold text-white">Расходы</h2>
+    </div>
+    <div class="p-6">
+        @php
+            $expType = old('type', $expense?->type ?? 'rent');
+        @endphp
+
+        <form method="POST" action="{{ route('expenses.store') }}" id="expense-form">
+            @csrf
+
+            {{-- Табы --}}
+            <div class="flex gap-2 mb-5">
+                <button type="button" onclick="setExpenseType('rent')"
+                    id="tab-rent"
+                    class="flex-1 py-2.5 rounded-lg border-2 text-sm font-semibold transition
+                        {{ $expType === 'rent' ? 'border-orange-500 text-orange-500 bg-orange-50' : 'border-gray-200 text-gray-500' }}">
+                    <i class="fas fa-building mr-1"></i> Аренда зала
+                </button>
+                <button type="button" onclick="setExpenseType('percent')"
+                    id="tab-percent"
+                    class="flex-1 py-2.5 rounded-lg border-2 text-sm font-semibold transition
+                        {{ $expType === 'percent' ? 'border-orange-500 text-orange-500 bg-orange-50' : 'border-gray-200 text-gray-500' }}">
+                    <i class="fas fa-percent mr-1"></i> Процент зала
+                </button>
+            </div>
+
+            <input type="hidden" name="type" id="expense-type" value="{{ $expType }}">
+
+            {{-- Аренда --}}
+            <div id="field-rent" class="{{ $expType === 'rent' ? '' : 'hidden' }}">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Сумма аренды в месяц (₸)</label>
+                <div class="relative max-w-xs">
+                    <input type="number" name="rent_amount" min="0"
+                        value="{{ old('rent_amount', $expense?->rent_amount) }}"
+                        placeholder="например 50000"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-7 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    <span class="absolute right-3 top-2.5 text-gray-400 text-sm">₸</span>
+                </div>
+            </div>
+
+            {{-- Процент --}}
+            <div id="field-percent" class="{{ $expType === 'percent' ? '' : 'hidden' }}">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Процент зала (%)</label>
+                <div class="relative max-w-xs">
+                    <input type="number" name="gym_percent" min="0" max="100" step="0.1"
+                        value="{{ old('gym_percent', $expense?->gym_percent) }}"
+                        placeholder="например 30"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-7 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    <span class="absolute right-3 top-2.5 text-gray-400 text-sm">%</span>
+                </div>
+                @if($expense?->type === 'percent' && $expense?->gym_percent && $totalPaid > 0)
+                <div class="mt-3 bg-orange-50 border border-orange-100 rounded-lg px-4 py-3 text-sm max-w-xs">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Зал ({{ $expense->gym_percent }}%):</span>
+                        <span class="font-semibold text-red-500">−{{ number_format($totalPaid * $expense->gym_percent / 100, 0, '.', ' ') }} ₸</span>
+                    </div>
+                    <div class="flex justify-between text-gray-800 font-bold mt-1">
+                        <span>Ваши:</span>
+                        <span class="text-green-600">{{ number_format($totalPaid - ($totalPaid * $expense->gym_percent / 100), 0, '.', ' ') }} ₸</span>
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            <div class="mt-4">
+                <button type="submit"
+                    class="text-white px-6 py-2 rounded-lg font-medium transition text-sm"
+                    style="background-color:#f97316"
+                    onmouseover="this.style.backgroundColor='#ea580c'"
+                    onmouseout="this.style.backgroundColor='#f97316'">
+                    <i class="fas fa-save mr-1"></i>Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Чистая прибыль --}}
+@if($expense)
+@php
+    $expenseAmount = $expense->type === 'rent'
+        ? (float)$expense->rent_amount
+        : ($totalPaid * (float)$expense->gym_percent / 100);
+    $netProfit = $totalPaid - $expenseAmount;
+@endphp
+<div class="bg-white rounded-xl shadow mt-6 overflow-hidden">
+    <div class="px-6 py-4 flex items-center gap-3" style="background:#0f2035;">
+        <i class="fas fa-chart-line text-orange-400"></i>
+        <h2 class="font-semibold text-white">Чистая прибыль за {{ now()->translatedFormat('F Y') }}</h2>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-xs text-gray-500 mb-1">Оплачено</p>
+                <p class="font-bold text-lg" style="color:#0f2035;">{{ number_format($totalPaid, 0, '.', ' ') }} ₸</p>
+            </div>
+            <div class="bg-red-50 rounded-xl p-4">
+                <p class="text-xs text-gray-500 mb-1">Расходы</p>
+                <p class="font-bold text-lg text-red-500">−{{ number_format($expenseAmount, 0, '.', ' ') }} ₸</p>
+            </div>
+            <div class="{{ $netProfit >= 0 ? 'bg-green-50' : 'bg-red-50' }} rounded-xl p-4">
+                <p class="text-xs text-gray-500 mb-1">Ваши</p>
+                <p class="font-bold text-xl {{ $netProfit >= 0 ? 'text-green-600' : 'text-red-500' }}">
+                    {{ number_format($netProfit, 0, '.', ' ') }} ₸
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- === ДИНАМИКА ПО МЕСЯЦАМ === --}}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
     <div class="bg-white rounded-xl shadow overflow-hidden">
@@ -222,121 +337,6 @@
         @endforeach
     </div>
 </div>
-
-{{-- Расходы --}}
-<div class="bg-white rounded-xl shadow mt-6 overflow-hidden">
-    <div class="px-6 py-4 flex items-center gap-3" style="background:#0f2035;">
-        <i class="fas fa-wallet text-orange-400"></i>
-        <h2 class="font-semibold text-white">Расходы</h2>
-    </div>
-    <div class="p-6">
-        @php
-            $expType = old('type', $expense?->type ?? 'rent');
-        @endphp
-
-        <form method="POST" action="{{ route('expenses.store') }}" id="expense-form">
-            @csrf
-
-            {{-- Табы --}}
-            <div class="flex gap-2 mb-5">
-                <button type="button" onclick="setExpenseType('rent')"
-                    id="tab-rent"
-                    class="flex-1 py-2.5 rounded-lg border-2 text-sm font-semibold transition
-                        {{ $expType === 'rent' ? 'border-orange-500 text-orange-500 bg-orange-50' : 'border-gray-200 text-gray-500' }}">
-                    <i class="fas fa-building mr-1"></i> Аренда зала
-                </button>
-                <button type="button" onclick="setExpenseType('percent')"
-                    id="tab-percent"
-                    class="flex-1 py-2.5 rounded-lg border-2 text-sm font-semibold transition
-                        {{ $expType === 'percent' ? 'border-orange-500 text-orange-500 bg-orange-50' : 'border-gray-200 text-gray-500' }}">
-                    <i class="fas fa-percent mr-1"></i> Процент зала
-                </button>
-            </div>
-
-            <input type="hidden" name="type" id="expense-type" value="{{ $expType }}">
-
-            {{-- Аренда --}}
-            <div id="field-rent" class="{{ $expType === 'rent' ? '' : 'hidden' }}">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Сумма аренды в месяц (₸)</label>
-                <div class="relative max-w-xs">
-                    <input type="number" name="rent_amount" min="0"
-                        value="{{ old('rent_amount', $expense?->rent_amount) }}"
-                        placeholder="например 50000"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-7 focus:outline-none focus:ring-2 focus:ring-orange-400">
-                    <span class="absolute right-3 top-2.5 text-gray-400 text-sm">₸</span>
-                </div>
-            </div>
-
-            {{-- Процент --}}
-            <div id="field-percent" class="{{ $expType === 'percent' ? '' : 'hidden' }}">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Процент зала (%)</label>
-                <div class="relative max-w-xs">
-                    <input type="number" name="gym_percent" min="0" max="100" step="0.1"
-                        value="{{ old('gym_percent', $expense?->gym_percent) }}"
-                        placeholder="например 30"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-7 focus:outline-none focus:ring-2 focus:ring-orange-400">
-                    <span class="absolute right-3 top-2.5 text-gray-400 text-sm">%</span>
-                </div>
-                @if($expense?->type === 'percent' && $expense?->gym_percent && $totalPaid > 0)
-                <div class="mt-3 bg-orange-50 border border-orange-100 rounded-lg px-4 py-3 text-sm max-w-xs">
-                    <div class="flex justify-between text-gray-600">
-                        <span>Зал ({{ $expense->gym_percent }}%):</span>
-                        <span class="font-semibold text-red-500">−{{ number_format($totalPaid * $expense->gym_percent / 100, 0, '.', ' ') }} ₸</span>
-                    </div>
-                    <div class="flex justify-between text-gray-800 font-bold mt-1">
-                        <span>Ваши:</span>
-                        <span class="text-green-600">{{ number_format($totalPaid - ($totalPaid * $expense->gym_percent / 100), 0, '.', ' ') }} ₸</span>
-                    </div>
-                </div>
-                @endif
-            </div>
-
-            <div class="mt-4">
-                <button type="submit"
-                    class="text-white px-6 py-2 rounded-lg font-medium transition text-sm"
-                    style="background-color:#f97316"
-                    onmouseover="this.style.backgroundColor='#ea580c'"
-                    onmouseout="this.style.backgroundColor='#f97316'">
-                    <i class="fas fa-save mr-1"></i>Сохранить
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-{{-- Чистая прибыль --}}
-@if($expense)
-@php
-    $expenseAmount = $expense->type === 'rent'
-        ? (float)$expense->rent_amount
-        : ($totalPaid * (float)$expense->gym_percent / 100);
-    $netProfit = $totalPaid - $expenseAmount;
-@endphp
-<div class="bg-white rounded-xl shadow mt-6 overflow-hidden">
-    <div class="px-6 py-4 flex items-center gap-3" style="background:#0f2035;">
-        <i class="fas fa-chart-line text-orange-400"></i>
-        <h2 class="font-semibold text-white">Чистая прибыль за {{ now()->translatedFormat('F Y') }}</h2>
-    </div>
-    <div class="p-6">
-        <div class="grid grid-cols-3 gap-4 text-center">
-            <div class="bg-gray-50 rounded-xl p-4">
-                <p class="text-xs text-gray-500 mb-1">Оплачено</p>
-                <p class="font-bold text-lg" style="color:#0f2035;">{{ number_format($totalPaid, 0, '.', ' ') }} ₸</p>
-            </div>
-            <div class="bg-red-50 rounded-xl p-4">
-                <p class="text-xs text-gray-500 mb-1">Расходы</p>
-                <p class="font-bold text-lg text-red-500">−{{ number_format($expenseAmount, 0, '.', ' ') }} ₸</p>
-            </div>
-            <div class="{{ $netProfit >= 0 ? 'bg-green-50' : 'bg-red-50' }} rounded-xl p-4">
-                <p class="text-xs text-gray-500 mb-1">Ваши</p>
-                <p class="font-bold text-xl {{ $netProfit >= 0 ? 'text-green-600' : 'text-red-500' }}">
-                    {{ number_format($netProfit, 0, '.', ' ') }} ₸
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
 
 <script>
 function setExpenseType(type) {
