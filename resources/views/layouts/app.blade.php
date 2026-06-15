@@ -535,6 +535,18 @@ document.addEventListener('DOMContentLoaded', function() {
         icon.className = 'fas fa-sun text-sm text-yellow-300';
     }
 });
+
+// Restore scroll position after form submit
+(function() {
+    var key = 'scroll_' + location.pathname;
+    var saved = sessionStorage.getItem(key);
+    if (saved) { window.scrollTo(0, parseInt(saved)); sessionStorage.removeItem(key); }
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function() {
+            sessionStorage.setItem('scroll_' + location.pathname, window.scrollY);
+        });
+    });
+})();
 </script>
 </body>
 </html>
