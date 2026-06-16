@@ -18,6 +18,25 @@
         <a href="{{ route('packages.create', $client) }}" class="text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2" style="background-color: #f97316;" onmouseover="this.style.backgroundColor='#ea580c'" onmouseout="this.style.backgroundColor='#f97316'">
             <i class="fas fa-plus"></i> Добавить пакет
         </a>
+        @if($client->phone)
+        @php
+            $trainerName = auth()->user()->name;
+            $clientName  = $client->full_name;
+            $days        = $client->training_days_label ?? '';
+            $time        = $client->training_time ?? '';
+            $welcomeText = "Привет, {$clientName}! Я ваш тренер {$trainerName}. Рад видеть вас в своей команде! Ваши тренировки: {$days}" . ($time ? " в {$time}" : "") . ". Жду вас на первом занятии 💪";
+            $phone = preg_replace('/\D/', '', $client->phone);
+        @endphp
+        <a href="https://wa.me/{{ $phone }}?text={{ urlencode($welcomeText) }}"
+           target="_blank"
+           class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition"
+           style="background-color: #25d366;"
+           onmouseover="this.style.backgroundColor='#1ebe5d'"
+           onmouseout="this.style.backgroundColor='#25d366'"
+           title="Написать клиенту в WhatsApp">
+            <i class="fab fa-whatsapp"></i> Написать
+        </a>
+        @endif
         <a href="{{ route('clients.edit', $client) }}" class="border border-gray-300 text-gray-500 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition" title="Редактировать профиль клиента">
             <i class="fas fa-user-edit"></i>
         </a>
@@ -93,6 +112,11 @@
         $isArchived = $remaining <= 0;
         $progressPercent = $pkg->total_sessions > 0 ? (int) round(($pkg->completed_count / $pkg->total_sessions) * 100) : 0;
         $formattedPrice = number_format((float) $pkg->price, 0, '.', ' ') . ' ₸';
+        $phone = preg_replace('/\D/', '', $client->phone ?? '');
+        $clientName = $client->full_name;
+        $reminderText = $remaining <= 0
+            ? "Привет, {$clientName}! Ваш пакет тренировок закончился. Для продолжения нужно оформить новый пакет. Напишите мне, договоримся 💪"
+            : "Привет, {$clientName}! Напоминаю — у вас осталось {$remaining} " . ($remaining === 1 ? 'тренировка' : ($remaining < 5 ? 'тренировки' : 'тренировок')) . " из пакета. Готовы продлить? 💪";
     @endphp
     <div class="bg-white rounded-xl shadow overflow-hidden {{ $isArchived ? 'opacity-70' : '' }}">
         <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -117,6 +141,18 @@
                 <span class="text-gray-400 text-xs">{{ $pkg->payment_date->format('d.m.Y') }}</span>
             </div>
             <div class="flex gap-2 shrink-0">
+                @if($phone && ($remaining <= 3))
+                <a href="https://wa.me/{{ $phone }}?text={{ urlencode($reminderText) }}"
+                   target="_blank"
+                   class="text-sm flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-lg font-medium text-white transition whitespace-nowrap"
+                   style="background-color: #25d366;"
+                   onmouseover="this.style.backgroundColor='#1ebe5d'"
+                   onmouseout="this.style.backgroundColor='#25d366'"
+                   title="Напомнить клиенту об окончании пакета">
+                    <i class="fab fa-whatsapp"></i>
+                    <span class="hidden md:inline">{{ $remaining <= 0 ? 'Пакет закончился' : 'Осталось ' . $remaining }}</span>
+                </a>
+                @endif
                 <a href="{{ route('packages.edit', $pkg) }}"
                    class="text-sm border border-gray-300 text-gray-500 px-2 md:px-3 py-1.5 rounded-lg hover:bg-gray-50 hover:border-orange-400 hover:text-orange-500 transition"
                    title="Редактировать пакет">
