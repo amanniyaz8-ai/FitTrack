@@ -71,7 +71,7 @@
             $phone = preg_replace('/\D/', '', $pkg->client->phone ?? '');
             $cnt = $pkg->scheduled_count;
             $declension = $cnt === 1 ? 'тренировка' : ($cnt < 5 ? 'тренировки' : 'тренировок');
-            $reminderText = "Привет, {$pkg->client->full_name}! Напоминаю — у вас осталось {$cnt} {$declension} из пакета. Готовы продлить? 💪";
+            $reminderText = "Добрый день, {$pkg->client->full_name}! Напоминаю — у вас осталось {$cnt} {$declension} из пакета. Хотите продлить? )";
         @endphp
         <div class="flex items-center justify-between bg-white rounded-lg px-4 py-2.5 shadow-sm">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1">

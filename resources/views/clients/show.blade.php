@@ -115,8 +115,8 @@
         $phone = preg_replace('/\D/', '', $client->phone ?? '');
         $clientName = $client->full_name;
         $reminderText = $remaining <= 0
-            ? "Привет, {$clientName}! Ваш пакет тренировок закончился. Для продолжения нужно оформить новый пакет. Напишите мне, договоримся 💪"
-            : "Привет, {$clientName}! Напоминаю — у вас осталось {$remaining} " . ($remaining === 1 ? 'тренировка' : ($remaining < 5 ? 'тренировки' : 'тренировок')) . " из пакета. Готовы продлить? 💪";
+            ? "Добрый день, {$clientName}! Ваш пакет тренировок закончился. Хотите оформить новый? )"
+            : "Добрый день, {$clientName}! Напоминаю — у вас осталось {$remaining} " . ($remaining === 1 ? 'тренировка' : ($remaining < 5 ? 'тренировки' : 'тренировок')) . " из пакета. Хотите продлить? )";
     @endphp
     <div class="bg-white rounded-xl shadow overflow-hidden {{ $isArchived ? 'opacity-70' : '' }}">
         <div class="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
