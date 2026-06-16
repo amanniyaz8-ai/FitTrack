@@ -27,9 +27,14 @@
 
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.field_phone') }}</label>
-        <input type="text" name="phone" value="{{ old('phone', $client->phone ?? '') }}"
+        <input type="tel" name="phone" id="phone_input" value="{{ old('phone', $client->phone ?? '') }}"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
-            placeholder="+7 777 123 4567">
+            placeholder="+7 777 123 4567" inputmode="numeric">
+        <script>
+        document.getElementById('phone_input').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^\d+\s\-()]/g, '');
+        });
+        </script>
     </div>
 
     <div>
