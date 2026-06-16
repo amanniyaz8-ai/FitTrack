@@ -27,13 +27,38 @@
 
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.field_phone') }}</label>
-        <input type="tel" name="phone" id="phone_input" value="{{ old('phone', $client->phone ?? '') }}"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
-            placeholder="+7 777 123 4567" inputmode="numeric">
+        <div class="flex gap-2 items-center">
+            <input type="tel" name="phone" id="phone_input" value="{{ old('phone', $client->phone ?? '') }}"
+                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
+                placeholder="+7 777 123 4567" inputmode="numeric">
+            <a id="wa_btn" href="#" target="_blank"
+                class="hidden items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-white transition flex-shrink-0"
+                style="background-color: #25d366;"
+                onmouseover="this.style.backgroundColor='#1ebe5d'"
+                onmouseout="this.style.backgroundColor='#25d366'">
+                <i class="fab fa-whatsapp"></i>
+                <span class="hidden md:inline">Написать</span>
+            </a>
+        </div>
         <script>
-        document.getElementById('phone_input').addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^\d+\s\-()]/g, '');
-        });
+        (function() {
+            var input = document.getElementById('phone_input');
+            var btn = document.getElementById('wa_btn');
+            function updateWa() {
+                input.value = input.value.replace(/[^\d+\s\-()]/g, '');
+                var digits = input.value.replace(/\D/g, '');
+                if (digits.length >= 10) {
+                    btn.href = 'https://wa.me/' + digits;
+                    btn.classList.remove('hidden');
+                    btn.classList.add('flex');
+                } else {
+                    btn.classList.add('hidden');
+                    btn.classList.remove('flex');
+                }
+            }
+            input.addEventListener('input', updateWa);
+            updateWa();
+        })();
         </script>
     </div>
 
