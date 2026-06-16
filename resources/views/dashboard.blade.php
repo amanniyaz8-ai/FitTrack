@@ -67,6 +67,12 @@
     </h3>
     <div class="space-y-2">
         @foreach($expiringPackages as $pkg)
+        @php
+            $phone = preg_replace('/\D/', '', $pkg->client->phone ?? '');
+            $cnt = $pkg->scheduled_count;
+            $declension = $cnt === 1 ? 'тренировка' : ($cnt < 5 ? 'тренировки' : 'тренировок');
+            $reminderText = "Привет, {$pkg->client->full_name}! Напоминаю — у вас осталось {$cnt} {$declension} из пакета. Готовы продлить? 💪";
+        @endphp
         <div class="flex items-center justify-between bg-white rounded-lg px-4 py-2.5 shadow-sm">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <a href="{{ route('clients.show', $pkg->client) }}" class="font-medium hover:text-orange-500 transition" style="color: #0f2035;">
@@ -82,9 +88,22 @@
                     <span class="text-gray-600 font-medium">{{ $pkg->payment_date->format('d.m.Y') }} г.</span>
                 </span>
             </div>
-            <a href="{{ route('packages.create', $pkg->client) }}" class="text-sm text-white px-3 py-1 rounded-lg transition ml-3 flex-shrink-0" style="background-color: #f97316;" onmouseover="this.style.backgroundColor='#ea580c'" onmouseout="this.style.backgroundColor='#f97316'">
-                + Пакет
-            </a>
+            <div class="flex items-center gap-2 ml-3 flex-shrink-0">
+                @if($phone)
+                <a href="https://wa.me/{{ $phone }}?text={{ urlencode($reminderText) }}"
+                   target="_blank"
+                   class="text-sm flex items-center gap-1 px-2 md:px-3 py-1 rounded-lg font-medium text-white transition"
+                   style="background-color: #25d366;"
+                   onmouseover="this.style.backgroundColor='#1ebe5d'"
+                   onmouseout="this.style.backgroundColor='#25d366'">
+                    <i class="fab fa-whatsapp"></i>
+                    <span class="hidden md:inline">Написать</span>
+                </a>
+                @endif
+                <a href="{{ route('packages.create', $pkg->client) }}" class="text-sm text-white px-3 py-1 rounded-lg transition" style="background-color: #f97316;" onmouseover="this.style.backgroundColor='#ea580c'" onmouseout="this.style.backgroundColor='#f97316'">
+                    + Пакет
+                </a>
+            </div>
         </div>
         @endforeach
     </div>
