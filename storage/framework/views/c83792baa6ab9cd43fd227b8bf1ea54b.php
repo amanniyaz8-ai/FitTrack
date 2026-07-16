@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FitTrack — Вход</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,9 +41,14 @@
                             <label class="block text-sm font-medium text-gray-700">Пароль</label>
                             <a href="<?php echo e(route('password.request')); ?>" class="text-xs hover:underline" style="color:#f97316;">Забыли пароль?</a>
                         </div>
-                        <input type="password" name="password" required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2"
-                            placeholder="••••••••">
+                        <div class="relative">
+                            <input type="password" name="password" id="password" required
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-12 focus:outline-none focus:ring-2"
+                                placeholder="••••••••">
+                            <button type="button" onclick="togglePassword('password','eyeIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i id="eyeIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="flex items-center">
                         <input type="checkbox" name="remember" id="remember" class="w-4 h-4 rounded" style="accent-color: #f97316;">
@@ -57,12 +63,25 @@
             <p class="mt-4 text-center text-sm text-gray-500">
                 Нет аккаунта? <a href="<?php echo e(route('register')); ?>" class="font-medium hover:underline" style="color: #f97316;">Зарегистрироваться</a>
             </p>
+            <p class="mt-2 text-center text-xs text-gray-400">
+                <a href="/pricing" class="hover:underline" style="color: #f97316;">Посмотреть тарифы →</a>
+            </p>
 
-            <div class="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-400 text-center">
-                Demo: trainer@fittrack.kz / password
-            </div>
         </div>
     </div>
+<script>
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+</script>
 </body>
 </html>
 <?php /**PATH /Users/amanniyaz8gmail.com/Desktop/Код/fittrack/resources/views/auth/login.blade.php ENDPATH**/ ?>

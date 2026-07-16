@@ -64,6 +64,9 @@ Route::middleware(['auth', \App\Http\Middleware\CheckTrial::class])->group(funct
     Route::post('/sessions/{session}/reschedule', [SessionController::class, 'reschedule'])->name('sessions.reschedule');
     Route::delete('/sessions/{session}', [SessionController::class, 'destroy'])->name('sessions.destroy');
 
+    Route::get('/cabinet/support', [SupportController::class, 'cabinet'])->name('support.cabinet');
+    Route::post('/cabinet/support', [SupportController::class, 'store'])->name('support.cabinet.store');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
