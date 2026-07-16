@@ -9,9 +9,9 @@ class SubscriptionController extends Controller
 {
     // Plan prices in KZT
     const PLANS = [
-        'monthly'   => ['label' => '1 месяц',   'days' => 30,  'price' => 4990],
-        'halfyear'  => ['label' => '6 месяцев', 'days' => 180, 'price' => 19990],
-        'annual'    => ['label' => '1 год',     'days' => 365, 'price' => 23990],
+        'monthly'   => ['label' => '1 месяц',   'days' => 30,  'price' => 5000],
+        'halfyear'  => ['label' => '6 месяцев', 'days' => 180, 'price' => 5000],
+        'annual'    => ['label' => '1 год',     'days' => 365, 'price' => 5000],
     ];
 
     /**
