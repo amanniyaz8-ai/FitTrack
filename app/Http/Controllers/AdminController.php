@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Client;
 use App\Models\SupportTicket;
 use Illuminate\Http\Request;
 
@@ -11,10 +12,17 @@ class AdminController extends Controller
     public function users()
     {
         $users = User::whereNotNull('trial_ends_at')
+            ->withCount('clients')
+            ->with(['clients' => function($q) {
+                $q->withCount(['sessions', 'packages'])
+                  ->with(['sessions' => fn($q) => $q->where('status', 'completed')]);
+            }])
             ->orderByDesc('created_at')
             ->get();
 
-        return view('admin.users', compact('users'));
+        $totalClients = Client::count();
+
+        return view('admin.users', compact('users', 'totalClients'));
     }
 
     public function grantAccess(Request $request, User $user)
