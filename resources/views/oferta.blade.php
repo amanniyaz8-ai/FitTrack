@@ -51,19 +51,9 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2">Месячный</td>
-                            <td class="px-4 py-2">30 дней</td>
-                            <td class="px-4 py-2 font-semibold">4 990 ₸</td>
-                        </tr>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2">Полугодовой</td>
-                            <td class="px-4 py-2">180 дней</td>
-                            <td class="px-4 py-2 font-semibold">19 990 ₸</td>
-                        </tr>
-                        <tr class="hover:bg-gray-50">
                             <td class="px-4 py-2">Годовой</td>
                             <td class="px-4 py-2">365 дней</td>
-                            <td class="px-4 py-2 font-semibold">23 990 ₸</td>
+                            <td class="px-4 py-2 font-semibold">5 000 ₸</td>
                         </tr>
                     </tbody>
                 </table>
