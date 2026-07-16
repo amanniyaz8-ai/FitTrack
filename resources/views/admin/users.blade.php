@@ -110,11 +110,6 @@
                 <div class="flex gap-2 shrink-0">
                     <form method="POST" action="{{ route('admin.grant', $user) }}">
                         @csrf
-                        <input type="hidden" name="months" value="1">
-                        <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition" style="background:#f97316;" onmouseover="this.style.background='#ea6c10'" onmouseout="this.style.background='#f97316'">+1 мес</button>
-                    </form>
-                    <form method="POST" action="{{ route('admin.grant', $user) }}">
-                        @csrf
                         <input type="hidden" name="months" value="12">
                         <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition" style="background:#0f2035;" onmouseover="this.style.background='#1a3a5c'" onmouseout="this.style.background='#0f2035'">+1 год</button>
                     </form>
