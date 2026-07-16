@@ -24,10 +24,10 @@
             </div>
             <div class="mb-2">
                 <span id="price_display" class="text-5xl font-bold text-white">5 000</span>
-                <span class="text-orange-100 text-xl"> ₸ / мес</span>
+                <span class="text-orange-100 text-xl"> ₸ / год</span>
             </div>
             <span id="old_price" class="hidden text-sm line-through text-orange-200 mb-1"></span>
-            <p class="text-orange-100 text-sm mb-6">Отменить можно в любой момент</p>
+            <p class="text-orange-100 text-sm mb-6">Примерно 417 ₸ в месяц</p>
             <ul class="text-left text-white space-y-3 mb-8 w-full">
                 <li><i class="fas fa-check mr-2 opacity-80"></i>Неограниченные клиенты</li>
                 <li><i class="fas fa-check mr-2 opacity-80"></i>Трекинг тренировок</li>
