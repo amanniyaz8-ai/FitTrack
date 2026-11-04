@@ -7,57 +7,125 @@ use Illuminate\Support\Facades\Log;
 
 class Telegram
 {
-    private function url(string $method): string
+    /** Вызов метода Bot API. Возвращает result или null при ошибке. */
+    public function call(string $method, array $params = []): mixed
     {
-        return 'https://api.telegram.org/bot'.config('telegram.bot_token').'/'.$method;
-    }
+        foreach ($params as $k => $v) {
+            if (is_array($v)) {
+                $params[$k] = json_encode($v, JSON_UNESCAPED_UNICODE);
+            }
+        }
 
-    /** true — человек состоит в закрытом канале курса. При ошибке API — false. */
-    public function isChannelMember(int $telegramId): bool
-    {
         try {
-            $res = Http::timeout(10)->get($this->url('getChatMember'), [
-                'chat_id' => config('telegram.channel_id'),
-                'user_id' => $telegramId,
-            ]);
+            $res = Http::timeout(15)->asForm()->post('https://api.telegram.org/bot'.config('telegram.bot_token').'/'.$method, $params);
         } catch (\Throwable $e) {
-            Log::warning('Telegram getChatMember failed: '.$e->getMessage());
-            return false;
+            Log::warning("Telegram {$method} failed: ".$e->getMessage());
+            return null;
         }
 
         if (! $res->ok() || ! $res->json('ok')) {
+            Log::warning("Telegram {$method} error: ".$res->body());
+            return null;
+        }
+
+        return $res->json('result');
+    }
+
+    /** true — человек состоит в закрытом канале курса. */
+    public function isChannelMember(int $telegramId): bool
+    {
+        $r = $this->call('getChatMember', ['chat_id' => config('telegram.channel_id'), 'user_id' => $telegramId]);
+        if (! $r) {
             return false;
         }
+        $status = $r['status'] ?? null;
 
-        $status = $res->json('result.status');
-        if (in_array($status, ['member', 'administrator', 'creator'], true)) {
-            return true;
-        }
-
-        // В приватных группах участник с ограничениями всё ещё участник.
-        return $status === 'restricted' && $res->json('result.is_member') === true;
+        return in_array($status, ['member', 'administrator', 'creator'], true)
+            || ($status === 'restricted' && ($r['is_member'] ?? false) === true);
     }
 
-    public function sendMessage(int $chatId, string $text, ?array $button = null): void
+    /** $buttons — ряды кнопок: [[['text'=>..,'url'=>..]], [['text'=>..,'callback_data'=>..]]] */
+    public function sendMessage(int $chatId, string $text, array $buttons = []): mixed
     {
-        $payload = ['chat_id' => $chatId, 'text' => $text, 'disable_web_page_preview' => true];
-        if ($button) {
-            $payload['reply_markup'] = json_encode(['inline_keyboard' => [[$button]]]);
+        $p = ['chat_id' => $chatId, 'text' => $text, 'disable_web_page_preview' => 'true'];
+        if ($buttons) {
+            $p['reply_markup'] = ['inline_keyboard' => $buttons];
         }
 
-        try {
-            Http::timeout(10)->post($this->url('sendMessage'), $payload);
-        } catch (\Throwable $e) {
-            Log::warning('Telegram sendMessage failed: '.$e->getMessage());
-        }
+        return $this->call('sendMessage', $p);
     }
 
-    public function setWebhook(string $url, string $secret): array
+    public function sendReceipt(int $chatId, string $type, string $fileId, string $caption, array $buttons): mixed
     {
-        return Http::timeout(15)->post($this->url('setWebhook'), [
-            'url' => $url,
-            'secret_token' => $secret,
-            'allowed_updates' => json_encode(['message']),
-        ])->json() ?? [];
+        $method = $type === 'photo' ? 'sendPhoto' : 'sendDocument';
+
+        return $this->call($method, [
+            'chat_id' => $chatId,
+            $type === 'photo' ? 'photo' : 'document' => $fileId,
+            'caption' => $caption,
+            'reply_markup' => ['inline_keyboard' => $buttons],
+        ]);
+    }
+
+    public function editCaption(int $chatId, int $messageId, string $caption): void
+    {
+        $this->call('editMessageCaption', ['chat_id' => $chatId, 'message_id' => $messageId, 'caption' => $caption]);
+    }
+
+    public function answerCallback(string $id, string $text = ''): void
+    {
+        $this->call('answerCallbackQuery', ['callback_query_id' => $id, 'text' => $text]);
+    }
+
+    /** Личное одноразовое приглашение в закрытый канал. */
+    public function createPersonalInvite(string $name): ?string
+    {
+        $r = $this->call('createChatInviteLink', [
+            'chat_id' => config('telegram.channel_id'),
+            'name' => mb_substr($name, 0, 32),
+            'member_limit' => 1,
+            'expire_date' => now()->addHours(config('telegram.invite_hours'))->timestamp,
+        ]);
+
+        return $r['invite_link'] ?? null;
+    }
+
+    public function setWebhook(string $url, string $secret): mixed
+    {
+        return $this->call('setWebhook', ['url' => $url, 'secret_token' => $secret, 'allowed_updates' => ['message', 'callback_query']]);
+    }
+
+    public function setMenuButton(string $appUrl): mixed
+    {
+        return $this->call('setChatMenuButton', ['menu_button' => ['type' => 'web_app', 'text' => 'Конструктор', 'web_app' => ['url' => $appUrl]]]);
+    }
+
+    /**
+     * Проверка подписи Telegram Mini App (initData). Возвращает данные пользователя или null.
+     * https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app
+     */
+    public function verifyInitData(string $initData, int $maxAgeSeconds = 86400): ?array
+    {
+        parse_str($initData, $data);
+        $hash = $data['hash'] ?? '';
+        unset($data['hash']);
+        if ($hash === '' || empty($data['user']) || empty($data['auth_date'])) {
+            return null;
+        }
+
+        ksort($data);
+        $check = implode("\n", array_map(fn ($k, $v) => "$k=$v", array_keys($data), $data));
+        $secret = hash_hmac('sha256', (string) config('telegram.bot_token'), 'WebAppData', true);
+
+        if (! hash_equals(hash_hmac('sha256', $check, $secret), $hash)) {
+            return null;
+        }
+        if (time() - (int) $data['auth_date'] > $maxAgeSeconds) {
+            return null;
+        }
+
+        $user = json_decode($data['user'], true);
+
+        return is_array($user) && isset($user['id']) ? $user : null;
     }
 }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Konstruktor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureStudent;
+use App\Models\Student;
 use App\Models\StudentLoginToken;
+use App\Services\Telegram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 
@@ -30,14 +32,42 @@ class KonstruktorController extends Controller
         }
 
         $row->update(['used_at' => now()]);
-        $student = $row->student;
-        $student->update(['last_login_at' => now()]);
+        $this->loginStudent($request, $row->student);
 
+        return redirect()->route('konstruktor.show');
+    }
+
+    /** Страница-прослойка для Telegram Mini App: получает initData и логинит. */
+    public function app()
+    {
+        return view('konstruktor.app');
+    }
+
+    public function telegramAuth(Request $request, Telegram $tg)
+    {
+        $user = $tg->verifyInitData((string) $request->input('initData', ''));
+        if (! $user) {
+            return response()->json(['error' => 'bad_signature'], 403);
+        }
+        if (! $tg->isChannelMember((int) $user['id'])) {
+            return response()->json(['error' => 'not_member'], 403);
+        }
+
+        $student = Student::updateOrCreate(
+            ['telegram_id' => (int) $user['id']],
+            ['telegram_username' => $user['username'] ?? null, 'first_name' => $user['first_name'] ?? null, 'membership_checked_at' => now()]
+        );
+        $this->loginStudent($request, $student);
+
+        return response()->json(['ok' => true, 'redirect' => route('konstruktor.show')]);
+    }
+
+    private function loginStudent(Request $request, Student $student): void
+    {
+        $student->update(['last_login_at' => now()]);
         $request->session()->regenerate();
         $request->session()->put(EnsureStudent::SESSION_KEY, $student->id);
         Cookie::queue(EnsureStudent::COOKIE, (string) $student->id, 60 * 24 * config('telegram.remember_days'));
-
-        return redirect()->route('konstruktor.show');
     }
 
     public function saveState(Request $request)

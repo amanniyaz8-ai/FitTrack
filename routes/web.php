@@ -76,6 +76,8 @@ Route::middleware(['auth', \App\Http\Middleware\CheckTrial::class])->group(funct
 Route::post('/telegram/webhook', \App\Http\Controllers\Konstruktor\TelegramWebhookController::class)->name('telegram.webhook');
 Route::get('/konstruktor/login', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'login'])->name('konstruktor.login');
 Route::get('/konstruktor/enter/{token}', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'enter'])->name('konstruktor.enter')->middleware('throttle:20,1');
+Route::get('/konstruktor/app', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'app'])->name('konstruktor.app');
+Route::post('/konstruktor/telegram-auth', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'telegramAuth'])->name('konstruktor.telegramAuth')->middleware('throttle:30,1');
 Route::post('/konstruktor/logout', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'logout'])->name('konstruktor.logout');
 Route::middleware(\App\Http\Middleware\EnsureStudent::class)->group(function () {
     Route::get('/konstruktor', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'show'])->name('konstruktor.show');
