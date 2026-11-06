@@ -698,24 +698,28 @@ function sessDate(W,i){const st=$("start").value;if(!st)return null;const d0=new
 function dateFor(W,i){const dt=sessDate(W,i);if(!dt)return"";return `${DAYN[S.days[i]]}, ${String(dt.getDate()).padStart(2,"0")}.${String(dt.getMonth()+1).padStart(2,"0")}`;}
 function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
  while(w>=0){if(k<0){w--;k=N()-1;continue;}if(w%4!==3&&tplOf(w,k)===t){const e=exRow(w,t,s,k),v=setVals(w,k,s,e).filter(Boolean);if(v.length)return{W:w,e,v};}k--;}return null;}
-function tip(W,i,s,e){const P=findPrev(W,i,s);if(!P)return"";const maxW=Math.max(...P.v.map(x=>x.w));
- if(e.ph&&e.ph.mul<1&&W%4!==3){const x=Math.round(maxW*e.ph.mul/2.5)*2.5;return`<span class="tip same">По циклу: возьми ≈ ${dec(x)} кг (−${Math.round((1-e.ph.mul)*100)}% от ${dec(maxW)})</span>`;}
- if(W%4===3){const dl=Math.round(maxW*0.8/2.5)*2.5;return`<span class="tip same">Разгрузка: возьми ≈ ${dec(dl)} кг (80% от ${dec(maxW)})</span>`;}
- if(W%4===0&&W>=4)return`<span class="tip up">▲ Новый блок: ${dec(sugW(W,i,s,e))} кг — на 5% больше, чем в 1-ю неделю прошлого блока</span>`;
- const [lo,up]=lowUp(P.e.reps);if(!up)return"";
- const nup=lowUp(e.reps)[1];if(nup&&nup<up)return`<span class="tip up">▲ Повторов меньше, чем прошлый раз — ставь ${dec(heavier(maxW))} кг (было ${dec(maxW)})</span>`;
- const allTop=P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up),anyLow=P.v.some(x=>x.r<lo);
- if(allTop)return`<span class="tip up">▲ Прошлый раз ${dec(maxW)} кг на ${up}+ во всех подходах — ставь ${dec(maxW+2.5)} кг</span>`;
- if(anyLow)return`<span class="tip down">▼ Прошлый раз ${dec(maxW)} кг было тяжело — оставь вес или сними 5–10%</span>`;
- return`<span class="tip same">= Оставь ${dec(maxW)} кг и добавь по 1 повтору</span>`;}
+function tip(W,i,s,e){const I=sugInfo(W,i,s,e);if(!I||!I.why)return"";
+ return`<span class="tip ${I.cls}">${{up:"▲",down:"▼",same:"="}[I.cls]} ${I.why} → ставь ${dec(I.w)} кг</span>`;}
 function heavier(w){const st=w<20?1:2.5;return Math.max(w+st,Math.ceil(w*1.05/st)*st);}
-function sugW(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;const maxW=Math.max(...P.v.map(x=>x.w)),r=x=>Math.round(x/2.5)*2.5;
- if(e.ph&&e.ph.mul<1&&W%4!==3)return r(maxW*e.ph.mul);
- if(W%4===3)return r(maxW*0.8);
- if(W%4===0&&W>=4){const B=findPrev(W-3,i,s);return B&&B.W===W-4?heavier(Math.max(...B.v.map(x=>x.w))):r(maxW*0.9);}
- const [lo,up]=lowUp(P.e.reps);if(!up)return maxW;
- const nup=lowUp(e.reps)[1];if(nup&&nup<up)return heavier(maxW);
- return P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)?maxW+2.5:maxW;}
+function rr(x){return x<20?Math.round(x):Math.round(x/2.5)*2.5;}
+// Вес, снятый в лёгкую фазу цикла, пересчитывается обратно в рабочий — иначе скидки копятся и прогресс теряется.
+function baseW(P){const m=Math.max(...P.v.map(x=>x.w)),mu=P.e.ph?.mul||1;if(!(mu<1))return m;const x=m/mu-0.01,st=x<20?1:2.5;return Math.ceil(x/st)*st;}
+function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
+ const b=baseW(P),mu=e.ph?.mul||1,dl=W%4===3,easy=(P.e.ph?.mul||1)<1,[lo,up]=lowUp(P.e.reps),nup=lowUp(e.reps)[1];
+ let t=b,why="",cls="same";
+ if(dl){why=`Разгрузка: 80% от ${dec(b)} кг`;t=b*0.8;}
+ else if(W%4===0&&W>=4){const B=findPrev(W-3,i,s);cls="up";
+  if(B&&B.W===W-4){t=heavier(baseW(B));why=`Новый блок: +5% к 1-й неделе прошлого блока (${dec(baseW(B))} кг)`;}else{t=b*0.9;why=`Новый блок: 90% от ${dec(b)} кг`;}}
+ else if(!up){t=b;}
+ else if(nup&&nup<up){t=heavier(b);cls="up";why=`Повторов меньше, чем прошлый раз — вес больше (было ${dec(b)} кг)`;}
+ else if(easy){why=`Прошлая тренировка была облегчена по циклу — твой рабочий вес ${dec(b)} кг`;}
+ else if(P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)){t=b+(b<20?1:2.5);cls="up";why=`Прошлый раз ${dec(b)} кг на ${up}+ во всех подходах`;}
+ else if(P.v.some(x=>x.r<lo)){cls="down";why=`Прошлый раз ${dec(b)} кг было тяжело — оставь вес или сними 5–10%`;}
+ else why=`Оставь ${dec(b)} кг и добавь по 1 повтору`;
+ if(mu<1){if(dl){if(mu<0.8){t=b*mu;why=`Разгрузка совпала с фазой «${e.ph.name}»: −${Math.round((1-mu)*100)}% от ${dec(b)} кг`;}}
+  else{why+=`${why?". ":""}По плану ${dec(rr(t))} кг, по циклу −${Math.round((1-mu)*100)}%`;t=t*mu;cls="same";}}
+ return{w:rr(t),why,cls};}
+function sugW(W,i,s,e){const I=sugInfo(W,i,s,e);return I?I.w:null;}
 function scheme(e){const lu=lowUp(e.reps);
  if(lu[1]===0){if(e.sets>1)return`<div class="scheme t"><div><b>${e.sets}</b><span>${plural(e.sets,"подход","подхода","подходов")}</span></div><i>×</i><div><b>${esc(dash(e.reps))}</b><span>время / дистанция</span></div></div>`;
   return`<div class="scheme t"><div><b>${esc(dash(e.reps))}</b><span>работа / отдых</span></div></div>`;}
