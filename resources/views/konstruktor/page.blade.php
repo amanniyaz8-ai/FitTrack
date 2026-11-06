@@ -836,7 +836,8 @@ function buildHTML(){const g=S.goal,nm=$("name").value||"Клиент";
  ${INJ_ORDER.filter(k=>S.injs.includes(k)).map(k=>`<div class="warn"><b>${INJ[k].short}.</b> ${INJ[k].warn}</div>`).join("")}<div class="box"><b>Питание:</b> ${k("k_target")} ккал в день (норма ${k("k_tdee")}) · белки ${k("m_p")} г · жиры ${k("m_f")} г · углеводы ${k("m_c")} г</div>${b}
  <div class="warn"><b>Важно.</b> Программа — рекомендация, а не медицинское назначение. Головокружение, боль или давление в груди, резкая боль в суставе, тошнота, сильная одышка — сразу прекрати тренировку и обратись к врачу.${$("sex").value==="f"?" Самочувствие важнее календаря цикла: если нет сил — снижай нагрузку без чувства вины.":""}</div></body></html>`;}
 async function doSave(kind){
- if(window.Telegram?.WebApp?.initData){$("dlMsg").innerHTML='Скачивание не работает внутри Telegram. Открой конструктор в браузере — <a href="https://fittrack.kz/konstruktor/login" style="color:var(--accent)">fittrack.kz/konstruktor/login</a>';return;}
+ let inTg=!!(window.Telegram?.WebApp?.initData||window.TelegramWebviewProxy||/Telegram/i.test(navigator.userAgent));try{inTg=inTg||sessionStorage.getItem("inTg")==="1"}catch(e){}
+ if(inTg){$("dlMsg").innerHTML='Скачивание не работает внутри Telegram. Открой конструктор в браузере — <a href="https://fittrack.kz/konstruktor/login" style="color:var(--accent)">fittrack.kz/konstruktor/login</a>';return;}
  if(!DL){$("dlMsg").textContent="Скачивание недоступно в этом окне — используй «Скопировать неделю».";return;}
  const TR={а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ё:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"ts",ч:"ch",ш:"sh",щ:"sch",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya",ә:"a",ғ:"g",қ:"k",ң:"n",ө:"o",ұ:"u",ү:"u",һ:"h",і:"i"};
  const nm=[...($("name").value||"client").toLowerCase()].map(c=>TR[c]??c).join("").replace(/[^a-z0-9_-]+/g,"_").replace(/^_+|_+$/g,"")||"client";

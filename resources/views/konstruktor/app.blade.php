@@ -29,6 +29,7 @@
         return;
     }
     tg.ready(); tg.expand();
+    try { sessionStorage.setItem('inTg', '1'); } catch (e) {}
     fetch('{{ route('konstruktor.telegramAuth') }}', {
         method: 'POST', credentials: 'same-origin',
         headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content},
