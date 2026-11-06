@@ -652,7 +652,8 @@ function exRow(W,t,s,i){
  const g=S.goal,lv=S.level,li=LEVELS.indexOf(lv),fat=g==="Жиросжигание",m=Math.floor(W/4)+1,w=W%4;
  const role=(fat?FLR:HYR)[s],block=(fat?FLB:HYB)[s],tp=TPL[g][t][s];
  const p=GEN[g](m,w,t,role),[dSets,dPct]=LEVEL_T[g][lv];
- const reps=(lv==="Новичок"&&p.nov)?p.nov:p.reps;
+ let reps=(lv==="Новичок"&&p.nov)?p.nov:p.reps;
+ if(lv==="Новичок"){const lu=lowUp(reps);if(lu[1]>0&&lu[0]<5)reps="5-6";}
  const sets=p.sets+(role==="Основное"?dSets:0);
  const pct=p.pct!=null?p.pct+dPct:null;
  const link=li===1?tp[3]:li===2?tp[4]:"";
