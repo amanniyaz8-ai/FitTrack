@@ -706,6 +706,12 @@ function tip(W,i,s,e){const P=findPrev(W,i,s);if(!P)return"";const maxW=Math.max
  if(allTop)return`<span class="tip up">▲ Прошлый раз ${dec(maxW)} кг на ${up}+ во всех подходах — ставь ${dec(maxW+2.5)} кг</span>`;
  if(anyLow)return`<span class="tip down">▼ Прошлый раз ${dec(maxW)} кг было тяжело — оставь вес или сними 5–10%</span>`;
  return`<span class="tip same">= Оставь ${dec(maxW)} кг и добавь по 1 повтору</span>`;}
+function sugW(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;const maxW=Math.max(...P.v.map(x=>x.w)),r=x=>Math.round(x/2.5)*2.5;
+ if(e.ph&&e.ph.mul<1&&W%4!==3)return r(maxW*e.ph.mul);
+ if(W%4===3)return r(maxW*0.8);
+ if(W%4===0&&P.W%4===2)return maxW;
+ const [lo,up]=lowUp(P.e.reps);if(!up)return maxW;
+ return P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)?maxW+2.5:maxW;}
 function scheme(e){const lu=lowUp(e.reps);
  if(lu[1]===0){if(e.sets>1)return`<div class="scheme t"><div><b>${e.sets}</b><span>${plural(e.sets,"подход","подхода","подходов")}</span></div><i>×</i><div><b>${esc(dash(e.reps))}</b><span>время / дистанция</span></div></div>`;
   return`<div class="scheme t"><div><b>${esc(dash(e.reps))}</b><span>работа / отдых</span></div></div>`;}
@@ -731,7 +737,7 @@ function renderProgram(){
    const meta=[`отдых <b>${esc(e.rest)}</b>`];if(e.rpeTxt)meta.push(e.rpeTxt);if(e.tempo&&e.tempo!=="—")meta.push(`темп ${esc(e.tempo)}`);if(e.rec)meta.push(`рабочий вес ≈ <b>${dec(e.rec)} кг</b>`);
    let body="";
    if(timed){body=`<div class="exfoot"><label class="check"><input type="checkbox" id="c_${i}_${s}" data-k="${lk(W,i,s)}" data-f="done" ${L.done?"checked":""}>Сделано</label></div>`;}
-   else{const sv=setVals(W,i,s,e);let cells="";const arr=L.sets||[];let ph=e.rec?dec(e.rec):"";
+   else{const sv=setVals(W,i,s,e);let cells="";const arr=L.sets||[];const sg=sugW(W,i,s,e);let ph=sg?dec(sg):e.rec?dec(e.rec):"";
     for(let k=0;k<e.sets;k++){const c=arr[k]||{};const done=!!sv[k]&&(c.w||c.r);
      cells+=`<div class="set ${done?"done":""}" id="set_${i}_${s}_${k}"><span class="n">${k+1}</span><input aria-label="Подход ${k+1}, вес кг" inputmode="decimal" id="w_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="w" value="${esc(c.w??"")}" placeholder="${ph||"кг"}"><em>×</em><input aria-label="Подход ${k+1}, повторы" inputmode="numeric" id="r_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="r" value="${esc(c.r??"")}" placeholder="${lowUp(e.reps)[0]}"></div>`;
      if(c.w)ph=c.w;}
@@ -774,7 +780,8 @@ document.addEventListener("input",ev=>{const el=ev.target;
  if(el.dataset&&el.dataset.k){const k=el.dataset.k;S.log[k]=S.log[k]||{};
   if(el.dataset.f==="done"){S.log[k].done=el.checked;save();return;}
   const arr=S.log[k].sets=S.log[k].sets||[];const n=+el.dataset.set;arr[n]=arr[n]||{};arr[n][el.dataset.f]=el.value.replace(",",".");
-  const p=el.id.split("_");refreshEx(+p[1],+p[2]);save();return;}
+  const p=el.id.split("_");
+  if(el.dataset.f==="r"&&el.value){const wi=$(`w_${p[1]}_${p[2]}_${p[3]}`);if(wi&&!wi.value&&parseFloat(wi.placeholder.replace(",","."))>0){wi.value=wi.placeholder;arr[n].w=wi.placeholder.replace(",",".");}}refreshEx(+p[1],+p[2]);save();return;}
  if(FIELDS.includes(el.id)){markTouched();if(el.id.startsWith("rm_")||el.id==="start"||el.id.startsWith("cyc_"))renderProgram();renderKcal();save();}
  if(el.id==="c_w"||el.id==="c_r"){const w=num("c_w"),r=num("c_r");$("c_out").textContent=(w>0&&r>0)?`≈ максимум ${dec(Math.round(w*(1+r/30)*2)/2)} кг`:"≈ максимум появится здесь";}});
 document.addEventListener("change",ev=>{if(ev.target.dataset&&ev.target.dataset.f==="done"){const k=ev.target.dataset.k;S.log[k]=S.log[k]||{};S.log[k].done=ev.target.checked;save();return;}
