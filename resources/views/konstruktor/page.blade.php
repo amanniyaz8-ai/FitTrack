@@ -702,15 +702,18 @@ function tip(W,i,s,e){const P=findPrev(W,i,s);if(!P)return"";const maxW=Math.max
  if(W%4===3){const dl=Math.round(maxW*0.8/2.5)*2.5;return`<span class="tip same">Разгрузка: возьми ≈ ${dec(dl)} кг (80% от ${dec(maxW)})</span>`;}
  if(W%4===0&&P.W%4===2)return`<span class="tip same">Новый блок: начни с ${dec(maxW)} кг — это вес пиковой недели</span>`;
  const [lo,up]=lowUp(P.e.reps);if(!up)return"";
+ const nup=lowUp(e.reps)[1];if(nup&&nup<up)return`<span class="tip up">▲ Повторов меньше, чем прошлый раз — ставь ${dec(heavier(maxW))} кг (было ${dec(maxW)})</span>`;
  const allTop=P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up),anyLow=P.v.some(x=>x.r<lo);
  if(allTop)return`<span class="tip up">▲ Прошлый раз ${dec(maxW)} кг на ${up}+ во всех подходах — ставь ${dec(maxW+2.5)} кг</span>`;
  if(anyLow)return`<span class="tip down">▼ Прошлый раз ${dec(maxW)} кг было тяжело — оставь вес или сними 5–10%</span>`;
  return`<span class="tip same">= Оставь ${dec(maxW)} кг и добавь по 1 повтору</span>`;}
+function heavier(w){const st=w<20?1:2.5;return Math.max(w+st,Math.ceil(w*1.05/st)*st);}
 function sugW(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;const maxW=Math.max(...P.v.map(x=>x.w)),r=x=>Math.round(x/2.5)*2.5;
  if(e.ph&&e.ph.mul<1&&W%4!==3)return r(maxW*e.ph.mul);
  if(W%4===3)return r(maxW*0.8);
  if(W%4===0&&P.W%4===2)return maxW;
  const [lo,up]=lowUp(P.e.reps);if(!up)return maxW;
+ const nup=lowUp(e.reps)[1];if(nup&&nup<up)return heavier(maxW);
  return P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)?maxW+2.5:maxW;}
 function scheme(e){const lu=lowUp(e.reps);
  if(lu[1]===0){if(e.sets>1)return`<div class="scheme t"><div><b>${e.sets}</b><span>${plural(e.sets,"подход","подхода","подходов")}</span></div><i>×</i><div><b>${esc(dash(e.reps))}</b><span>время / дистанция</span></div></div>`;
