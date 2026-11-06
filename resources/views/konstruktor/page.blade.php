@@ -442,7 +442,8 @@ const RPE_TXT={"6":"легко, 4 повтора в запасе","7":"3 пов�
 function fl(m,w,d,role){const rpe=["7","7-8","8","6"][w],tempo=role!=="Кор/Финишер"?"2-0-1":"—";
  if(role==="Кор/Финишер")return{sets:[2,2,3,2][w],reps:["30-45 сек","40-50 сек","45-60 сек","30-45 сек"][w],rpe,rest:"—",tempo};
  const restS={Основное:["90 с","75 с","75 с","90 с"],Вторичное:["75 с","60 с","60 с","75 с"],Подсобное:["60 с","60 с","60 с","60 с"]}[role]||["60 с","60 с","60 с","60 с"];
- return{sets:[3,3,3,2][w],reps:["12-15","10-12","8-10","12-15"][w],rpe,rest:restS[w],tempo};}
+ const pct=role==="Основное"?[[60,65,70,55],[62,67,72,55],[65,70,75,55]][m-1][w]:null;
+ return{sets:[3,3,3,2][w],reps:["12-15","10-12","8-10","12-15"][w],pct,rpe,rest:restS[w],tempo};}
 function hy(m,w,d,role){const rpe=["7","7-8","8","6"][w];
  const tempo={Основное:"3-0-1",Вторичное:"3-0-1",Подсобное:"2-0-1","Кор/Финишер":"медленно"}[role];
  if(role==="Кор/Финишер")return{sets:[2,3,3,2][w],reps:["15-20","20-25 сек","20-30 сек","15-20"][w],rpe,rest:"45 с",tempo};
@@ -700,7 +701,7 @@ function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
 function tip(W,i,s,e){const P=findPrev(W,i,s);if(!P)return"";const maxW=Math.max(...P.v.map(x=>x.w));
  if(e.ph&&e.ph.mul<1&&W%4!==3){const x=Math.round(maxW*e.ph.mul/2.5)*2.5;return`<span class="tip same">По циклу: возьми ≈ ${dec(x)} кг (−${Math.round((1-e.ph.mul)*100)}% от ${dec(maxW)})</span>`;}
  if(W%4===3){const dl=Math.round(maxW*0.8/2.5)*2.5;return`<span class="tip same">Разгрузка: возьми ≈ ${dec(dl)} кг (80% от ${dec(maxW)})</span>`;}
- if(W%4===0&&P.W%4===2)return`<span class="tip same">Новый блок: начни с ${dec(maxW)} кг — это вес пиковой недели</span>`;
+ if(W%4===0&&W>=4)return`<span class="tip up">▲ Новый блок: ${dec(sugW(W,i,s,e))} кг — на 5% больше, чем в 1-ю неделю прошлого блока</span>`;
  const [lo,up]=lowUp(P.e.reps);if(!up)return"";
  const nup=lowUp(e.reps)[1];if(nup&&nup<up)return`<span class="tip up">▲ Повторов меньше, чем прошлый раз — ставь ${dec(heavier(maxW))} кг (было ${dec(maxW)})</span>`;
  const allTop=P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up),anyLow=P.v.some(x=>x.r<lo);
@@ -711,7 +712,7 @@ function heavier(w){const st=w<20?1:2.5;return Math.max(w+st,Math.ceil(w*1.05/st
 function sugW(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;const maxW=Math.max(...P.v.map(x=>x.w)),r=x=>Math.round(x/2.5)*2.5;
  if(e.ph&&e.ph.mul<1&&W%4!==3)return r(maxW*e.ph.mul);
  if(W%4===3)return r(maxW*0.8);
- if(W%4===0&&P.W%4===2)return maxW;
+ if(W%4===0&&W>=4){const B=findPrev(W-3,i,s);return B&&B.W===W-4?heavier(Math.max(...B.v.map(x=>x.w))):r(maxW*0.9);}
  const [lo,up]=lowUp(P.e.reps);if(!up)return maxW;
  const nup=lowUp(e.reps)[1];if(nup&&nup<up)return heavier(maxW);
  return P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)?maxW+2.5:maxW;}
@@ -737,7 +738,7 @@ function renderProgram(){
  for(let i=0;i<N();i++){const t=tplOf(W,i);let rows="",tot=0;
   for(let s=0;s<7;s++){const e=exRow(W,t,s,i),L=S.log[lk(W,i,s)]||{},ton=exTon(W,i,s,e);tot+=ton;
    const [col,cls]=PLATE[e.role],timed=lowUp(e.reps)[1]===0,isPair=false;
-   const meta=[`отдых <b>${esc(e.rest)}</b>`];if(e.rpeTxt)meta.push(e.rpeTxt);if(e.tempo&&e.tempo!=="—")meta.push(`темп ${esc(e.tempo)}`);if(e.rec)meta.push(`рабочий вес ≈ <b>${dec(e.rec)} кг</b>`);
+   const meta=[`отдых <b>${esc(e.rest)}</b>`];if(e.rpeTxt)meta.push(e.rpeTxt);if(e.tempo&&e.tempo!=="—")meta.push(`темп ${esc(e.tempo)}`);if(e.rec&&!sugW(W,i,s,e))meta.push(`рабочий вес ≈ <b>${dec(e.rec)} кг</b>`);
    let body="";
    if(timed){body=`<div class="exfoot"><label class="check"><input type="checkbox" id="c_${i}_${s}" data-k="${lk(W,i,s)}" data-f="done" ${L.done?"checked":""}>Сделано</label></div>`;}
    else{const sv=setVals(W,i,s,e);let cells="";const arr=L.sets||[];const sg=sugW(W,i,s,e);let ph=sg?dec(sg):e.rec?dec(e.rec):"";
