@@ -35,6 +35,8 @@ class TelegramWebhookController extends Controller
         return strtr(config("bot_texts.$key"), [
             '{price}' => config('bot_texts.price'),
             '{support}' => config('telegram.support_contact'),
+            '{presale_price}' => config('bot_texts.presale_price'),
+            '{start_date}' => config('bot_texts.start_date'),
         ]);
     }
 
@@ -74,6 +76,7 @@ class TelegramWebhookController extends Controller
         // Любой текст / команда: участнику — меню конструктора, остальным — продажа
         if ($this->tg->isChannelMember($uid)) {
             $this->upsertStudent($from);
+            $this->tg->setMenuButton(route('konstruktor.app'), $chatId);
             $this->tg->sendMessage($chatId, $this->t('member_welcome'), [
                 [$this->appButton()],
                 [['text' => $this->t('btn_login_link'), 'callback_data' => 'login']],
@@ -157,6 +160,7 @@ class TelegramWebhookController extends Controller
                     return;
                 }
                 $p->update(['status' => 'approved', 'invite_link' => $link, 'decided_at' => now()]);
+                $this->tg->setMenuButton(route('konstruktor.app'), (int) $p->telegram_id);
                 $this->tg->sendMessage($p->telegram_id, $this->t('approved'), [
                     [['text' => $this->t('btn_join'), 'url' => $link]],
                     [$this->appButton()],

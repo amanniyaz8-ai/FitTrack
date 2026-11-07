@@ -95,9 +95,27 @@ class Telegram
         return $this->call('setWebhook', ['url' => $url, 'secret_token' => $secret, 'allowed_updates' => ['message', 'callback_query']]);
     }
 
-    public function setMenuButton(string $appUrl): mixed
+    /** Кнопка «Конструктор» в чате. С $chatId — только этому человеку (ученику), без — всем. */
+    public function setMenuButton(string $appUrl, ?int $chatId = null): mixed
     {
-        return $this->call('setChatMenuButton', ['menu_button' => ['type' => 'web_app', 'text' => 'Конструктор', 'web_app' => ['url' => $appUrl]]]);
+        $p = ['menu_button' => ['type' => 'web_app', 'text' => 'Конструктор', 'web_app' => ['url' => $appUrl]]];
+        if ($chatId) {
+            $p['chat_id'] = $chatId;
+        }
+        return $this->call('setChatMenuButton', $p);
+    }
+
+    /** По умолчанию (для новых людей) — обычное меню команд, без кнопки конструктора. */
+    public function setDefaultMenuButton(): mixed
+    {
+        return $this->call('setChatMenuButton', ['menu_button' => ['type' => 'commands']]);
+    }
+
+    /** Тексты профиля бота: экран до «Старт» и короткое описание. */
+    public function setDescriptions(string $description, string $short): void
+    {
+        $this->call('setMyDescription', ['description' => $description]);
+        $this->call('setMyShortDescription', ['short_description' => $short]);
     }
 
     /**

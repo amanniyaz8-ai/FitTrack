@@ -12,6 +12,9 @@ Artisan::command('telegram:set-webhook', function (\App\Services\Telegram $tg) {
     $res = $tg->setWebhook($url, (string) config('telegram.webhook_secret'));
     $this->info($url);
     $this->line('webhook: '.json_encode($res, JSON_UNESCAPED_UNICODE));
-    $menu = $tg->setMenuButton(route('konstruktor.app'));
+    // Новым людям — без кнопки «Конструктор» (её получают только ученики, персонально).
+    $menu = $tg->setDefaultMenuButton();
     $this->line('menu button: '.json_encode($menu, JSON_UNESCAPED_UNICODE));
+    $tg->setDescriptions(config('bot_texts.description'), config('bot_texts.short_description'));
+    $this->line('descriptions: ok');
 })->purpose('Подключить вебхук и кнопку «Конструктор» Telegram-бота');
