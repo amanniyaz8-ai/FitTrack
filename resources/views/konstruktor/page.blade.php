@@ -1020,59 +1020,62 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
  if($("sex").value==="f")warn.push("Самочувствие важнее календаря цикла: нет сил — снижай нагрузку без чувства вины.");
  warn.forEach(t=>{const c=o.getCell(r,3);c.value="• "+t;c.font={name:F,color:{argb:"FFB3261E"}};c.alignment={wrapText:true};r++;});
  /* blocks */
- const head=["№","Упражнение","Подходы","Повторы","Отдых","Сколько в запасе","Рек. вес, кг","Вес, кг","Сделал раз","Тоннаж, кг","Заметки"];
+ const head=["№","Упражнение","Подходы","Повторы","Отдых","Сколько в запасе","Рек. вес, кг","Рек. повт.","Вес, кг","Сделал раз","Тоннаж, кг","Заметки"];
  /* список упражнений по типу движения */
  const li=LEVELS.indexOf(S.level),lists=PAT_ORDER.map(p=>[...PAT_LIST[p]]);
  for(let t=0;t<3;t++)for(let s=0;s<7;s++){const p=PAT_ORDER.indexOf(PAT[t][s]),nm=S.injs.length?safeNames(t)[s]:TPL[g][t][s][li];if(!lists[p].includes(nm))lists[p].push(nm);}
  const colL=k=>String.fromCharCode(65+k),dv=(t,s)=>{const k=PAT_ORDER.indexOf(PAT[t][s]);return{type:"list",allowBlank:true,showErrorMessage:false,showInputMessage:true,promptTitle:PAT_NAME[PAT[t][s]],prompt:"Выбери из списка или впиши своё. Меняй в 1-й неделе — дальше поменяется само.",formulae:[`'Упражнения'!$${colL(k)}$3:$${colL(k)}$${lists[k].length+2}`]};};
- const src={},hist={};
+ const src={},hist={},NC=12;
+ // Колонки: G рек.вес, H рек.повт, I вес, J сделал раз, K тоннаж, L заметки; скрытые M нижняя граница повторов, N рабочий вес прошлого раза, O его тоннаж.
  for(let m=0;m<3;m++){
   const ws=wb.addWorksheet(`Блок ${m+1}`,{views:[{state:"frozen",ySplit:2,showGridLines:false}],pageSetup:{orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0}});
-  ws.columns=[{width:6},{width:40},{width:10},{width:11},{width:12},{width:26},{width:12},{width:11},{width:11},{width:12},{width:34},{width:4,hidden:true},{width:4,hidden:true},{width:4,hidden:true}];
-  ws.mergeCells(1,1,1,11);const t=ws.getCell(1,1);t.value=`БЛОК ${m+1} · ${MESO_NAME[g][m].toUpperCase()} · ${GOAL_RU[g]} · ${nm}`;t.font={name:F,size:14,bold:true,color:{argb:"FFFFFFFF"}};t.fill=fill(DARK);t.alignment={vertical:"middle",indent:1};ws.getRow(1).height=28;
+  ws.columns=[{width:6},{width:40},{width:10},{width:11},{width:12},{width:24},{width:11},{width:10},{width:11},{width:11},{width:12},{width:34},{width:4,hidden:true},{width:4,hidden:true},{width:4,hidden:true}];
+  ws.mergeCells(1,1,1,NC);const t=ws.getCell(1,1);t.value=`БЛОК ${m+1} · ${MESO_NAME[g][m].toUpperCase()} · ${GOAL_RU[g]} · ${nm}`;t.font={name:F,size:14,bold:true,color:{argb:"FFFFFFFF"}};t.fill=fill(DARK);t.alignment={vertical:"middle",indent:1};ws.getRow(1).height=28;
   head.forEach((h,k)=>{const c=ws.getCell(2,k+1);c.value=h;c.font={name:F,bold:true,size:10,color:{argb:"FFFFFFFF"}};c.fill=fill(ACC);c.alignment={horizontal:"center",vertical:"middle",wrapText:true};c.border=box;});ws.getRow(2).height=30;
   let row=3;const weekTotals=[];
   for(let w=0;w<4;w++){const W=m*4+w;
-   ws.mergeCells(row,1,row,11);let c=ws.getCell(row,1);c.value=`НЕДЕЛЯ ${W+1} · ${WEEKNAMES[w].toUpperCase()} — ${WEEK_METHOD[g][m+1][w]}`;c.font={name:F,bold:true,size:12,color:{argb:DARK}};c.fill=fill(SOFT);c.alignment={vertical:"middle",wrapText:true,indent:1};ws.getRow(row).height=32;row++;
+   ws.mergeCells(row,1,row,NC);let c=ws.getCell(row,1);c.value=`НЕДЕЛЯ ${W+1} · ${WEEKNAMES[w].toUpperCase()} — ${WEEK_METHOD[g][m+1][w]}`;c.font={name:F,bold:true,size:12,color:{argb:DARK}};c.fill=fill(SOFT);c.alignment={vertical:"middle",wrapText:true,indent:1};ws.getRow(row).height=32;row++;
    const sessTotals=[];
    for(let i=0;i<N();i++){const tt=tplOf(W,i),ph=phaseFor(W,i);
-    ws.mergeCells(row,1,row,11);c=ws.getCell(row,1);c.value=`Тренировка ${i+1} · ${DAYL[tt]} — ${dateFor(W,i)}${ph?` · ${ph.name}, ${ph.day}-й день цикла`:""}`;c.font={name:F,bold:true,size:11,color:{argb:"FFFFFFFF"}};c.fill=fill("FF3B4E7A");c.alignment={vertical:"middle",indent:1};ws.getRow(row).height=22;row++;
-    ws.mergeCells(row,1,row,11);c=ws.getCell(row,1);c.value="Разминка: "+warmSteps(tt).map(x=>x[0]+" — "+x[1]).join(" · ")+(ph?`\nПо циклу: ${ph.adv}`:"");c.font={name:F,size:9,italic:true,color:{argb:"FF5B6474"}};c.fill=fill(WARM);c.alignment={wrapText:true,vertical:"middle",indent:1};ws.getRow(row).height=ph?44:30;row++;
+    ws.mergeCells(row,1,row,NC);c=ws.getCell(row,1);c.value=`Тренировка ${i+1} · ${DAYL[tt]} — ${dateFor(W,i)}${ph?` · ${ph.name}, ${ph.day}-й день цикла`:""}`;c.font={name:F,bold:true,size:11,color:{argb:"FFFFFFFF"}};c.fill=fill("FF3B4E7A");c.alignment={vertical:"middle",indent:1};ws.getRow(row).height=22;row++;
+    ws.mergeCells(row,1,row,NC);c=ws.getCell(row,1);c.value="Разминка: "+warmSteps(tt).map(x=>x[0]+" — "+x[1]).join(" · ")+(ph?`\nПо циклу: ${ph.adv}`:"");c.font={name:F,size:9,italic:true,color:{argb:"FF5B6474"}};c.fill=fill(WARM);c.alignment={wrapText:true,vertical:"middle",indent:1};ws.getRow(row).height=ph?44:30;row++;
     const first=row;
     for(let s=0;s<7;s++){const e=exRow(W,tt,s,i),sv=setVals(W,i,s,e).filter(Boolean),[lo,top]=lowUp(e.reps),key=tt+"|"+s;
      const mx=sv.length?Math.max(...sv.map(v=>v.w)):null,avg=sv.length?Math.round(sv.reduce((a,v)=>a+v.r,0)/sv.length):null;
      const orig=e.orig?`вместо «${e.orig}»`:"";
-     const vals=[e.block,e.name,e.sets,dash(e.reps),e.rest,e.rpeTxt,e.rec||null,mx,avg,null,orig||null,lo||0];
-     vals.forEach((v,k)=>{const cc=ws.getCell(row,k+1);cc.value=v;cc.font={name:F,size:10,bold:k===1};cc.border=box;cc.alignment={vertical:"middle",wrapText:true,horizontal:[0,2,3,6,7,8,9].includes(k)?"center":"left"};});
-     ws.getCell(row,11).font={name:F,size:9,color:{argb:"FF5B6474"}};
+     const vals=[e.block,e.name,e.sets,dash(e.reps),e.rest,e.rpeTxt,e.rec||null,lo||null,mx,avg,null,orig||null,lo||0];
+     vals.forEach((v,k)=>{const cc=ws.getCell(row,k+1);cc.value=v;cc.font={name:F,size:10,bold:k===1};cc.border=box;cc.alignment={vertical:"middle",wrapText:true,horizontal:[0,2,3,6,7,8,9,10].includes(k)?"center":"left"};});
+     ws.getCell(row,12).font={name:F,size:9,color:{argb:"FF5B6474"}};
      const b=ws.getCell(row,1);b.fill=fill(roleCol[e.role]);b.font={name:F,bold:true,size:10,color:{argb:e.role==="Подсобное"?DARK:"FFFFFFFF"}};
      // Название: в 1-й встрече — ввод со списком, дальше — ссылка на неё (замена тянется на все недели).
      const nc=ws.getCell(row,2),swapped=e.name==="Спокойная ходьба или растяжка";
      if(!swapped){if(src[key]){const S0=src[key];nc.value={formula:(S0.m===m?"":`'Блок ${S0.m+1}'!`)+`B${S0.row}`,result:e.name};}else{src[key]={m,row};nc.fill=fill(INP);}nc.dataValidation=dv(tt,s);}
-     if(lo){[8,9].forEach(k=>{const cc=ws.getCell(row,k);cc.fill=fill(INP);cc.font={name:F,size:11,bold:true,color:{argb:"FF0000FF"}};});
-      ws.getCell(row,10).value={formula:`IF(H${row}="","",C${row}*IF(I${row}="",L${row},I${row})*H${row})`};ws.getCell(row,10).numFmt="#,##0";ws.getCell(row,10).font={name:F,bold:true,size:10};
+     if(lo){[9,10].forEach(k=>{const cc=ws.getCell(row,k);cc.fill=fill(INP);cc.font={name:F,size:11,bold:true,color:{argb:"FF0000FF"}};});
+      ws.getCell(row,11).value={formula:`IF(I${row}="","",C${row}*IF(J${row}="",M${row},J${row})*I${row})`};ws.getCell(row,11).numFmt="#,##0";ws.getCell(row,11).font={name:F,bold:true,size:10};
       const H=hist[key]||(hist[key]=[]),mu=e.ph?e.ph.mul:1,dl=w===3;
       let P=null;for(let k=H.length-1;k>=0;k--)if(!H[k].dl){P=H[k];break;}
       if(w===0&&W>=4){const B=H.find(x=>x.W===W-4);if(B)P=B;}
-      if(P){const pre=P.m===m?"":`'Блок ${P.m+1}'!`,M=`M${row}`,st=`IF(${M}<20,1,2.5)`,rnd=x=>`IF(${x}<20,ROUND(${x},0),MROUND(${x},2.5))`;
-       ws.getCell(row,13).value={formula:`IF(${pre}H${P.row}="","",${pre}H${P.row}/${P.mul})`};
-       ws.getCell(row,14).value={formula:`IF(${pre}J${P.row}="","",${pre}J${P.row}/${P.mul})`};
-       const cyc=mu<1&&!dl?` · по циклу −${Math.round((1-mu)*100)}%`:"";let x,hint;
-       if(dl){const k=Math.min(0.8,mu);x=`${M}*${k}`;hint=`"Разгрузка: ${Math.round(k*100)}% от рабочего веса"`;}
-       else if(top<P.top){x=`MAX(${M}+${st},CEILING(${M}*1.05,${st}))*${mu}`;hint=`"Повторов меньше, чем прошлый раз — вес +5%${cyc}"`;}
-       else{const tg=`N${row}*(1+${PADDR})`;x=`MAX(${M},CEILING(${tg}/(C${row}*${top}),${st}))*${mu}`;
-        hint=`IF(${M}*C${row}*${top}>=${tg},"Цель — тоннаж "&ROUND(${tg},0)&" кг: делай по "&MIN(${top},ROUNDUP(${tg}/(C${row}*${M}),0))&" повт.${cyc}","Повторы на максимуме — вес вверх${cyc}")`;}
-       ws.getCell(row,7).value={formula:`IF(${M}="",${e.rec||'""'},${rnd(x)})`};
-       ws.getCell(row,11).value={formula:`IF(${M}="",${orig?`"${orig}"`:'""'},${orig?`"${orig}. "&`:""}${hint})`};}
+      if(P){const pre=P.m===m?"":`'Блок ${P.m+1}'!`,N0=`N${row}`,st=`IF(${N0}<20,1,2.5)`,rnd=x=>`IF(${x}<20,ROUND(${x},0),MROUND(${x},2.5))`;
+       ws.getCell(row,14).value={formula:`IF(${pre}I${P.row}="","",${pre}I${P.row}/${P.mul})`};
+       ws.getCell(row,15).value={formula:`IF(${pre}K${P.row}="","",${pre}K${P.row}/${P.mul})`};
+       const cyc=mu<1&&!dl?` · по циклу вес −${Math.round((1-mu)*100)}%`:"";let x,reps,hint;
+       if(dl){const k=Math.min(0.8,mu);x=`${N0}*${k}`;reps=`${lo}`;hint=`"Разгрузка: ${Math.round(k*100)}% от рабочего веса"`;}
+       else if(top<P.top){x=`MAX(${N0}+${st},CEILING(${N0}*1.05,${st}))*${mu}`;reps=`${lo}`;hint=`"Повторов по плану меньше — вес +5%. Получается легко — делай до ${top}${cyc}"`;}
+       else{const tg=`ROUND(O${row}*(1+${PADDR}),2)`,wp=`MAX(${N0},CEILING(${tg}/(C${row}*${top})-0.001,${st}))`;x=`${wp}*${mu}`;
+        reps=`MAX(${lo},MIN(${top},ROUNDUP(${tg}/(C${row}*${wp})-0.001,0)))`;
+        hint=`IF(${N0}*C${row}*${top}>=${tg},"Цель — тоннаж "&ROUND(${tg},0)&" кг: вес тот же, повторов больше${cyc}","Повторы были на максимуме — вес вверх${cyc}")`;}
+       ws.getCell(row,7).value={formula:`IF(${N0}="",${e.rec||'""'},${rnd(x)})`};
+       ws.getCell(row,8).value={formula:`IF(${N0}="",${lo},${reps})`};
+       ws.getCell(row,12).value={formula:`IF(${N0}="",${orig?`"${orig}"`:'""'},${orig?`"${orig}. "&`:""}${hint})`};}
       H.push({W,m,row,mul:mu,top,dl});}
-     else{[8,9,10].forEach(k=>{ws.getCell(row,k).value="—";ws.getCell(row,k).font={name:F,color:{argb:"FF9AA4B5"}};});}
-     ws.getCell(row,7).numFmt="0.#";ws.getCell(row,7).font={name:F,size:10,bold:true,color:{argb:ACC}};ws.getRow(row).height=e.orig?32:20;row++;}
-    ws.mergeCells(row,1,row,9);c=ws.getCell(row,1);c.value="Тоннаж тренировки";c.font={name:F,bold:true,size:10};c.alignment={horizontal:"right"};
-    c=ws.getCell(row,10);c.value={formula:`SUM(J${first}:J${row-1})`};c.numFmt="#,##0";c.font={name:F,bold:true};c.fill=fill("FFE2F3E7");c.border=box;sessTotals.push(`J${row}`);row+=2;}
-   ws.mergeCells(row,1,row,9);c=ws.getCell(row,1);c.value=`ИТОГО НЕДЕЛЯ ${W+1}`;c.font={name:F,bold:true,size:11};c.alignment={horizontal:"right"};
-   c=ws.getCell(row,10);c.value={formula:sessTotals.join("+")};c.numFmt="#,##0";c.font={name:F,bold:true,size:11};c.fill=fill(GREY);c.border=box;weekTotals.push(`J${row}`);row+=2;}
-  ws.mergeCells(row,1,row,9);let c2=ws.getCell(row,1);c2.value=`ИТОГО БЛОК ${m+1}`;c2.font={name:F,bold:true,size:12};c2.alignment={horizontal:"right"};
-  c2=ws.getCell(row,10);c2.value={formula:weekTotals.join("+")};c2.numFmt="#,##0";c2.font={name:F,bold:true,size:12};c2.fill=fill(SOFT);c2.border=box;}
+     else{[8,9,10,11].forEach(k=>{ws.getCell(row,k).value="—";ws.getCell(row,k).font={name:F,color:{argb:"FF9AA4B5"}};});}
+     ws.getCell(row,7).numFmt="0.#";[7,8].forEach(k=>{if(lo)ws.getCell(row,k).font={name:F,size:10,bold:true,color:{argb:ACC}};});ws.getRow(row).height=e.orig?32:20;row++;}
+    ws.mergeCells(row,1,row,10);c=ws.getCell(row,1);c.value="Тоннаж тренировки";c.font={name:F,bold:true,size:10};c.alignment={horizontal:"right"};
+    c=ws.getCell(row,11);c.value={formula:`SUM(K${first}:K${row-1})`};c.numFmt="#,##0";c.font={name:F,bold:true};c.fill=fill("FFE2F3E7");c.border=box;sessTotals.push(`K${row}`);row+=2;}
+   ws.mergeCells(row,1,row,10);c=ws.getCell(row,1);c.value=`ИТОГО НЕДЕЛЯ ${W+1}`;c.font={name:F,bold:true,size:11};c.alignment={horizontal:"right"};
+   c=ws.getCell(row,11);c.value={formula:sessTotals.join("+")};c.numFmt="#,##0";c.font={name:F,bold:true,size:11};c.fill=fill(GREY);c.border=box;weekTotals.push(`K${row}`);row+=2;}
+  ws.mergeCells(row,1,row,10);let c2=ws.getCell(row,1);c2.value=`ИТОГО БЛОК ${m+1}`;c2.font={name:F,bold:true,size:12};c2.alignment={horizontal:"right"};
+  c2=ws.getCell(row,11);c2.value={formula:weekTotals.join("+")};c2.numFmt="#,##0";c2.font={name:F,bold:true,size:12};c2.fill=fill(SOFT);c2.border=box;}
  const xs=wb.addWorksheet("Упражнения",{views:[{state:"frozen",ySplit:2}]});xs.columns=PAT_ORDER.map(()=>({width:40}));
  xs.mergeCells(1,1,1,PAT_ORDER.length);xs.getCell(1,1).value="Списки для замены упражнений — в каждом от тяжёлого (свободный вес) к лёгкому (тренажёр, блок)";xs.getCell(1,1).font={name:F,bold:true,size:12};
  PAT_ORDER.forEach((p,k)=>{const c=xs.getCell(2,k+1);c.value=PAT_NAME[p];c.font={name:F,bold:true,color:{argb:"FFFFFFFF"}};c.fill=fill(ACC);c.alignment={wrapText:true,vertical:"middle"};c.border=box;
