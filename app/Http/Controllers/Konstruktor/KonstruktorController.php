@@ -17,6 +17,14 @@ class KonstruktorController extends Controller
         return view('konstruktor.page', ['student' => $request->attributes->get('student')]);
     }
 
+    /** Одноразовая ссылка, чтобы открыть конструктор во внешнем браузере уже вошедшим (из Telegram там нельзя скачивать файлы). */
+    public function browserLink(Request $request)
+    {
+        $token = $request->attributes->get('student')->issueLoginToken(30);
+
+        return response()->json(['url' => route('konstruktor.enter', $token)]);
+    }
+
     public function login()
     {
         return view('konstruktor.login', ['reason' => session('konstruktor_reason')]);

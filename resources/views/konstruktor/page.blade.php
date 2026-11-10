@@ -252,7 +252,8 @@ dl.terms dd{margin:0;color:var(--muted)}
 <style>body{margin:0;font-size:14px}[hidden]{display:none!important}img{max-width:100%}</style>
 </head><body>
 @endverbatim
-<script>window.TP_API = {!! json_encode(['state' => $student->state, 'saveUrl' => route('konstruktor.state'), 'csrf' => csrf_token()], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>window.TP_API = {!! json_encode(['state' => $student->state, 'saveUrl' => route('konstruktor.state'), 'browserLink' => route('konstruktor.browserLink'), 'csrf' => csrf_token()], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
 <form method="POST" action="{{ route('konstruktor.logout') }}" style="position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:20;margin:0">
     @csrf
     <button type="submit" style="font:600 12px system-ui,sans-serif;padding:6px 12px;border-radius:999px;border:1px solid #D3D8E1;background:#fff;color:#5B6474;cursor:pointer">Выйти{{ $student->first_name ? ' · '.e($student->first_name) : '' }}</button>
@@ -882,9 +883,14 @@ function buildHTML(){const g=S.goal,nm=$("name").value||"Клиент";
  <h1>Программа тренировок — ${esc(nm)}</h1><p>Цель: <b>${GOAL_RU[g]}</b> · уровень: ${S.level.toLowerCase()} · ${N()} ${plural(N(),"тренировка","тренировки","тренировок")} в неделю · 12 недель</p>
  ${INJ_ORDER.filter(k=>S.injs.includes(k)).map(k=>`<div class="warn"><b>${INJ[k].short}.</b> ${INJ[k].warn}</div>`).join("")}<div class="box"><b>Питание:</b> ${k("k_target")} ккал в день (норма ${k("k_tdee")}) · белки ${k("m_p")} г · жиры ${k("m_f")} г · углеводы ${k("m_c")} г</div>${b}
  <div class="warn"><b>Важно.</b> Программа — рекомендация, а не медицинское назначение. Головокружение, боль или давление в груди, резкая боль в суставе, тошнота, сильная одышка — сразу прекрати тренировку и обратись к врачу.${$("sex").value==="f"?" Самочувствие важнее календаря цикла: если нет сил — снижай нагрузку без чувства вины.":""}</div></body></html>`;}
+let IN_TG=!!(window.Telegram?.WebApp?.initData||window.TelegramWebviewProxy||/Telegram/i.test(navigator.userAgent));try{IN_TG=IN_TG||sessionStorage.getItem("inTg")==="1"}catch(e){}
+// Ссылку берём заранее: Telegram открывает браузер только прямо в ответ на нажатие, ждать сеть нельзя.
+let tgLink=null;
+function tgPrefetch(){if(!IN_TG||!API?.browserLink)return;fetch(API.browserLink,{method:"POST",credentials:"same-origin",headers:{"Accept":"application/json","X-CSRF-TOKEN":API.csrf||""}}).then(r=>r.ok?r.json():null).then(j=>{if(j?.url)tgLink={url:j.url,at:Date.now()};}).catch(()=>{});}
+tgPrefetch();setInterval(()=>{if(!tgLink||Date.now()-tgLink.at>20*60000)tgPrefetch();},5*60000);
 async function doSave(kind){
- let inTg=!!(window.Telegram?.WebApp?.initData||window.TelegramWebviewProxy||/Telegram/i.test(navigator.userAgent));try{inTg=inTg||sessionStorage.getItem("inTg")==="1"}catch(e){}
- if(inTg){$("dlMsg").innerHTML='Скачивание не работает внутри Telegram. Открой конструктор в браузере — <a href="https://fittrack.kz/konstruktor/login" style="color:var(--accent)">fittrack.kz/konstruktor/login</a>';return;}
+ if(IN_TG){const tg=window.Telegram?.WebApp;
+  if(tgLink&&tg?.openLink){tg.openLink(tgLink.url);tgLink=null;tgPrefetch();$("dlMsg").innerHTML="Открываю браузер — конструктор откроется уже с твоими данными, там нажми «Скачать» ещё раз.";return;}$("dlMsg").innerHTML='Скачивание не работает внутри Telegram. Открой конструктор в браузере — <a href="https://fittrack.kz/konstruktor/login" style="color:var(--accent)">fittrack.kz/konstruktor/login</a>';return;}
  if(!DL){$("dlMsg").textContent="Скачивание недоступно в этом окне — используй «Скопировать неделю».";return;}
  const TR={а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ё:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"ts",ч:"ch",ш:"sh",щ:"sch",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya",ә:"a",ғ:"g",қ:"k",ң:"n",ө:"o",ұ:"u",ү:"u",һ:"h",і:"i"};
  const nm=[...($("name").value||"client").toLowerCase()].map(c=>TR[c]??c).join("").replace(/[^a-z0-9_-]+/g,"_").replace(/^_+|_+$/g,"")||"client";

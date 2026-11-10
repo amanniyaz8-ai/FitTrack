@@ -82,6 +82,7 @@ Route::post('/konstruktor/logout', [\App\Http\Controllers\Konstruktor\Konstrukto
 Route::middleware(\App\Http\Middleware\EnsureStudent::class)->group(function () {
     Route::get('/konstruktor', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'show'])->name('konstruktor.show');
     Route::put('/konstruktor/state', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'saveState'])->name('konstruktor.state');
+    Route::post('/konstruktor/browser-link', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'browserLink'])->name('konstruktor.browserLink')->middleware('throttle:10,1');
 });
 
 require __DIR__.'/auth.php';
