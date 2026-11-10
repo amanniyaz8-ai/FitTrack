@@ -211,6 +211,27 @@ dl.terms dd{margin:0;color:var(--muted)}
 .swapnote b{color:var(--plate-blue)}
 @media (max-width:520px){.panel{padding:16px}.stat .val{font-size:24px}}
 @media (prefers-reduced-motion:no-preference){.bar i{transition:height .3s}}
+
+.ob{position:fixed;inset:0;z-index:50;background:rgba(10,13,20,.55);display:grid;place-items:center;padding:16px}
+.ob[hidden]{display:none}
+.ob-card{width:min(520px,100%);max-height:calc(100dvh - 32px);overflow:auto;background:var(--surface);color:var(--fg);border-radius:20px;padding:20px 20px 14px;display:grid;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.ob-prog{height:6px;border-radius:6px;background:var(--sunk);overflow:hidden}.ob-prog i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.ob-body{display:grid;gap:14px;min-height:220px;align-content:start}
+.ob-q{font-family:var(--f-display);font-size:22px;line-height:1.25;margin:4px 0 0}
+.ob-in{width:100%;box-sizing:border-box;font:600 22px var(--f-body);padding:14px 16px;border:2px solid var(--line);border-radius:14px;background:var(--bg);color:var(--fg)}
+.ob-in:focus{outline:none;border-color:var(--accent)}
+.ob-num{display:flex;align-items:center;gap:10px}.ob-num span{font-weight:700;color:var(--muted);min-width:70px}
+.ob-opts{display:grid;gap:10px}
+.ob-opt{text-align:left;display:grid;gap:3px;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--fg);font:inherit;cursor:pointer}
+.ob-opt b{font-size:17px}.ob-opt span{font-size:13px;color:var(--muted)}
+.ob-opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.ob-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.ob-day{padding:14px 0;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--fg);font:700 15px var(--f-body);cursor:pointer}
+.ob-day[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-fg)}
+.ob-nav{display:flex;justify-content:space-between;gap:10px}
+.ob-back,.ob-next{font:700 16px var(--f-body);padding:14px 20px;border-radius:14px;border:0;cursor:pointer}
+.ob-back{background:transparent;color:var(--muted)}.ob-next{background:var(--accent);color:var(--accent-fg);flex:1}
+.ob-skip{background:none;border:0;color:var(--muted);font:13px var(--f-body);text-decoration:underline;cursor:pointer;justify-self:center}
 </style>
 
 <style>body{margin:0;font-size:14px}[hidden]{display:none!important}img{max-width:100%}</style>
@@ -229,6 +250,7 @@ dl.terms dd{margin:0;color:var(--muted)}
     <span class="eyebrow">Тренировки · питание · 12 недель</span>
     <h1>Конструктор тренировок <em>и КБЖУ</em></h1>
     <p class="lead">Заполни 3 шага — получишь программу тренировок на 12 недель, свои калории и понятный план, как расти. Ты вписываешь только вес и повторы на тренировке, остальное считается само. Всё сохраняется в этом браузере.</p>
+    <p><button type="button" class="btn ghost" id="obAgain">Пройти анкету заново</button></p>
   </header>
 
   <section aria-labelledby="s1">
@@ -1097,6 +1119,64 @@ const PAT_LIST={
  core:["Ролик для пресса","Подъём ног в висе","Скручивания в блоке","Скручивания","Планка","Боковая планка","«Мёртвый жук»","Скручивание по Макгиллу","Паллоф-пресс в блоке","«Птица-собака»"]};
 
 renderAll();
+
+/* ---------- анкета-окно: по одному вопросу на экран ---------- */
+function obSteps(){const st=[
+ {k:"name",q:"Как тебя зовут?",t:"text"},
+ {k:"sex",q:"Твой пол",t:"pick",opts:[["m","Мужской"],["f","Женский"]]},
+ {k:"age",q:"Сколько тебе лет?",t:"num",min:14,max:90,unit:"лет"},
+ {k:"height",q:"Твой рост",t:"num",min:120,max:230,unit:"см"},
+ {k:"weight",q:"Твой вес сейчас",t:"num",min:35,max:250,unit:"кг",step:0.1},
+ {k:"goal",q:"Какая у тебя цель?",t:"pick",opts:[["Жиросжигание","Похудеть","Убрать жир, сохранить мышцы"],["Набор массы","Набрать мышцы","Рост мышц, профицит калорий"],["Сила","Стать сильнее","Присед, жим, становая — большие веса"]]}];
+ if(S.goal==="Жиросжигание")st.push({k:"fl",q:"Сколько хочешь сбросить?",t:"fl"});
+ st.push({k:"level",q:"Какой у тебя опыт в зале?",t:"pick",opts:[["Новичок","Новичок","Меньше 6 месяцев или после долгого перерыва"],["Средний","Средний","6 месяцев – 2 года, знаю технику базовых"],["Продвинутый","Продвинутый","Больше 2 лет, большие веса"]]},
+  {k:"days",q:"В какие дни будешь тренироваться?",t:"days"},
+  {k:"injs",q:"Есть травмы или ограничения?",t:"injs"});
+ if($("sex").value==="f")st.push({k:"cyc",q:"Подстроить тренировки под цикл?",t:"cyc"});
+ return st;}
+let obI=0;
+function obOpen(){obI=0;$("ob").hidden=false;document.body.style.overflow="hidden";obRender();}
+function obClose(){$("ob").hidden=true;document.body.style.overflow="";}
+function obRender(){const st=obSteps(),s=st[obI],b=$("obBody");
+ $("obBar").style.width=((obI+1)/st.length*100)+"%";$("obBack").style.visibility=obI?"visible":"hidden";
+ $("obNext").textContent=obI===st.length-1?"Собрать программу":"Далее";
+ let h=`<h2 class="ob-q">${s.q}</h2>`;
+ if(s.t==="text")h+=`<input class="ob-in" id="obV" type="text" value="${esc(touched?$("name").value:"")}" placeholder="Имя">`;
+ if(s.t==="num")h+=`<div class="ob-num"><input class="ob-in" id="obV" type="number" inputmode="decimal" min="${s.min}" max="${s.max}" step="${s.step||1}" value="${esc(touched?$(s.k).value:"")}"><span>${s.unit}</span></div><p class="hint" id="obErr"></p>`;
+ if(s.t==="pick"){const cur=s.k==="sex"?$("sex").value:S[s.k];h+=`<div class="ob-opts">${s.opts.map(o=>`<button type="button" class="ob-opt" data-v="${o[0]}" aria-pressed="${touched&&o[0]===cur}"><b>${o[1]}</b>${o[2]?`<span>${o[2]}</span>`:""}</button>`).join("")}</div>`;}
+ if(s.t==="fl")h+=`<div class="ob-num"><input class="ob-in" id="obV" type="number" inputmode="decimal" min="1" max="80" step="0.5" value="${esc($("fl_kg").value)}"><span>кг</span></div><div class="ob-num"><input class="ob-in" id="obV2" type="number" inputmode="numeric" min="1" max="24" value="${esc($("fl_mo").value)}"><span>месяцев</span></div><p class="hint">Безопасно — до 1% веса в неделю.</p>`;
+ if(s.t==="days")h+=`<div class="ob-days">${DAYN.map((d,i)=>`<button type="button" class="ob-day" data-d="${i}" aria-pressed="${S.days.includes(i)}">${d}</button>`).join("")}</div><p class="hint" id="obErr">Отметь 2–5 дней. Между тренировками лучше день отдыха.</p>`;
+ if(s.t==="injs")h+=`<div class="ob-opts">${[["none","Нет, всё хорошо"],["lumbar","Поясница: грыжа, протрузия"],["knee","Колено"],["shoulder","Плечо"]].map(o=>`<button type="button" class="ob-opt" data-inj="${o[0]}" aria-pressed="${o[0]==="none"?!S.injs.length:S.injs.includes(o[0])}"><b>${o[1]}</b></button>`).join("")}</div><p class="hint">Можно выбрать несколько.</p>`;
+ if(s.t==="cyc")h+=`<div class="ob-opts"><button type="button" class="ob-opt" data-cyc="1" aria-pressed="${$("cyc_on").checked}"><b>Да, учитывать</b><span>Веса и подходы подстроятся под фазу цикла</span></button><button type="button" class="ob-opt" data-cyc="0" aria-pressed="${!$("cyc_on").checked}"><b>Нет</b><span>Нерегулярный цикл, контрацептивы, беременность</span></button></div>
+  <label class="f" id="obCycD" ${$("cyc_on").checked?"":"hidden"}>Первый день последних месячных<input class="ob-in" id="obV" type="date" value="${esc($("cyc_start").value)}"></label>`;
+ b.innerHTML=h;const f=b.querySelector("input");if(f&&s.t!=="cyc")setTimeout(()=>f.focus(),50);}
+function obNext(){const st=obSteps(),s=st[obI],v=$("obV"),err=t=>{const e=$("obErr");if(e)e.textContent=t;else alert(t);};
+ if(s.t==="text"){if(!v.value.trim())return;$("name").value=v.value.trim();}
+ if(s.t==="num"){const x=parseFloat(String(v.value).replace(",","."));if(!(x>=s.min&&x<=s.max))return err(`Впиши число от ${s.min} до ${s.max}`);$(s.k).value=x;}
+ if(s.t==="pick"&&!document.querySelector('#obBody .ob-opt[aria-pressed="true"]'))return;
+ if(s.t==="fl"){const kg=parseFloat(v.value),mo=parseFloat($("obV2").value);if(!(kg>0&&mo>0))return;$("fl_kg").value=kg;$("fl_mo").value=mo;}
+ if(s.t==="days"&&(S.days.length<2||S.days.length>5))return err("Нужно от 2 до 5 дней.");
+ if(s.t==="cyc"&&$("cyc_on").checked){if(!v.value)return;$("cyc_start").value=v.value;}
+ if(obI<st.length-1){obI++;obRender();return;}
+ if(!touched)S.log={};touched=true;markTouched();S.W=0;renderAll();save();obClose();
+ $("weekInfo").scrollIntoView({behavior:"smooth",block:"start"});}
+document.body.insertAdjacentHTML("beforeend",`<div class="ob" id="ob" hidden role="dialog" aria-modal="true" aria-label="Анкета">
+ <div class="ob-card"><div class="ob-prog"><i id="obBar"></i></div><div id="obBody" class="ob-body"></div>
+ <div class="ob-nav"><button type="button" class="ob-back" id="obBack">Назад</button><button type="button" class="ob-next" id="obNext">Далее</button></div>
+ <button type="button" class="ob-skip" id="obSkip">Заполню сам в форме</button></div></div>`);
+$("ob").addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)return;ev.stopPropagation();
+ const s=obSteps()[obI];
+ if(b.id==="obNext")return obNext();
+ if(b.id==="obBack"){if(obI>0){obI--;obRender();}return;}
+ if(b.id==="obSkip"){touched=true;markTouched();save();obClose();return;}
+ if(b.classList.contains("ob-opt")&&s.t==="pick"){if(s.k==="sex")$("sex").value=b.dataset.v;else S[s.k]=b.dataset.v;if(s.k==="goal")S.pace=1;
+  b.parentElement.querySelectorAll(".ob-opt").forEach(x=>x.setAttribute("aria-pressed",x===b));setTimeout(obNext,180);return;}
+ if(b.dataset.d!=null){const d=+b.dataset.d;if(S.days.includes(d))S.days=S.days.filter(x=>x!==d);else if(S.days.length<5)S.days=[...S.days,d].sort((a,c)=>a-c);obRender();return;}
+ if(b.dataset.inj){const k=b.dataset.inj;S.injs=k==="none"?[]:S.injs.includes(k)?S.injs.filter(x=>x!==k):[...S.injs,k];obRender();return;}
+ if(b.dataset.cyc){$("cyc_on").checked=b.dataset.cyc==="1";obRender();return;}});
+$("ob").addEventListener("keydown",ev=>{if(ev.key==="Enter"&&ev.target.tagName==="INPUT"){ev.preventDefault();obNext();}});
+$("obAgain").addEventListener("click",obOpen);
+if(!touched)obOpen();
 
 })();
 </script>
