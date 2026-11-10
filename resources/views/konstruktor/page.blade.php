@@ -1051,6 +1051,7 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
      const nc=ws.getCell(row,2),swapped=e.name==="Спокойная ходьба или растяжка";
      if(!swapped){if(src[key]){const S0=src[key];nc.value={formula:(S0.m===m?"":`'Блок ${S0.m+1}'!`)+`B${S0.row}`,result:e.name};}else{src[key]={m,row};nc.fill=fill(INP);}nc.dataValidation=dv(tt,s);}
      if(lo){[9,10].forEach(k=>{const cc=ws.getCell(row,k);cc.fill=fill(INP);cc.font={name:F,size:11,bold:true,color:{argb:"FF0000FF"}};});
+      ws.getCell(row,10).dataValidation={type:"list",allowBlank:true,showErrorMessage:false,formulae:['"8,9,10,11,12,13,14,15"']};
       ws.getCell(row,11).value={formula:`IF(I${row}="","",C${row}*IF(J${row}="",M${row},J${row})*I${row})`};ws.getCell(row,11).numFmt="#,##0";ws.getCell(row,11).font={name:F,bold:true,size:10};
       const H=hist[key]||(hist[key]=[]),mu=e.ph?e.ph.mul:1,dl=w===3;
       let P=null;for(let k=H.length-1;k>=0;k--)if(!H[k].dl){P=H[k];break;}
