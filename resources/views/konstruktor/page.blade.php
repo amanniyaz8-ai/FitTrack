@@ -871,8 +871,8 @@ const LUMBAR={
  "Становая тяга с плинтов":["Ягодичный мост со штангой","Отведение ноги назад в кроссовере"],
  "Становая тяга с трэп-грифом":["Ягодичный мост со штангой","Отведение ноги назад в кроссовере"],
  "Становая тяга с гантелями":["Ягодичный мост с гантелью","Отведение ноги назад в кроссовере"],
- "Румынская тяга со штангой":["Отведение ноги назад в кроссовере","Мост на одной ноге"],
- "Румынская тяга с гантелями":["Отведение ноги назад в кроссовере","Мост на одной ноге"],
+ "Румынская тяга со штангой":["Ягодичный мост со штангой","Ягодичный мост с гантелью","Отведение ноги назад в кроссовере"],
+ "Румынская тяга с гантелями":["Ягодичный мост с гантелью","Отведение ноги назад в кроссовере","Мост на одной ноге"],
  "Гиперэкстензия":["«Птица-собака» с паузой 5 сек"],
  "Разведения гантелей в наклоне":["Разведения гантелей лёжа грудью на наклонной скамье","Тяга каната к лицу"],
  "Махи гирей двумя руками":["Ягодичный мост с гантелью","Отведение ноги назад в кроссовере"],
@@ -1011,8 +1011,9 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
  if(S.injs.length)info.push(["Ограничения",INJ_ORDER.filter(k=>S.injs.includes(k)).map(k=>INJ[k].short).join(", ")+" — упражнения заменены, см. отметки «вместо …»"]);
  if(cycleOn())info.push(["Цикл","Учитывается: у каждой тренировки указана фаза, веса уже скорректированы"]);
  info.forEach((r,k)=>{const a=o.getCell(4+k,2),b=o.getCell(4+k,3);a.value=r[0];b.value=r[1];a.font={name:F,bold:true};b.font={name:F};a.fill=fill(GREY);[a,b].forEach(c=>{c.border=box;c.alignment={vertical:"middle",wrapText:true};});});
- let r=5+info.length;ot(r,"Как заполнять",{b:true,s:13});r++;
- ["Листы «Блок 1–3» — твои тренировки по неделям.","Жёлтые ячейки — вписываешь вес и сколько раз сделал (в среднем за подход). Тоннаж считается сам.","Сделал верхнюю границу повторов во всех подходах — в следующий раз +2,5–5% веса.","4-я неделя каждого блока — разгрузка: легче и меньше подходов.","Перед каждой тренировкой — разминка 10 минут (расписана в начале тренировки)."].forEach(t=>{o.getCell(r,3).value="• "+t;o.getCell(r,3).font={name:F};o.getCell(r,3).alignment={wrapText:true};r++;});
+ const pr=4+info.length,PADDR=`'Обзор'!$C$${pr}`;{const a=o.getCell(pr,2),b=o.getCell(pr,3);a.value="Прирост тоннажа (когда повторы те же)";b.value=0.1;b.numFmt="0%";a.font={name:F,bold:true};b.font={name:F,bold:true,color:{argb:"FF0000FF"}};a.fill=fill(GREY);b.fill=fill(INP);[a,b].forEach(c=>{c.border=box;c.alignment={vertical:"middle",horizontal:"left"};});}
+ let r=6+info.length;ot(r,"Как заполнять",{b:true,s:13});r++;
+ ["Листы «Блок 1–3» — твои тренировки по неделям.","Жёлтые ячейки — вписываешь вес и сколько раз сделал (в среднем за подход). Тоннаж считается сам.","Хочешь другое упражнение — поменяй название в 1-й неделе (есть список по типу движения, можно вписать своё). На всех следующих неделях оно поменяется само.","«Рек. вес» со 2-й недели считается от того, что ты вписал. Повторов столько же, сколько в прошлый раз, — цель: тоннаж + прирост из ячейки выше (сначала добавляешь повторы, дошёл до верха — вес вверх). Повторов по плану меньше — вес +5%, тоннаж может быть чуть ниже: так задумано.","4-я неделя каждого блока — разгрузка: 80% веса и меньше подходов.","Перед каждой тренировкой — разминка 10 минут (расписана в начале тренировки)."].forEach(t=>{o.getCell(r,3).value="• "+t;o.getCell(r,3).font={name:F};o.getCell(r,3).alignment={wrapText:true};r++;});
  r++;ot(r,"Важно",{b:true,s:13,c:"FFB3261E"});r++;
  const warn=["Программа — рекомендация, а не медицинское назначение.","Головокружение, боль или давление в груди, резкая боль в суставе или спине, тошнота, сильная одышка — сразу прекрати тренировку и обратись к врачу."];
  INJ_ORDER.filter(k=>S.injs.includes(k)&&k!=="lumbar").forEach(k=>warn.push(INJ[k].warn));if(S.injs.includes("lumbar"))warn.push("Грыжа: только вне обострения и с разрешения врача. Боль во время — не больше 3 из 10 и не отдаёт в ногу. Онемение в паху, проблемы с мочеиспусканием, слабость в ноге — срочно к врачу.");
@@ -1020,9 +1021,14 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
  warn.forEach(t=>{const c=o.getCell(r,3);c.value="• "+t;c.font={name:F,color:{argb:"FFB3261E"}};c.alignment={wrapText:true};r++;});
  /* blocks */
  const head=["№","Упражнение","Подходы","Повторы","Отдых","Сколько в запасе","Рек. вес, кг","Вес, кг","Сделал раз","Тоннаж, кг","Заметки"];
+ /* список упражнений по типу движения */
+ const li=LEVELS.indexOf(S.level),lists=PAT_ORDER.map(p=>[...PAT_LIST[p]]);
+ for(let t=0;t<3;t++)for(let s=0;s<7;s++){const p=PAT_ORDER.indexOf(PAT[t][s]),nm=S.injs.length?safeNames(t)[s]:TPL[g][t][s][li];if(!lists[p].includes(nm))lists[p].push(nm);}
+ const colL=k=>String.fromCharCode(65+k),dv=(t,s)=>{const k=PAT_ORDER.indexOf(PAT[t][s]);return{type:"list",allowBlank:true,showErrorMessage:false,showInputMessage:true,promptTitle:PAT_NAME[PAT[t][s]],prompt:"Выбери из списка или впиши своё. Меняй в 1-й неделе — дальше поменяется само.",formulae:[`'Упражнения'!$${colL(k)}$3:$${colL(k)}$${lists[k].length+2}`]};};
+ const src={},hist={};
  for(let m=0;m<3;m++){
   const ws=wb.addWorksheet(`Блок ${m+1}`,{views:[{state:"frozen",ySplit:2,showGridLines:false}],pageSetup:{orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0}});
-  ws.columns=[{width:6},{width:40},{width:10},{width:11},{width:12},{width:26},{width:12},{width:11},{width:11},{width:12},{width:26},{width:4,hidden:true}];
+  ws.columns=[{width:6},{width:40},{width:10},{width:11},{width:12},{width:26},{width:12},{width:11},{width:11},{width:12},{width:34},{width:4,hidden:true},{width:4,hidden:true},{width:4,hidden:true}];
   ws.mergeCells(1,1,1,11);const t=ws.getCell(1,1);t.value=`БЛОК ${m+1} · ${MESO_NAME[g][m].toUpperCase()} · ${GOAL_RU[g]} · ${nm}`;t.font={name:F,size:14,bold:true,color:{argb:"FFFFFFFF"}};t.fill=fill(DARK);t.alignment={vertical:"middle",indent:1};ws.getRow(1).height=28;
   head.forEach((h,k)=>{const c=ws.getCell(2,k+1);c.value=h;c.font={name:F,bold:true,size:10,color:{argb:"FFFFFFFF"}};c.fill=fill(ACC);c.alignment={horizontal:"center",vertical:"middle",wrapText:true};c.border=box;});ws.getRow(2).height=30;
   let row=3;const weekTotals=[];
@@ -1033,22 +1039,58 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
     ws.mergeCells(row,1,row,11);c=ws.getCell(row,1);c.value=`Тренировка ${i+1} · ${DAYL[tt]} — ${dateFor(W,i)}${ph?` · ${ph.name}, ${ph.day}-й день цикла`:""}`;c.font={name:F,bold:true,size:11,color:{argb:"FFFFFFFF"}};c.fill=fill("FF3B4E7A");c.alignment={vertical:"middle",indent:1};ws.getRow(row).height=22;row++;
     ws.mergeCells(row,1,row,11);c=ws.getCell(row,1);c.value="Разминка: "+warmSteps(tt).map(x=>x[0]+" — "+x[1]).join(" · ")+(ph?`\nПо циклу: ${ph.adv}`:"");c.font={name:F,size:9,italic:true,color:{argb:"FF5B6474"}};c.fill=fill(WARM);c.alignment={wrapText:true,vertical:"middle",indent:1};ws.getRow(row).height=ph?44:30;row++;
     const first=row;
-    for(let s=0;s<7;s++){const e=exRow(W,tt,s,i),sv=setVals(W,i,s,e).filter(Boolean),lo=lowUp(e.reps)[0];
+    for(let s=0;s<7;s++){const e=exRow(W,tt,s,i),sv=setVals(W,i,s,e).filter(Boolean),[lo,top]=lowUp(e.reps),key=tt+"|"+s;
      const mx=sv.length?Math.max(...sv.map(v=>v.w)):null,avg=sv.length?Math.round(sv.reduce((a,v)=>a+v.r,0)/sv.length):null;
-     const vals=[e.block,e.name+(e.orig?`\n(вместо «${e.orig}»)`:""),e.sets,dash(e.reps),e.rest,e.rpeTxt,e.rec||null,mx,avg,null,null,lo||0];
+     const orig=e.orig?`вместо «${e.orig}»`:"";
+     const vals=[e.block,e.name,e.sets,dash(e.reps),e.rest,e.rpeTxt,e.rec||null,mx,avg,null,orig||null,lo||0];
      vals.forEach((v,k)=>{const cc=ws.getCell(row,k+1);cc.value=v;cc.font={name:F,size:10,bold:k===1};cc.border=box;cc.alignment={vertical:"middle",wrapText:true,horizontal:[0,2,3,6,7,8,9].includes(k)?"center":"left"};});
+     ws.getCell(row,11).font={name:F,size:9,color:{argb:"FF5B6474"}};
      const b=ws.getCell(row,1);b.fill=fill(roleCol[e.role]);b.font={name:F,bold:true,size:10,color:{argb:e.role==="Подсобное"?DARK:"FFFFFFFF"}};
+     // Название: в 1-й встрече — ввод со списком, дальше — ссылка на неё (замена тянется на все недели).
+     const nc=ws.getCell(row,2),swapped=e.name==="Спокойная ходьба или растяжка";
+     if(!swapped){if(src[key]){const S0=src[key];nc.value={formula:(S0.m===m?"":`'Блок ${S0.m+1}'!`)+`B${S0.row}`,result:e.name};}else{src[key]={m,row};nc.fill=fill(INP);}nc.dataValidation=dv(tt,s);}
      if(lo){[8,9].forEach(k=>{const cc=ws.getCell(row,k);cc.fill=fill(INP);cc.font={name:F,size:11,bold:true,color:{argb:"FF0000FF"}};});
-      ws.getCell(row,10).value={formula:`IF(H${row}="","",C${row}*IF(I${row}="",L${row},I${row})*H${row})`};ws.getCell(row,10).numFmt="#,##0";ws.getCell(row,10).font={name:F,bold:true,size:10};}
+      ws.getCell(row,10).value={formula:`IF(H${row}="","",C${row}*IF(I${row}="",L${row},I${row})*H${row})`};ws.getCell(row,10).numFmt="#,##0";ws.getCell(row,10).font={name:F,bold:true,size:10};
+      const H=hist[key]||(hist[key]=[]),mu=e.ph?e.ph.mul:1,dl=w===3;
+      let P=null;for(let k=H.length-1;k>=0;k--)if(!H[k].dl){P=H[k];break;}
+      if(w===0&&W>=4){const B=H.find(x=>x.W===W-4);if(B)P=B;}
+      if(P){const pre=P.m===m?"":`'Блок ${P.m+1}'!`,M=`M${row}`,st=`IF(${M}<20,1,2.5)`,rnd=x=>`IF(${x}<20,ROUND(${x},0),MROUND(${x},2.5))`;
+       ws.getCell(row,13).value={formula:`IF(${pre}H${P.row}="","",${pre}H${P.row}/${P.mul})`};
+       ws.getCell(row,14).value={formula:`IF(${pre}J${P.row}="","",${pre}J${P.row}/${P.mul})`};
+       const cyc=mu<1&&!dl?` · по циклу −${Math.round((1-mu)*100)}%`:"";let x,hint;
+       if(dl){const k=Math.min(0.8,mu);x=`${M}*${k}`;hint=`"Разгрузка: ${Math.round(k*100)}% от рабочего веса"`;}
+       else if(top<P.top){x=`MAX(${M}+${st},CEILING(${M}*1.05,${st}))*${mu}`;hint=`"Повторов меньше, чем прошлый раз — вес +5%${cyc}"`;}
+       else{const tg=`N${row}*(1+${PADDR})`;x=`MAX(${M},CEILING(${tg}/(C${row}*${top}),${st}))*${mu}`;
+        hint=`IF(${M}*C${row}*${top}>=${tg},"Цель — тоннаж "&ROUND(${tg},0)&" кг: делай по "&MIN(${top},ROUNDUP(${tg}/(C${row}*${M}),0))&" повт.${cyc}","Повторы на максимуме — вес вверх${cyc}")`;}
+       ws.getCell(row,7).value={formula:`IF(${M}="",${e.rec||'""'},${rnd(x)})`};
+       ws.getCell(row,11).value={formula:`IF(${M}="",${orig?`"${orig}"`:'""'},${orig?`"${orig}. "&`:""}${hint})`};}
+      H.push({W,m,row,mul:mu,top,dl});}
      else{[8,9,10].forEach(k=>{ws.getCell(row,k).value="—";ws.getCell(row,k).font={name:F,color:{argb:"FF9AA4B5"}};});}
-     ws.getCell(row,7).numFmt="0.0";ws.getRow(row).height=e.orig?32:20;row++;}
+     ws.getCell(row,7).numFmt="0.#";ws.getCell(row,7).font={name:F,size:10,bold:true,color:{argb:ACC}};ws.getRow(row).height=e.orig?32:20;row++;}
     ws.mergeCells(row,1,row,9);c=ws.getCell(row,1);c.value="Тоннаж тренировки";c.font={name:F,bold:true,size:10};c.alignment={horizontal:"right"};
     c=ws.getCell(row,10);c.value={formula:`SUM(J${first}:J${row-1})`};c.numFmt="#,##0";c.font={name:F,bold:true};c.fill=fill("FFE2F3E7");c.border=box;sessTotals.push(`J${row}`);row+=2;}
    ws.mergeCells(row,1,row,9);c=ws.getCell(row,1);c.value=`ИТОГО НЕДЕЛЯ ${W+1}`;c.font={name:F,bold:true,size:11};c.alignment={horizontal:"right"};
    c=ws.getCell(row,10);c.value={formula:sessTotals.join("+")};c.numFmt="#,##0";c.font={name:F,bold:true,size:11};c.fill=fill(GREY);c.border=box;weekTotals.push(`J${row}`);row+=2;}
   ws.mergeCells(row,1,row,9);let c2=ws.getCell(row,1);c2.value=`ИТОГО БЛОК ${m+1}`;c2.font={name:F,bold:true,size:12};c2.alignment={horizontal:"right"};
   c2=ws.getCell(row,10);c2.value={formula:weekTotals.join("+")};c2.numFmt="#,##0";c2.font={name:F,bold:true,size:12};c2.fill=fill(SOFT);c2.border=box;}
+ const xs=wb.addWorksheet("Упражнения",{views:[{state:"frozen",ySplit:2}]});xs.columns=PAT_ORDER.map(()=>({width:40}));
+ xs.mergeCells(1,1,1,PAT_ORDER.length);xs.getCell(1,1).value="Списки для замены упражнений — в каждом от тяжёлого (свободный вес) к лёгкому (тренажёр, блок)";xs.getCell(1,1).font={name:F,bold:true,size:12};
+ PAT_ORDER.forEach((p,k)=>{const c=xs.getCell(2,k+1);c.value=PAT_NAME[p];c.font={name:F,bold:true,color:{argb:"FFFFFFFF"}};c.fill=fill(ACC);c.alignment={wrapText:true,vertical:"middle"};c.border=box;
+  lists[k].forEach((n,j)=>{const cc=xs.getCell(j+3,k+1);cc.value=n;cc.font={name:F,size:10};cc.border=box;});});
+ xs.getRow(2).height=30;
  return await wb.xlsx.writeBuffer();}
+const PAT=[["knee","hip","hpush","vpush","vpull","hpull","core"],["hpush","vpush","vpull","hpull","knee","hip","core"],["vpull","hpull","knee","hip","hpush","delts","core"]];
+const PAT_ORDER=["knee","hip","hpush","vpush","vpull","hpull","delts","core"];
+const PAT_NAME={knee:"Ноги — коленодоминантные (приседы, выпады)",hip:"Ноги — тазодоминантные (тяги, мосты)",hpush:"Жимы лёжа (грудь)",vpush:"Жимы вверх (плечи)",vpull:"Тяги сверху (спина)",hpull:"Тяги к поясу (спина)",delts:"Плечи — изоляция",core:"Кор (пресс)"};
+const PAT_LIST={
+ knee:["Присед со штангой на спине","Фронтальный присед со штангой","Гоблет-присед","Гоблет-присед к скамье","Болгарские сплит-приседания с гантелями","Болгарские сплит-приседания","Шагающие выпады с гантелями","Выпады с гантелями","Выпады назад с гантелями","Выпады на месте","Зашагивания на платформу","Гакк-присед в тренажёре","Жим ногами","Разгибания ног в тренажёре"],
+ hip:["Становая тяга","Румынская тяга со штангой","Румынская тяга с гантелями","Ягодичный мост со штангой","Ягодичный мост с гантелью","Ягодичный мост в тренажёре","Гиперэкстензия со штангой","Гиперэкстензия","Сгибания ног в тренажёре","Отведение ноги назад в кроссовере","Мост на одной ноге"],
+ hpush:["Жим штанги лёжа","Жим штанги на наклонной","Жим гантелей лёжа","Жим гантелей на наклонной","Жим гантелей лёжа нейтральным хватом","Отжимания на брусьях","Отжимания от пола","Жим в тренажёре от груди","Жим лёжа в тренажёре под 30°","Сведение рук в кроссовере","Бабочка (пек-дек)"],
+ vpush:["Жим штанги стоя","Жим гантелей сидя","Жим гантелей сидя со спинкой","Жим Арнольда","Жим в рычаге (лэндмайн) одной рукой с колена","Жим в тренажёре сидя","Махи гантелями в стороны"],
+ vpull:["Подтягивания с весом","Подтягивания","Подтягивания в гравитроне","Тяга верхнего блока широким хватом","Тяга верхнего блока","Тяга верхнего блока узким хватом","Тяга верхнего блока нейтральным хватом","Пуловер в блоке"],
+ hpull:["Тяга штанги в наклоне","Тяга Т-грифа","Тяга Пендли","Тяга гантели одной рукой","Тяга гантелей лёжа грудью на наклонной скамье","Тяга к поясу в рычажном тренажёре","Тяга в рычажном тренажёре с упором грудью","Тяга горизонтального блока","Тяга к поясу на блоке"],
+ delts:["Махи гантелями в стороны","Махи в стороны в блоке","Разведения гантелей в наклоне","Тяга каната к лицу","Махи в тренажёре"],
+ core:["Ролик для пресса","Подъём ног в висе","Скручивания в блоке","Скручивания","Планка","Боковая планка","«Мёртвый жук»","Скручивание по Макгиллу","Паллоф-пресс в блоке","«Птица-собака»"]};
 
 renderAll();
 
