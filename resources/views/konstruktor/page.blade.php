@@ -233,11 +233,11 @@ dl.terms dd{margin:0;color:var(--muted)}
 .ob-back{background:transparent;color:var(--muted)}.ob-next{background:var(--accent);color:var(--accent-fg);flex:1}
 .ob-skip{background:none;border:0;color:var(--muted);font:13px var(--f-body);text-decoration:underline;cursor:pointer;justify-self:center}
 
-.ob-hero{display:flex;align-items:center;gap:12px;min-height:118px}
-.kb{width:118px;height:118px;flex:none;animation:kbIdle 2.4s ease-in-out infinite;transform-origin:50% 90%}
-.kb .kb-eyes{animation:kbBlink 4s infinite;transform-origin:60px 76px}
+.ob-hero{display:flex;align-items:center;gap:12px;min-height:124px}
+.kb{width:124px;height:124px;flex:none;animation:kbIdle 2.4s ease-in-out infinite;transform-origin:50% 90%}
+.kb .kb-eyes{animation:kbBlink 4s infinite;transform-origin:70px 95px}
 .kb.jump{animation:kbJump .5s ease-out}
-.kb.flex{animation:kbJump .5s ease-out}.kb.flex .kb-arm-l{animation:kbFlexL .9s ease-in-out 2;transform-origin:30px 78px}.kb.flex .kb-arm-r{animation:kbFlexR .9s ease-in-out 2;transform-origin:90px 78px}
+.kb.flex{animation:kbJump .5s ease-out}.kb.flex .kb-arm-l{animation:kbFlexL .9s ease-in-out 2;transform-origin:34px 86px}.kb.flex .kb-arm-r{animation:kbFlexR .9s ease-in-out 2;transform-origin:106px 86px}
 .ob-say{position:relative;background:var(--accent-soft);color:var(--fg);font-weight:600;font-size:15px;padding:10px 14px;border-radius:14px;line-height:1.35}
 .ob-say:before{content:"";position:absolute;left:-7px;top:50%;margin-top:-7px;border:7px solid transparent;border-right-color:var(--accent-soft);border-left:0}
 .ob-say:empty{visibility:hidden}
@@ -1180,15 +1180,26 @@ async function obNext(){const st=obSteps(),s=st[obI],v=$("obV"),err=t=>{const e=
  $("weekInfo").scrollIntoView({behavior:"smooth",block:"start"});}
 document.body.insertAdjacentHTML("beforeend",`<div class="ob" id="ob" hidden role="dialog" aria-modal="true" aria-label="Анкета">
  <div class="ob-card"><div class="ob-prog"><i id="obBar"></i></div>
- <div class="ob-hero"><svg id="obKb" class="kb" viewBox="0 0 120 120" aria-hidden="true">
-  <g class="kb-arm kb-arm-l"><path d="M30 78 Q14 70 12 56" fill="none" stroke="#8A96AD" stroke-width="7" stroke-linecap="round"/><circle cx="12" cy="54" r="7" fill="#F2C9A0"/></g>
-  <g class="kb-arm kb-arm-r"><path d="M90 78 Q106 70 108 56" fill="none" stroke="#8A96AD" stroke-width="7" stroke-linecap="round"/><circle cx="108" cy="54" r="7" fill="#F2C9A0"/></g>
-  <path d="M42 46 V30 Q42 16 60 16 Q78 16 78 30 V46" fill="none" stroke="#8A96AD" stroke-width="9" stroke-linecap="round"/>
-  <ellipse cx="60" cy="80" rx="36" ry="34" fill="#4F74F0"/><ellipse cx="50" cy="66" rx="10" ry="6" fill="#A9BFFF" opacity=".6"/>
-  <g class="kb-eyes"><ellipse cx="48" cy="76" rx="6" ry="7" fill="#fff"/><ellipse cx="72" cy="76" rx="6" ry="7" fill="#fff"/><circle class="kb-pupil" cx="49" cy="77" r="3.2" fill="#12151B"/><circle class="kb-pupil" cx="73" cy="77" r="3.2" fill="#12151B"/></g>
-  <circle cx="40" cy="88" r="4" fill="#FF8A80" opacity=".55"/><circle cx="80" cy="88" r="4" fill="#FF8A80" opacity=".55"/>
-  <path class="kb-mouth" d="M52 90 Q60 98 68 90" fill="none" stroke="#12151B" stroke-width="3" stroke-linecap="round"/>
-  <text x="60" y="108" text-anchor="middle" font-family="Arial" font-weight="700" font-size="11" fill="#E8ECF2">16 кг</text>
+ <div class="ob-hero"><svg id="obKb" class="kb" viewBox="0 0 140 140" aria-hidden="true">
+  <defs><radialGradient id="kbBody" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#9DB8FF"/><stop offset=".55" stop-color="#5B86FF"/><stop offset="1" stop-color="#2F55D4"/></radialGradient>
+   <linearGradient id="kbHandle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FA9F5"/><stop offset="1" stop-color="#3B5BDB"/></linearGradient></defs>
+  <ellipse cx="70" cy="132" rx="34" ry="5" fill="#000" opacity=".25"/>
+  <ellipse cx="54" cy="125" rx="10" ry="6" fill="#2F55D4" stroke="#16224A" stroke-width="3.5"/><ellipse cx="86" cy="125" rx="10" ry="6" fill="#2F55D4" stroke="#16224A" stroke-width="3.5"/>
+  <g class="kb-arm kb-arm-l"><path d="M34 86 Q18 80 15 64" fill="none" stroke="#16224A" stroke-width="11" stroke-linecap="round"/><path d="M34 86 Q18 80 15 64" fill="none" stroke="#5B86FF" stroke-width="5.5" stroke-linecap="round"/><circle cx="15" cy="60" r="9" fill="#FFD7B0" stroke="#16224A" stroke-width="3.5"/></g>
+  <g class="kb-arm kb-arm-r"><path d="M106 86 Q122 80 125 64" fill="none" stroke="#16224A" stroke-width="11" stroke-linecap="round"/><path d="M106 86 Q122 80 125 64" fill="none" stroke="#5B86FF" stroke-width="5.5" stroke-linecap="round"/><circle cx="125" cy="60" r="9" fill="#FFD7B0" stroke="#16224A" stroke-width="3.5"/></g>
+  <path d="M48 54 V34 Q48 14 70 14 Q92 14 92 34 V54" fill="none" stroke="#16224A" stroke-width="18" stroke-linecap="round"/>
+  <path d="M48 54 V34 Q48 14 70 14 Q92 14 92 34 V54" fill="none" stroke="url(#kbHandle)" stroke-width="10" stroke-linecap="round"/>
+  <path d="M55 30 Q58 22 66 20" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+  <circle cx="70" cy="86" r="42" fill="url(#kbBody)" stroke="#16224A" stroke-width="4"/>
+  <path d="M30 72 Q70 56 110 72 L108 80 Q70 65 32 80 Z" fill="#FF5A5F" stroke="#16224A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M106 74 l10 -6 l-2 9 z" fill="#FF5A5F" stroke="#16224A" stroke-width="2.5" stroke-linejoin="round"/>
+  <ellipse cx="50" cy="66" rx="9" ry="4" fill="#fff" opacity=".35" transform="rotate(-20 50 66)"/>
+  <path d="M48 84 Q55 80 62 84" fill="none" stroke="#16224A" stroke-width="3" stroke-linecap="round"/><path d="M78 84 Q85 80 92 84" fill="none" stroke="#16224A" stroke-width="3" stroke-linecap="round"/>
+  <g class="kb-eyes"><ellipse cx="55" cy="95" rx="8.5" ry="10" fill="#fff" stroke="#16224A" stroke-width="3"/><ellipse cx="85" cy="95" rx="8.5" ry="10" fill="#fff" stroke="#16224A" stroke-width="3"/>
+   <circle class="kb-pupil" cx="57" cy="97" r="5" fill="#16224A"/><circle class="kb-pupil" cx="87" cy="97" r="5" fill="#16224A"/><circle cx="59" cy="94.5" r="1.8" fill="#fff"/><circle cx="89" cy="94.5" r="1.8" fill="#fff"/></g>
+  <ellipse cx="42" cy="108" rx="6" ry="3.5" fill="#FF8FA3" opacity=".75"/><ellipse cx="98" cy="108" rx="6" ry="3.5" fill="#FF8FA3" opacity=".75"/>
+  <path class="kb-mouth" d="M60 108 Q70 122 80 108 Z" fill="#7A1F35" stroke="#16224A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M64 113 Q70 120 76 113 Q70 111 64 113 Z" fill="#FF7A90"/>
  </svg><div class="ob-say" id="obSay"></div></div>
  <div id="obBody" class="ob-body"></div>
  <div class="ob-nav"><button type="button" class="ob-back" id="obBack">Назад</button><button type="button" class="ob-next" id="obNext">Далее</button></div>
@@ -1199,7 +1210,7 @@ $("ob").addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)
  if(b.id==="obBack"){if(obI>0){obI--;obRender();}return;}
  if(b.id==="obSkip"){touched=true;markTouched();save();obClose();return;}
  if(b.classList.contains("ob-opt")&&s.t==="pick"){if(s.k==="sex")$("sex").value=b.dataset.v;else S[s.k]=b.dataset.v;if(s.k==="goal")S.pace=1;
-  b.parentElement.querySelectorAll(".ob-opt").forEach(x=>x.setAttribute("aria-pressed",x===b));$("obSay").textContent=["Отличный выбор!","Принято 👍","Записал!"][obI%3];setTimeout(obNext,450);return;}
+  b.parentElement.querySelectorAll(".ob-opt").forEach(x=>x.setAttribute("aria-pressed",x===b));$("obSay").textContent=["Отличный выбор!","Принято 👍","Записал!"][obI%3];kbJump();return;}
  if(b.dataset.d!=null){const d=+b.dataset.d;if(S.days.includes(d))S.days=S.days.filter(x=>x!==d);else if(S.days.length<5)S.days=[...S.days,d].sort((a,c)=>a-c);obRender();return;}
  if(b.dataset.inj){const k=b.dataset.inj;S.injs=k==="none"?[]:S.injs.includes(k)?S.injs.filter(x=>x!==k):[...S.injs,k];obRender();return;}
  if(b.dataset.cyc){$("cyc_on").checked=b.dataset.cyc==="1";obRender();return;}});
