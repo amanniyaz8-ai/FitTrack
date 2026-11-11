@@ -988,7 +988,7 @@ async function doSave(kind){
   await DL.save(req);$("dlMsg").textContent="Файл сохранён";}
  catch(e){const c=e&&e.code;if(e&&e.xl){$("dlMsg").textContent="Не удалось подготовить Excel — проверь интернет и попробуй ещё раз";return;}$("dlMsg").textContent=c==="declined"?"Отменено":c==="rate_limited"?"Подожди пару секунд и нажми снова":"Не получилось скачать в этом окне";if(["unavailable","not_granted","capability_disabled","capability_removed"].includes(c))$("dlRow").hidden=true;}}
 $("dlCsv").addEventListener("click",()=>doSave("csv"));$("dlHtml").addEventListener("click",()=>doSave("html"));
-if(IN_TG&&API?.sendFile){$("dlHtml").textContent="📩 Прислать программу в Telegram";$("dlCsv").hidden=true;}
+if(IN_TG&&API?.sendFile){$("dlHtml").hidden=true;$("dlCsv").textContent="📩 Прислать таблицу в Telegram";$("dlCsv").classList.remove("ghost");}
 if(new URLSearchParams(location.search).has("dl")){$("dlTop").hidden=false;
  $("dlTopHtml").addEventListener("click",()=>doSave("html"));$("dlTopCsv").addEventListener("click",()=>doSave("csv"));
  new MutationObserver(()=>{$("dlTopMsg").innerHTML=$("dlMsg").innerHTML;}).observe($("dlMsg"),{childList:true,characterData:true,subtree:true});
