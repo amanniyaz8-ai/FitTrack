@@ -22,7 +22,7 @@ class KonstruktorController extends Controller
     {
         $token = $request->attributes->get('student')->issueLoginToken(30);
 
-        return response()->json(['url' => route('konstruktor.enter', $token)]);
+        return response()->json(['url' => route('konstruktor.enter', ['token' => $token, 'dl' => 1])]);
     }
 
     public function login()
@@ -42,7 +42,8 @@ class KonstruktorController extends Controller
         $row->update(['used_at' => now()]);
         $this->loginStudent($request, $row->student);
 
-        return redirect()->route('konstruktor.show');
+        // Пришёл из Telegram за файлом — сразу покажем кнопки скачивания
+        return redirect()->route('konstruktor.show', $request->boolean('dl') ? ['dl' => 1] : []);
     }
 
     /** Страница-прослойка для Telegram Mini App: получает initData и логинит. */

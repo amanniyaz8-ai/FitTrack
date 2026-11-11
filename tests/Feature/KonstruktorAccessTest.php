@@ -207,7 +207,7 @@ class KonstruktorAccessTest extends TestCase
         $s = Student::create(['telegram_id' => 4, 'membership_checked_at' => now()]);
         $url = $this->withSession(['konstruktor_student_id' => $s->id])->postJson('/konstruktor/browser-link')->assertOk()->json('url');
         $this->flushSession();
-        $this->get($url)->assertRedirect(route('konstruktor.show'));
+        $this->get($url)->assertRedirect(route('konstruktor.show', ['dl' => 1]));
         $this->flushSession();
         $this->get($url)->assertRedirect(route('konstruktor.login'));
     }

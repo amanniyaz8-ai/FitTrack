@@ -267,6 +267,11 @@ dl.terms dd{margin:0;color:var(--muted)}
     <h1>Конструктор тренировок <em>и КБЖУ</em></h1>
     <p class="lead">Заполни 3 шага — получишь программу тренировок на 12 недель, свои калории и понятный план, как расти. Ты вписываешь только вес и повторы на тренировке, остальное считается само. Всё сохраняется в этом браузере.</p>
     <p><button type="button" class="btn ghost" id="obAgain">Пройти анкету заново</button></p>
+    <div class="panel" id="dlTop" hidden style="border:2px solid var(--accent);display:grid;gap:12px">
+      <b style="font-size:20px">Твоя программа готова — скачай её</b>
+      <div class="row"><button type="button" class="btn" id="dlTopHtml">Скачать программу (для печати)</button><button type="button" class="btn ghost" id="dlTopCsv">Скачать таблицу (Excel)</button></div>
+      <p class="hint" id="dlTopMsg"></p>
+    </div>
   </header>
 
   <section aria-labelledby="s1">
@@ -973,6 +978,10 @@ async function doSave(kind){
   await DL.save(req);$("dlMsg").textContent="Файл сохранён";}
  catch(e){const c=e&&e.code;if(e&&e.xl){$("dlMsg").textContent="Не удалось подготовить Excel — проверь интернет и попробуй ещё раз";return;}$("dlMsg").textContent=c==="declined"?"Отменено":c==="rate_limited"?"Подожди пару секунд и нажми снова":"Не получилось скачать в этом окне";if(["unavailable","not_granted","capability_disabled","capability_removed"].includes(c))$("dlRow").hidden=true;}}
 $("dlCsv").addEventListener("click",()=>doSave("csv"));$("dlHtml").addEventListener("click",()=>doSave("html"));
+if(new URLSearchParams(location.search).has("dl")){$("dlTop").hidden=false;
+ $("dlTopHtml").addEventListener("click",()=>doSave("html"));$("dlTopCsv").addEventListener("click",()=>doSave("csv"));
+ new MutationObserver(()=>{$("dlTopMsg").innerHTML=$("dlMsg").innerHTML;}).observe($("dlMsg"),{childList:true,characterData:true,subtree:true});
+ history.replaceState(null,"",location.pathname);}
 
 
 /* ---------- lumbar hernia ---------- */
