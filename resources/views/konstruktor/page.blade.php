@@ -247,6 +247,12 @@ dl.terms dd{margin:0;color:var(--muted)}
 @keyframes kbFlexL{0%,100%{transform:rotate(0)}50%{transform:rotate(25deg)}}
 @keyframes kbFlexR{0%,100%{transform:rotate(0)}50%{transform:rotate(-25deg)}}
 @media (prefers-reduced-motion:reduce){.kb,.kb *{animation:none!important}}
+
+.techbtn{margin:6px 0 2px;display:inline-flex;align-items:center;gap:6px;font:700 14px var(--f-body);padding:7px 14px;border-radius:999px;border:2px solid var(--accent);background:var(--accent-soft);color:var(--fg);cursor:pointer}
+.tv{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.88);display:grid;place-items:center;padding:12px}
+.tv[hidden]{display:none}
+.tv video{max-width:100%;max-height:calc(100dvh - 90px);aspect-ratio:9/16;border-radius:16px;background:#000}
+.tv-close{position:absolute;top:max(12px,env(safe-area-inset-top));right:12px;width:48px;height:48px;border-radius:50%;border:0;background:#fff;color:#111;font:700 24px/1 var(--f-body);cursor:pointer}
 </style>
 
 <style>body{margin:0;font-size:14px}[hidden]{display:none!important}img{max-width:100%}</style>
@@ -673,6 +679,8 @@ const HOME_WEEK=[["Учим движения: спокойный темп, ро�
  ["Короче отдых, больше кругов — тело уже готово.","Держим темп на всех кругах.","Пик программы — ты уже другой человек, чем 3 месяца назад.","Лёгкая неделя. Дальше — переходи на средний уровень или в зал."]];
 const HOME_MACRO=[["Нед. 1–4","Блок 1 · Знакомство","Учим движения, 2–3 круга. Цель — не пропустить ни одной тренировки."],["Нед. 5–8","Блок 2 · Темп","Больше времени работы, отдых короче."],["Нед. 9–12","Блок 3 · Пик","Максимум кругов. Дальше — следующий уровень."]];
 const isHome=()=>S.place==="home";
+// Ролики техники: название упражнения → файл в public/videos/technique
+const TECH={"Присед со штангой на спине":"squat-barbell"};
 const LEVELS=["Новичок","Средний","Продвинутый"];
 const DAYL=["A","B","C"],DAYN=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
 
@@ -865,7 +873,7 @@ function renderProgram(){
      cells+=`<div class="set ${done?"done":""}" id="set_${i}_${s}_${k}"><span class="n">${k+1}</span><input aria-label="Подход ${k+1}, вес кг" inputmode="decimal" id="w_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="w" value="${esc(c.w??"")}" placeholder="${ph||"кг"}"><em>×</em><input aria-label="Подход ${k+1}, повторы" inputmode="numeric" id="r_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="r" value="${esc(c.r??"")}" placeholder="${lowUp(e.reps)[0]}"></div>`;
      if(c.w)ph=c.w;}
     body=`<div class="sets">${cells}</div><div class="exfoot"><span>Тоннаж: <span class="ton" id="t_${i}_${s}">${fmt(ton)} кг</span></span>${tip(W,i,s,e)}</div>`;}
-   rows+=`<div class="ex"><span class="plate ${cls}" style="background:${col}">${e.block}</span><div><div class="exname">${esc(e.name)}</div><div class="exmeta">${meta.map(x=>`<span>${x}</span>`).join("")}</div></div>${scheme(e)}
+   rows+=`<div class="ex"><span class="plate ${cls}" style="background:${col}">${e.block}</span><div><div class="exname">${esc(e.name)}</div>${TECH[e.name]?`<button type="button" class="techbtn" data-tech="${esc(e.name)}">▶ Техника</button>`:""}<div class="exmeta">${meta.map(x=>`<span>${x}</span>`).join("")}</div></div>${scheme(e)}
     ${e.orig?`<div class="swapnote"><b>Вместо «${esc(e.orig)}»</b> — бережнее к пояснице</div>`:""}${isPair?`<div class="pair">${e.block} + ${e.block.replace("1","2")}: делай подряд без отдыха, отдых после второго</div>`:""}${body}</div>`;}
   const st=RAMP_STEPS[t],ph=phaseFor(W,i);
   html+=`<article class="panel day"><div class="dayhead"><h3>Тренировка ${i+1} · ${DAYL[t]}</h3><span>${dateFor(W,i)}</span></div>
@@ -1316,6 +1324,11 @@ $("ob").addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)
 $("ob").addEventListener("keydown",ev=>{if(ev.key==="Enter"&&ev.target.tagName==="INPUT"){ev.preventDefault();obNext();}});
 $("obAgain").addEventListener("click",obOpen);
 if(!touched)obOpen();
+document.body.insertAdjacentHTML("beforeend",`<div class="tv" id="tv" hidden role="dialog" aria-modal="true" aria-label="Техника упражнения"><button type="button" class="tv-close" id="tvClose" aria-label="Закрыть">✕</button><video id="tvVideo" controls playsinline preload="none"></video></div>`);
+function tvClose(){const v=$("tvVideo");v.pause();v.removeAttribute("src");v.load();$("tv").hidden=true;document.body.style.overflow="";}
+document.addEventListener("click",ev=>{const b=ev.target.closest(".techbtn");if(b){const f=TECH[b.dataset.tech];if(!f)return;const v=$("tvVideo");v.poster=`/videos/technique/${f}.jpg`;v.src=`/videos/technique/${f}.mp4`;$("tv").hidden=false;document.body.style.overflow="hidden";v.play().catch(()=>{});return;}
+ if(ev.target.id==="tvClose"||ev.target.id==="tv")tvClose();});
+document.addEventListener("keydown",ev=>{if(ev.key==="Escape"&&!$("tv").hidden)tvClose();});
 
 })();
 </script>
