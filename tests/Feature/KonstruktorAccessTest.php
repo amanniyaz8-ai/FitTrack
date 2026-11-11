@@ -212,6 +212,19 @@ class KonstruktorAccessTest extends TestCase
         $this->get($url)->assertRedirect(route('konstruktor.login'));
     }
 
+    public function test_send_file_goes_to_student_chat(): void
+    {
+        Http::fake(['api.telegram.org/*' => Http::response(['ok' => true, 'result' => []])]);
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('p.html', '<html>программа</html>');
+        $this->post('/konstruktor/send-file', ['kind' => 'html', 'file' => $file], ['Accept' => 'application/json'])->assertStatus(401);
+        $s = Student::create(['telegram_id' => 5, 'membership_checked_at' => now()]);
+        $this->withSession(['konstruktor_student_id' => $s->id])
+            ->post('/konstruktor/send-file', ['kind' => 'html', 'file' => $file], ['Accept' => 'application/json'])->assertOk();
+        Http::assertSent(fn ($r) => str_contains($r->url(), '/sendDocument') && str_contains($r->body(), 'name="chat_id"') && str_contains($r->body(), "\r\n\r\n5\r\n"));
+        $this->withSession(['konstruktor_student_id' => $s->id])
+            ->post('/konstruktor/send-file', ['kind' => 'exe', 'file' => $file], ['Accept' => 'application/json'])->assertStatus(422);
+    }
+
     public function test_trainer_pages_still_work(): void
     {
         $this->get('/pricing')->assertOk();

@@ -253,7 +253,7 @@ dl.terms dd{margin:0;color:var(--muted)}
 </head><body>
 @endverbatim
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>window.TP_API = {!! json_encode(['state' => $student->state, 'saveUrl' => route('konstruktor.state'), 'browserLink' => route('konstruktor.browserLink'), 'csrf' => csrf_token()], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
+<script>window.TP_API = {!! json_encode(['state' => $student->state, 'saveUrl' => route('konstruktor.state'), 'browserLink' => route('konstruktor.browserLink'), 'sendFile' => route('konstruktor.sendFile'), 'csrf' => csrf_token()], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
 <form method="POST" action="{{ route('konstruktor.logout') }}" style="position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:20;margin:0">
     @csrf
     <button type="submit" style="font:600 12px system-ui,sans-serif;padding:6px 12px;border-radius:999px;border:1px solid #D3D8E1;background:#fff;color:#5B6474;cursor:pointer">Выйти{{ $student->first_name ? ' · '.e($student->first_name) : '' }}</button>
@@ -969,6 +969,16 @@ let tgLink=null;
 function tgPrefetch(){if(!IN_TG||!API?.browserLink)return;fetch(API.browserLink,{method:"POST",credentials:"same-origin",headers:{"Accept":"application/json","X-CSRF-TOKEN":API.csrf||""}}).then(r=>r.ok?r.json():null).then(j=>{if(j?.url)tgLink={url:j.url,at:Date.now()};}).catch(()=>{});}
 tgPrefetch();setInterval(()=>{if(!tgLink||Date.now()-tgLink.at>20*60000)tgPrefetch();},5*60000);
 async function doSave(kind){
+ if(IN_TG&&API?.sendFile){
+  // В Telegram файлы не скачиваются — бот присылает их прямо в чат
+  $("dlMsg").textContent=kind==="csv"?"Собираю таблицу…":"Собираю программу…";
+  try{const data=kind==="csv"?await buildXLSX():buildHTML();
+   const fd=new FormData();fd.append("kind",kind==="csv"?"xlsx":"html");fd.append("file",new Blob([data]),kind==="csv"?"p.xlsx":"p.html");
+   $("dlMsg").textContent="Отправляю в чат…";
+   const r=await fetch(API.sendFile,{method:"POST",credentials:"same-origin",headers:{"Accept":"application/json","X-CSRF-TOKEN":API.csrf||""},body:fd});
+   if(r.ok){$("dlMsg").innerHTML="✅ Готово! Файл в чате с ботом — закрой конструктор и посмотри сообщения.";return;}
+  }catch(e){}
+  $("dlMsg").innerHTML=tgLink?`Не получилось отправить. <a href="${tgLink.url}" style="color:var(--accent)">Открыть в браузере и скачать</a>`:"Не получилось отправить — попробуй ещё раз через минуту.";return;}
  if(IN_TG){const tg=window.Telegram?.WebApp;
   if(tgLink&&tg?.openLink){tg.openLink(tgLink.url);tgLink=null;tgPrefetch();$("dlMsg").innerHTML="Открываю браузер — конструктор откроется уже с твоими данными, там нажми «Скачать» ещё раз.";return;}$("dlMsg").innerHTML='Скачивание не работает внутри Telegram. Открой конструктор в браузере — <a href="https://fittrack.kz/konstruktor/login" style="color:var(--accent)">fittrack.kz/konstruktor/login</a>';return;}
  if(!DL){$("dlMsg").textContent="Скачивание недоступно в этом окне — используй «Скопировать неделю».";return;}
@@ -978,6 +988,7 @@ async function doSave(kind){
   await DL.save(req);$("dlMsg").textContent="Файл сохранён";}
  catch(e){const c=e&&e.code;if(e&&e.xl){$("dlMsg").textContent="Не удалось подготовить Excel — проверь интернет и попробуй ещё раз";return;}$("dlMsg").textContent=c==="declined"?"Отменено":c==="rate_limited"?"Подожди пару секунд и нажми снова":"Не получилось скачать в этом окне";if(["unavailable","not_granted","capability_disabled","capability_removed"].includes(c))$("dlRow").hidden=true;}}
 $("dlCsv").addEventListener("click",()=>doSave("csv"));$("dlHtml").addEventListener("click",()=>doSave("html"));
+if(IN_TG&&API?.sendFile){$("dlHtml").textContent="📩 Прислать программу в Telegram";$("dlCsv").textContent="📩 Прислать таблицу в Telegram";}
 if(new URLSearchParams(location.search).has("dl")){$("dlTop").hidden=false;
  $("dlTopHtml").addEventListener("click",()=>doSave("html"));$("dlTopCsv").addEventListener("click",()=>doSave("csv"));
  new MutationObserver(()=>{$("dlTopMsg").innerHTML=$("dlMsg").innerHTML;}).observe($("dlMsg"),{childList:true,characterData:true,subtree:true});

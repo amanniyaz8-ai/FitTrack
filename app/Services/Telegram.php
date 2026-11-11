@@ -31,6 +31,24 @@ class Telegram
         return $res->json('result');
     }
 
+    /** Отправить файл, созданный на лету (программа, таблица). */
+    public function sendFile(int $chatId, string $contents, string $filename, string $caption = ''): bool
+    {
+        try {
+            $res = Http::timeout(30)->attach('document', $contents, $filename)
+                ->post('https://api.telegram.org/bot'.config('telegram.bot_token').'/sendDocument', ['chat_id' => $chatId, 'caption' => $caption]);
+        } catch (\Throwable $e) {
+            Log::warning('Telegram sendDocument failed: '.$e->getMessage());
+            return false;
+        }
+        if (! $res->ok() || ! $res->json('ok')) {
+            Log::warning('Telegram sendDocument error: '.$res->body());
+            return false;
+        }
+
+        return true;
+    }
+
     /** true — человек состоит в закрытом канале курса. */
     public function isChannelMember(int $telegramId): bool
     {

@@ -25,6 +25,23 @@ class KonstruktorController extends Controller
         return response()->json(['url' => route('konstruktor.enter', ['token' => $token, 'dl' => 1])]);
     }
 
+    /** Бот присылает ученику в чат файл программы или таблицы — удобнее, чем скачивать на телефоне. */
+    public function sendFile(Request $request, Telegram $tg)
+    {
+        $data = $request->validate([
+            'file' => ['required', 'file', 'max:6144'],
+            'kind' => ['required', 'in:html,xlsx'],
+        ]);
+        $student = $request->attributes->get('student');
+        $name = ($data['kind'] === 'xlsx' ? 'Таблица тренировок' : 'Программа тренировок').'.'.$data['kind'];
+        $caption = $data['kind'] === 'xlsx'
+            ? 'Таблица тренировок. Открой в Google Таблицах или Excel — вписывай веса, рекомендации посчитаются сами.'
+            : 'Программа тренировок на 12 недель. Открывается в браузере, можно распечатать.';
+        $ok = $tg->sendFile((int) $student->telegram_id, $request->file('file')->get(), $name, $caption);
+
+        return response()->json(['ok' => $ok], $ok ? 200 : 502);
+    }
+
     public function login()
     {
         return view('konstruktor.login', ['reason' => session('konstruktor_reason')]);
