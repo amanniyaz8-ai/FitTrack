@@ -530,6 +530,31 @@ const FLB=["1","2","3","4","5","6","7"],HYB=["1","2","3","4","5","6","7"];
 // [novice, middle, advanced, link (1RM) for mid, link for adv]
 // День A: ноги вперёд → жим → тяга; День B: жим вперёд → тяга → ноги; День C: тяга вперёд → ноги → жим
 // Упр. 1-2: тяжёлые со свободным весом; 3-4: тренажёр/чуть легче; 5-6: блочный/изоляция; 7: кор
+// Девушки: 3 на низ (таз → колено → таз), 2 тяги, 1 жим по очереди (A — горизонтальный, B — вертикальный, C — горизонтальный)
+const TPL_F_DAYS=[
+ [["Румынская тяга с гантелями","Румынская тяга со штангой","Румынская тяга со штангой","",""],
+  ["Гоблет-присед","Присед со штангой на спине","Присед со штангой на спине","sq","sq"],
+  ["Ягодичный мост на полу","Ягодичный мост в тренажёре","Отведение ноги назад в кроссовере","",""],
+  ["Тяга горизонтального блока","Тяга к поясу на блоке","Тяга гантели одной рукой","",""],
+  ["Тяга верхнего блока широким хватом","Тяга верхнего блока","Подтягивания в гравитроне","",""],
+  ["Жим в тренажёре от груди","Жим гантелей лёжа","Жим гантелей лёжа","",""],
+  ["Планка","Боковая планка","«Мёртвый жук»","",""]],
+ [["Ягодичный мост с гантелью","Ягодичный мост со штангой","Ягодичный мост со штангой","",""],
+  ["Жим ногами","Болгарские сплит-приседания","Болгарские сплит-приседания с гантелями","",""],
+  ["Сгибания ног в тренажёре","Гиперэкстензия","Гиперэкстензия со штангой","",""],
+  ["Тяга к поясу в рычажном тренажёре","Тяга к поясу в рычажном тренажёре","Тяга штанги в наклоне","",""],
+  ["Тяга верхнего блока","Тяга верхнего блока узким хватом","Подтягивания в гравитроне","",""],
+  ["Жим в тренажёре сидя","Жим гантелей сидя","Жим гантелей сидя","",""],
+  ["Скручивания","Скручивания в блоке","Паллоф-пресс в блоке","",""]],
+ [["Румынская тяга с гантелями","Становая тяга с гантелями","Становая тяга","","dl"],
+  ["Выпады с гантелями","Шагающие выпады с гантелями","Шагающие выпады с гантелями","",""],
+  ["Отведение бедра в тренажёре","Отведение ноги назад в кроссовере","Мост на одной ноге","",""],
+  ["Тяга гантели одной рукой","Тяга штанги в наклоне","Тяга Т-грифа","",""],
+  ["Тяга верхнего блока узким хватом","Тяга верхнего блока широким хватом","Подтягивания","",""],
+  ["Жим в тренажёре от груди","Жим гантелей на наклонной","Жим штанги лёжа","","bp"],
+  ["Боковая планка","«Мёртвый жук»","Ролик для пресса","",""]]];
+const isF=()=>$("sex").value==="f";
+const tplSet=()=>isF()?TPL_F_DAYS:TPL[S.goal];
 const TPL={"Жиросжигание":[
  // День A — Ноги первые
  [["Гоблет-присед","Присед со штангой на спине","Присед со штангой на спине","sq","sq"],
@@ -688,7 +713,7 @@ const N=()=>S.days.length;
 const tplOf=(W,i)=>(W*N()+i)%3;
 function exRow(W,t,s,i){
  const g=S.goal,lv=S.level,li=LEVELS.indexOf(lv),fat=g==="Жиросжигание",m=Math.floor(W/4)+1,w=W%4;
- const role=(fat?FLR:HYR)[s],block=(fat?FLB:HYB)[s],tp=TPL[g][t][s];
+ const role=(fat?FLR:HYR)[s],block=(fat?FLB:HYB)[s],tp=tplSet()[t][s];
  const p=GEN[g](m,w,t,role),[dSets,dPct]=LEVEL_T[g][lv];
  let reps=(lv==="Новичок"&&p.nov)?p.nov:p.reps;
  if(lv==="Новичок"){const lu=lowUp(reps);if(lu[1]>0&&lu[0]<5)reps="5-6";}
@@ -725,7 +750,7 @@ function phaseOfDay(day){const L=cycLen(),P=cycPer(),ov=L-14;return day<=P?"mens
 function phaseFor(W,i){if(i==null||!cycleOn())return null;const d=sessDate(W,i),s0=new Date($("cyc_start").value+"T00:00:00");if(!d||isNaN(s0))return null;
  const L=cycLen(),diff=Math.round((d-s0)/86400000),day=((diff%L)+L)%L+1,k=phaseOfDay(day);return Object.assign({key:k,day},PH[k]);}
 function lowUp(reps){if(/сек| м|мин|раунд|тест/.test(reps))return[0,0];const mm=String(reps).match(/^(\d+)(?:-(\d+))?/);if(!mm)return[0,0];const lo=+mm[1];return[lo,mm[2]?+mm[2]:lo];}
-const lk=(W,i,s)=>`${S.goal}|${S.level}|${S.days.join("")}${S.injs.length?"|"+S.injs.slice().sort().join(""):""}|${W}|${i}|${s}`;
+const lk=(W,i,s)=>`${S.goal}|${S.level}|${S.days.join("")}${S.injs.length?"|"+S.injs.slice().sort().join(""):""}${isF()?"|f":""}|${W}|${i}|${s}`;
 function setVals(W,i,s,e){const L=S.log[lk(W,i,s)]||{},arr=L.sets||[],lo=lowUp(e.reps)[0];let last=0;const out=[];
  for(let k=0;k<e.sets;k++){const c=arr[k]||{};let w=parseFloat(c.w),r=parseFloat(c.r);if(w>0)last=w;else if(r>0)w=last;
   if(w>0&&!(r>0))r=lo;out.push(w>0&&r>0?{w,r}:null);}return out;}
@@ -916,7 +941,7 @@ const LUMBAR={
  "Становая тяга с гантелями":["Ягодичный мост с гантелью","Отведение ноги назад в кроссовере"],
  "Румынская тяга со штангой":["Ягодичный мост со штангой","Ягодичный мост с гантелью","Отведение ноги назад в кроссовере"],
  "Румынская тяга с гантелями":["Ягодичный мост с гантелью","Отведение ноги назад в кроссовере","Мост на одной ноге"],
- "Гиперэкстензия":["«Птица-собака» с паузой 5 сек"],
+ "Гиперэкстензия":["Отведение ноги назад в кроссовере","«Птица-собака» с паузой 5 сек"],
  "Разведения гантелей в наклоне":["Разведения гантелей лёжа грудью на наклонной скамье","Тяга каната к лицу"],
  "Махи гирей двумя руками":["Ягодичный мост с гантелью","Отведение ноги назад в кроссовере"],
  "Махи гирей одной рукой":["Ягодичный мост с гантелью","Отведение ноги назад в кроссовере"],
@@ -1002,14 +1027,14 @@ const INJ={
   dont:["Жимы штанги и гантелей над головой, швунг","Отжимания на брусьях","Подтягивания и висы","Жим штанги лёжа широким хватом","Махи выше плеч","Бёрпи, трастеры, жим дьявола"],
   map:SHOULDER,warn:"После вывиха или падения — только с разрешения врача. Без жимов над головой, брусьев и подтягиваний, жимы гантелями нейтральным хватом, махи до параллели. Боль во время — не больше 3 из 10. Рука не поднимается, онемение в руке, сильная ночная боль — к врачу."}};
 const _safe={};
-function safeNames(t){const li=LEVELS.indexOf(S.level),act=INJ_ORDER.filter(k=>S.injs.includes(k)),key=S.goal+"|"+li+"|"+t+"|"+act.join(",");if(_safe[key])return _safe[key];
+function safeNames(t){const li=LEVELS.indexOf(S.level),act=INJ_ORDER.filter(k=>S.injs.includes(k)),key=S.goal+"|"+li+"|"+t+"|"+act.join(",")+(isF()?"|f":"");if(_safe[key])return _safe[key];
  const maps=act.map(k=>INJ[k].map),bad=n=>maps.some(m=>m[n]);
- const raw=TPL[S.goal][t].map(r=>r[li]),used=new Set(raw.filter(n=>!bad(n))),out=[];
+ const raw=tplSet()[t].map(r=>r[li]),used=new Set(raw.filter(n=>!bad(n))),out=[];
  raw.forEach(n=>{let cur=n;for(let pass=0;pass<3&&bad(cur);pass++){for(const m of maps){const alts=m[cur];if(!alts)continue;cur=alts.find(a=>!used.has(a)&&!bad(a))||alts.find(a=>!used.has(a))||alts[0];}}
   used.add(cur);out.push(cur);});
  return _safe[key]=out;}
 function injPairs(k){const li=LEVELS.indexOf(S.level),pairs=new Map(),m=INJ[k].map;
- for(let t=0;t<3;t++){const sn=safeNames(t);TPL[S.goal][t].forEach((r,s)=>{if(m[r[li]]&&sn[s]!==r[li])pairs.set(r[li],sn[s]);});}return pairs;}
+ for(let t=0;t<3;t++){const sn=safeNames(t);tplSet()[t].forEach((r,s)=>{if(m[r[li]]&&sn[s]!==r[li])pairs.set(r[li],sn[s]);});}return pairs;}
 function renderInjQuick(act){$("injQuick").hidden=!act.length;
  $("injQuick").innerHTML=act.map(k=>{const I=INJ[k],pr=injPairs(k);
   return`<div class="iq"><b class="iqt">${esc(I.short)}</b>
@@ -1020,7 +1045,7 @@ function renderInjQuick(act){$("injQuick").hidden=!act.length;
 function renderInj(){document.querySelectorAll("[data-inj]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.inj==="none"?S.injs.length===0:S.injs.includes(b.dataset.inj)));
  const act=INJ_ORDER.filter(k=>S.injs.includes(k));renderInjQuick(act);$("injInfo").hidden=!act.length;if(!act.length){$("injInfo").innerHTML="";return;}
  const li=LEVELS.indexOf(S.level),pairs=new Map();
- for(let t=0;t<3;t++){const sn=safeNames(t);TPL[S.goal][t].forEach((r,s)=>{if(sn[s]!==r[li])pairs.set(r[li],sn[s]);});}
+ for(let t=0;t<3;t++){const sn=safeNames(t);tplSet()[t].forEach((r,s)=>{if(sn[s]!==r[li])pairs.set(r[li],sn[s]);});}
  const ul=(a,c)=>`<ul${c?` class="${c}"`:""}>${a.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
  $("injInfo").innerHTML=act.map(k=>{const I=INJ[k];return`<div class="inj"><b class="big">${esc(I.title)}</b><p class="alert">${esc(I.alert)}</p>
   <div class="injgrid"><div><h4>Как тренируемся</h4>${ul(I.how)}</div><div><h4>Правило боли</h4>${ul(I.pain)}</div><div><h4>Срочно к врачу</h4>${ul(I.red,"red")}</div></div></div>`;}).join("")+
@@ -1066,8 +1091,8 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
  const head=["№","Упражнение","Подходы","Повторы","Отдых","Сколько в запасе","Рек. вес, кг","Рек. повт.","Вес, кг","Сделал раз","Тоннаж, кг","Заметки"];
  /* список упражнений по типу движения */
  const li=LEVELS.indexOf(S.level),lists=PAT_ORDER.map(p=>[...PAT_LIST[p]]);
- for(let t=0;t<3;t++)for(let s=0;s<7;s++){const p=PAT_ORDER.indexOf(PAT[t][s]),nm=S.injs.length?safeNames(t)[s]:TPL[g][t][s][li];if(!lists[p].includes(nm))lists[p].push(nm);}
- const colL=k=>String.fromCharCode(65+k),dv=(t,s)=>{const k=PAT_ORDER.indexOf(PAT[t][s]);return{type:"list",allowBlank:true,showErrorMessage:false,showInputMessage:true,promptTitle:PAT_NAME[PAT[t][s]],prompt:"Выбери из списка или впиши своё. Меняй в 1-й неделе — дальше поменяется само.",formulae:[`'Упражнения'!$${colL(k)}$3:$${colL(k)}$${lists[k].length+2}`]};};
+ for(let t=0;t<3;t++)for(let s=0;s<7;s++){const p=PAT_ORDER.indexOf(patSet()[t][s]),nm=S.injs.length?safeNames(t)[s]:tplSet()[t][s][li];if(!lists[p].includes(nm))lists[p].push(nm);}
+ const colL=k=>String.fromCharCode(65+k),dv=(t,s)=>{const pt=patSet()[t][s],k=PAT_ORDER.indexOf(pt);return{type:"list",allowBlank:true,showErrorMessage:false,showInputMessage:true,promptTitle:PAT_NAME[pt],prompt:"Выбери из списка или впиши своё. Меняй в 1-й неделе — дальше поменяется само.",formulae:[`'Упражнения'!$${colL(k)}$3:$${colL(k)}$${lists[k].length+2}`]};};
  const src={},hist={},NC=12;
  // Колонки: G рек.вес, H рек.повт, I вес, J сделал раз, K тоннаж, L заметки; скрытые M нижняя граница повторов, N рабочий вес прошлого раза, O его тоннаж.
  for(let m=0;m<3;m++){
@@ -1126,12 +1151,14 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
   lists[k].forEach((n,j)=>{const cc=xs.getCell(j+3,k+1);cc.value=n;cc.font={name:F,size:10};cc.border=box;});});
  xs.getRow(2).height=30;
  return await wb.xlsx.writeBuffer();}
+const PAT_F=[["hip","knee","hip","hpull","vpull","hpush","core"],["hip","knee","hip","hpull","vpull","vpush","core"],["hip","knee","hip","hpull","vpull","hpush","core"]];
+const patSet=()=>isF()?PAT_F:PAT;
 const PAT=[["knee","hip","hpush","vpush","vpull","hpull","core"],["hpush","vpush","vpull","hpull","knee","hip","core"],["vpull","hpull","knee","hip","hpush","delts","core"]];
 const PAT_ORDER=["knee","hip","hpush","vpush","vpull","hpull","delts","core"];
 const PAT_NAME={knee:"Ноги — коленодоминантные (приседы, выпады)",hip:"Ноги — тазодоминантные (тяги, мосты)",hpush:"Жимы лёжа (грудь)",vpush:"Жимы вверх (плечи)",vpull:"Тяги сверху (спина)",hpull:"Тяги к поясу (спина)",delts:"Плечи — изоляция",core:"Кор (пресс)"};
 const PAT_LIST={
  knee:["Присед со штангой на спине","Фронтальный присед со штангой","Гоблет-присед","Гоблет-присед к скамье","Болгарские сплит-приседания с гантелями","Болгарские сплит-приседания","Шагающие выпады с гантелями","Выпады с гантелями","Выпады назад с гантелями","Выпады на месте","Зашагивания на платформу","Гакк-присед в тренажёре","Жим ногами","Разгибания ног в тренажёре"],
- hip:["Становая тяга","Румынская тяга со штангой","Румынская тяга с гантелями","Ягодичный мост со штангой","Ягодичный мост с гантелью","Ягодичный мост в тренажёре","Гиперэкстензия со штангой","Гиперэкстензия","Сгибания ног в тренажёре","Отведение ноги назад в кроссовере","Мост на одной ноге"],
+ hip:["Становая тяга","Румынская тяга со штангой","Румынская тяга с гантелями","Ягодичный мост со штангой","Ягодичный мост с гантелью","Ягодичный мост в тренажёре","Гиперэкстензия со штангой","Гиперэкстензия","Сгибания ног в тренажёре","Отведение ноги назад в кроссовере","Отведение бедра в тренажёре","Мост на одной ноге"],
  hpush:["Жим штанги лёжа","Жим штанги на наклонной","Жим гантелей лёжа","Жим гантелей на наклонной","Жим гантелей лёжа нейтральным хватом","Отжимания на брусьях","Отжимания от пола","Жим в тренажёре от груди","Жим лёжа в тренажёре под 30°","Сведение рук в кроссовере","Бабочка (пек-дек)"],
  vpush:["Жим штанги стоя","Жим гантелей сидя","Жим гантелей сидя со спинкой","Жим Арнольда","Жим в рычаге (лэндмайн) одной рукой с колена","Жим в тренажёре сидя","Махи гантелями в стороны"],
  vpull:["Подтягивания с весом","Подтягивания","Подтягивания в гравитроне","Тяга верхнего блока широким хватом","Тяга верхнего блока","Тяга верхнего блока узким хватом","Тяга верхнего блока нейтральным хватом","Пуловер в блоке"],
