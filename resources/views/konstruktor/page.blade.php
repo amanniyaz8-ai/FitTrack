@@ -1272,7 +1272,11 @@ function obRender(){const st=obSteps(),s=st[obI],b=$("obBody");$("obSay").textCo
  if(s.t==="days")h+=`<div class="ob-days">${DAYN.map((d,i)=>`<button type="button" class="ob-day" data-d="${i}" aria-pressed="${S.days.includes(i)}">${d}</button>`).join("")}</div><p class="hint" id="obErr">Отметь 2–5 дней. Между тренировками лучше день отдыха.</p>`;
  if(s.t==="injs")h+=`<div class="ob-opts">${[["none","Нет, всё хорошо"],["lumbar","Поясница: грыжа, протрузия"],["knee","Колено"],["shoulder","Плечо"]].map(o=>`<button type="button" class="ob-opt" data-inj="${o[0]}" aria-pressed="${o[0]==="none"?!S.injs.length:S.injs.includes(o[0])}"><b>${o[1]}</b></button>`).join("")}</div><p class="hint">Можно выбрать несколько.</p>`;
  if(s.t==="cyc")h+=`<div class="ob-opts"><button type="button" class="ob-opt" data-cyc="1" aria-pressed="${$("cyc_on").checked}"><b>Да, учитывать</b><span>Веса и подходы подстроятся под фазу цикла</span></button><button type="button" class="ob-opt" data-cyc="0" aria-pressed="${!$("cyc_on").checked}"><b>Нет</b><span>Нерегулярный цикл, контрацептивы, беременность</span></button></div>
-  <label class="f" id="obCycD" ${$("cyc_on").checked?"":"hidden"}>Первый день последних месячных<input class="ob-in" id="obV" type="date" value="${esc($("cyc_start").value)}"></label>`;
+  <div id="obCycD" style="display:${$("cyc_on").checked?"grid":"none"};gap:12px">
+  <label class="f">Первый день последних месячных<input class="ob-in" id="obV" type="date" value="${esc($("cyc_start").value)}"></label>
+  <label class="f">Длина цикла<div class="ob-num"><input class="ob-in" id="obCL" type="number" inputmode="numeric" min="21" max="40" value="${esc($("cyc_len").value)}"><span>дней</span></div><small>От первого дня одних месячных до первого дня следующих. Не знаешь — оставь 28</small></label>
+  <label class="f">Сколько дней идут месячные<div class="ob-num"><input class="ob-in" id="obCP" type="number" inputmode="numeric" min="2" max="8" value="${esc($("cyc_per").value)}"><span>дней</span></div></label>
+  <p class="hint" id="obErr"></p></div>`;
  b.innerHTML=h;const f=b.querySelector("input");if(f&&s.t!=="cyc")setTimeout(()=>f.focus(),50);}
 async function obNext(){const st=obSteps(),s=st[obI],v=$("obV"),err=t=>{const e=$("obErr");if(e)e.textContent=t;else alert(t);};
  if(s.t==="text"){if(!v.value.trim())return;$("name").value=v.value.trim();}
@@ -1280,7 +1284,11 @@ async function obNext(){const st=obSteps(),s=st[obI],v=$("obV"),err=t=>{const e=
  if(s.t==="pick"&&!document.querySelector('#obBody .ob-opt[aria-pressed="true"]'))return;
  if(s.t==="fl"){const kg=parseFloat(v.value),mo=parseFloat($("obV2").value);if(!(kg>0&&mo>0))return;$("fl_kg").value=kg;$("fl_mo").value=mo;}
  if(s.t==="days"&&(S.days.length<2||S.days.length>5))return err("Нужно от 2 до 5 дней.");
- if(s.t==="cyc"&&$("cyc_on").checked){if(!v.value)return;$("cyc_start").value=v.value;}
+ if(s.t==="cyc"&&$("cyc_on").checked){if(!v.value)return err("Укажи первый день последних месячных");
+  const cl=Math.round(+$("obCL").value),cp=Math.round(+$("obCP").value);
+  if(!(cl>=21&&cl<=40))return err("Длина цикла — от 21 до 40 дней");
+  if(!(cp>=2&&cp<=8))return err("Месячные — от 2 до 8 дней");
+  $("cyc_start").value=v.value;$("cyc_len").value=cl;$("cyc_per").value=cp;}
  if(obI<st.length-1){obI++;obRender();kbJump();return;}
  kbJump("flex");$("obSay").textContent="Готово! Программа собрана 💪";await new Promise(r=>setTimeout(r,900));
  if(!touched)S.log={};touched=true;markTouched();S.W=0;renderAll();save();obClose();
