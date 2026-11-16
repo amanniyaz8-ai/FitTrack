@@ -290,4 +290,13 @@ class KonstruktorAccessTest extends TestCase
         $this->assertStringContainsString('Вносили веса за 7 дней: 1', $txt);
         $this->assertStringContainsString('Айдос', $txt);
     }
+
+    public function test_stats_when_no_students(): void
+    {
+        config(['telegram.webhook_secret' => 's3cret']);
+        $this->fakeTelegram('member');
+        $this->hook($this->msg(self::ADMIN, ['text' => '/stats']));
+        $txt = collect($this->sent('sendMessage'))->pluck('text')->first(fn ($t) => str_contains($t, 'Статистика'));
+        $this->assertStringContainsString('Пока никто не заходил', $txt);
+    }
 }
