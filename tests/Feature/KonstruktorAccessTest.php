@@ -263,4 +263,31 @@ class KonstruktorAccessTest extends TestCase
         $s = Student::create(['telegram_id' => 14, 'membership_checked_at' => now()->subDays(2)]);
         $this->withSession(['konstruktor_student_id' => $s->id])->get('/konstruktor')->assertRedirect();
     }
+
+    public function test_activity_marks_and_admin_stats(): void
+    {
+        config(['telegram.webhook_secret' => 's3cret']);
+        $this->fakeTelegram('member');
+        CoursePurchase::create(['telegram_id' => 21, 'status' => 'approved']);
+        $s = Student::create(['telegram_id' => 21, 'first_name' => 'Айдос', 'membership_checked_at' => now()]);
+        $this->withSession(['konstruktor_student_id' => $s->id])->get('/konstruktor')->assertOk();
+        $this->putJson('/konstruktor/state', ['S' => ['log' => []], 'touched' => true])->assertNoContent();
+        $this->putJson('/konstruktor/state', ['S' => ['log' => ['k' => ['sets' => [['w' => '40', 'r' => '12']]]]], 'touched' => true])->assertNoContent();
+        $this->postJson('/konstruktor/downloaded')->assertNoContent();
+        $s->refresh();
+        $this->assertNotNull($s->first_open_at);
+        $this->assertNotNull($s->onboarded_at);
+        $this->assertNotNull($s->last_log_at);
+        $this->assertNotNull($s->downloaded_at);
+
+        $this->hook($this->msg(999, ['text' => '/stats']));
+        $this->assertSame([], $this->sent('sendMessage') ? array_filter($this->sent('sendMessage'), fn ($m) => str_contains($m['text'], 'Статистика')) : []);
+
+        $this->hook($this->msg(self::ADMIN, ['text' => '/stats']));
+        $txt = collect($this->sent('sendMessage'))->pluck('text')->first(fn ($t) => str_contains($t, 'Статистика'));
+        $this->assertStringContainsString('Купили (одобрено): 1', $txt);
+        $this->assertStringContainsString('Прошли анкету: 1', $txt);
+        $this->assertStringContainsString('Вносили веса за 7 дней: 1', $txt);
+        $this->assertStringContainsString('Айдос', $txt);
+    }
 }

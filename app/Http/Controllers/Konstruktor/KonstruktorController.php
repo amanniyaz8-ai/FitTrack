@@ -14,7 +14,12 @@ class KonstruktorController extends Controller
 {
     public function show(Request $request)
     {
-        return view('konstruktor.page', ['student' => $request->attributes->get('student')]);
+        $student = $request->attributes->get('student');
+        if (! $student->first_open_at) {
+            $this->mark($student, ['first_open_at' => now()]);
+        }
+
+        return view('konstruktor.page', ['student' => $student]);
     }
 
     /** Одноразовая ссылка, чтобы открыть конструктор во внешнем браузере уже вошедшим (из Telegram там нельзя скачивать файлы). */
@@ -38,6 +43,9 @@ class KonstruktorController extends Controller
             ? 'Таблица тренировок. Открой в Google Таблицах или Excel — вписывай веса, рекомендации посчитаются сами.'
             : 'Программа тренировок на 12 недель. Открывается в браузере, можно распечатать.';
         $ok = $tg->sendFile((int) $student->telegram_id, $request->file('file')->get(), $name, $caption);
+        if ($ok && ! $student->downloaded_at) {
+            $this->mark($student, ['downloaded_at' => now()]);
+        }
 
         return response()->json(['ok' => $ok], $ok ? 200 : 502);
     }
@@ -117,7 +125,58 @@ class KonstruktorController extends Controller
             return response()->json(['error' => 'stale', 'state' => $student->state], 409);
         }
 
+        $marks = [];
+        if (! $student->onboarded_at && ! empty($data['touched'])) {
+            $marks['onboarded_at'] = now();
+        }
+        if ($this->filledSets($data) > $this->filledSets(is_array($student->state) ? $student->state : [])) {
+            $marks['last_log_at'] = now();
+        }
         $student->update(['state' => $data]);
+        $this->mark($student, $marks);
+
+        return response()->noContent();
+    }
+
+    /** Отметки активности. Если миграция ещё не запущена на сервере — молча пропускаем, работе ученика это не мешает. */
+    private function mark($student, array $marks): void
+    {
+        if (! $marks) {
+            return;
+        }
+        try {
+            $student->forceFill($marks)->save();
+        } catch (\Throwable $e) {
+            $student->refresh();
+            \Illuminate\Support\Facades\Log::warning('Student marks skipped: '.$e->getMessage());
+        }
+    }
+
+    /** Сколько подходов ученик вписал (вес или повторы) — растёт, значит тренируется. */
+    private function filledSets(array $state): int
+    {
+        $n = 0;
+        foreach ((array) ($state['S']['log'] ?? []) as $ex) {
+            foreach ((array) ($ex['sets'] ?? []) as $set) {
+                if (! empty($set['w']) || ! empty($set['r'])) {
+                    $n++;
+                }
+            }
+            if (! empty($ex['done'])) {
+                $n++;
+            }
+        }
+
+        return $n;
+    }
+
+    /** Ученик скачал таблицу в браузере. */
+    public function markDownload(Request $request)
+    {
+        $student = $request->attributes->get('student');
+        if (! $student->downloaded_at) {
+            $this->mark($student, ['downloaded_at' => now()]);
+        }
 
         return response()->noContent();
     }

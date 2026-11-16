@@ -263,7 +263,7 @@ dl.terms dd{margin:0;color:var(--muted)}
 </head><body>
 @endverbatim
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>window.TP_API = {!! json_encode(['state' => $student->state, 'uid' => $student->id, 'saveUrl' => route('konstruktor.state'), 'csrfUrl' => route('konstruktor.csrf'), 'browserLink' => route('konstruktor.browserLink'), 'sendFile' => route('konstruktor.sendFile'), 'csrf' => csrf_token()], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
+<script>window.TP_API = {!! json_encode(['state' => $student->state, 'uid' => $student->id, 'saveUrl' => route('konstruktor.state'), 'csrfUrl' => route('konstruktor.csrf'), 'dlMark' => route('konstruktor.downloaded'), 'browserLink' => route('konstruktor.browserLink'), 'sendFile' => route('konstruktor.sendFile'), 'csrf' => csrf_token()], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
 <form method="POST" action="{{ route('konstruktor.logout') }}" style="position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:20;margin:0">
     @csrf
     <button type="submit" style="font:600 12px system-ui,sans-serif;padding:6px 12px;border-radius:999px;border:1px solid #D3D8E1;background:#fff;color:#5B6474;cursor:pointer">Выйти{{ $student->first_name ? ' · '.e($student->first_name) : '' }}</button>
@@ -1022,7 +1022,8 @@ async function doSave(kind){
  const TR={а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ё:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"ts",ч:"ch",ш:"sh",щ:"sch",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya",ә:"a",ғ:"g",қ:"k",ң:"n",ө:"o",ұ:"u",ү:"u",һ:"h",і:"i"};
  const nm=[...($("name").value||"client").toLowerCase()].map(c=>TR[c]??c).join("").replace(/[^a-z0-9_-]+/g,"_").replace(/^_+|_+$/g,"")||"client";
  try{let req;if(kind==="csv"){$("dlMsg").textContent="Собираю таблицу…";const buf=await buildXLSX();req={filename:`Programma_${nm}.xlsx`,data:buf};}else req={filename:`Programma_${nm}.html`,data:buildHTML()};
-  await DL.save(req);$("dlMsg").textContent="Файл сохранён";}
+  await DL.save(req);$("dlMsg").textContent="Файл сохранён";
+  if(API?.dlMark)fetch(API.dlMark,{method:"POST",credentials:"same-origin",headers:{"Accept":"application/json","X-CSRF-TOKEN":API.csrf||""}}).catch(()=>{});}
  catch(e){const c=e&&e.code;if(e&&e.xl){$("dlMsg").textContent="Не удалось подготовить Excel — проверь интернет и попробуй ещё раз";return;}$("dlMsg").textContent=c==="declined"?"Отменено":c==="rate_limited"?"Подожди пару секунд и нажми снова":"Не получилось скачать в этом окне";if(["unavailable","not_granted","capability_disabled","capability_removed"].includes(c))$("dlRow").hidden=true;}}
 $("dlCsv").addEventListener("click",()=>doSave("csv"));$("dlHtml").addEventListener("click",()=>doSave("html"));
 if(IN_TG&&API?.sendFile){$("dlHtml").hidden=true;$("dlCsv").textContent="📩 Прислать таблицу в Telegram";$("dlCsv").classList.remove("ghost");}

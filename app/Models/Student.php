@@ -8,12 +8,16 @@ use Illuminate\Support\Str;
 
 class Student extends Model
 {
-    protected $fillable = ['telegram_id', 'telegram_username', 'first_name', 'state', 'membership_checked_at', 'last_login_at'];
+    protected $fillable = ['telegram_id', 'telegram_username', 'first_name', 'state', 'membership_checked_at', 'last_login_at', 'first_open_at', 'onboarded_at', 'downloaded_at', 'last_log_at'];
 
     protected $casts = [
         'state' => 'array',
         'membership_checked_at' => 'datetime',
         'last_login_at' => 'datetime',
+        'first_open_at' => 'datetime',
+        'onboarded_at' => 'datetime',
+        'downloaded_at' => 'datetime',
+        'last_log_at' => 'datetime',
     ];
 
     public function loginTokens(): HasMany

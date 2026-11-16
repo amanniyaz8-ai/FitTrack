@@ -73,6 +73,17 @@ class TelegramWebhookController extends Controller
             return;
         }
 
+        // /stats — только Аману: кто купил и кто реально пользуется конструктором
+        if (trim((string) ($msg['text'] ?? '')) === '/stats' && config('telegram.admin_id') && $uid === (int) config('telegram.admin_id')) {
+            try {
+                $text = $this->statsText();
+            } catch (\Throwable $e) {
+                $text = 'Статистика пока недоступна: на сервере не запущена миграция (php artisan migrate).';
+            }
+            $this->tg->sendMessage($chatId, $text);
+            return;
+        }
+
         // Любой текст / команда: участнику — меню конструктора, остальным — продажа
         if ($this->tg->isChannelMember($uid)) {
             $this->upsertStudent($from);
@@ -182,5 +193,38 @@ class TelegramWebhookController extends Controller
             ['telegram_id' => (int) $from['id']],
             ['telegram_username' => $from['username'] ?? null, 'first_name' => $from['first_name'] ?? null, 'membership_checked_at' => now()]
         );
+    }
+
+    private function statsText(): string
+    {
+        $paid = CoursePurchase::where('status', 'approved')->distinct('telegram_id')->count('telegram_id');
+        $pending = CoursePurchase::where('status', 'pending')->count();
+        $students = Student::orderBy('first_name')->get();
+        $week = now()->subDays(7);
+        $d = fn ($t) => $t ? $t->format('d.m') : '—';
+
+        $lines = [
+            '📊 Статистика конструктора',
+            '',
+            "Купили (одобрено): $paid".($pending ? " · ждут проверки: $pending" : ''),
+            'Зашли в конструктор: '.$students->whereNotNull('first_open_at')->count(),
+            'Прошли анкету: '.$students->whereNotNull('onboarded_at')->count(),
+            'Скачали таблицу: '.$students->whereNotNull('downloaded_at')->count(),
+            'Вносили веса за 7 дней: '.$students->filter(fn ($s) => $s->last_log_at && $s->last_log_at->gte($week))->count(),
+            '',
+            'По ученикам (вход · анкета · таблица · веса):',
+        ];
+        foreach ($students as $s) {
+            $name = $s->first_name ?: 'Без имени';
+            if ($s->telegram_username) {
+                $name .= ' (@'.$s->telegram_username.')';
+            }
+            $lines[] = "• $name — ".$d($s->first_open_at).' · '.($s->onboarded_at ? '✅' : '—').' · '.($s->downloaded_at ? '✅' : '—').' · '.$d($s->last_log_at);
+        }
+        if ($students->isEmpty()) {
+            $lines[] = 'Пока никто не заходил.';
+        }
+
+        return implode("\n", $lines);
     }
 }

@@ -81,6 +81,7 @@ Route::post('/konstruktor/telegram-auth', [\App\Http\Controllers\Konstruktor\Kon
 Route::post('/konstruktor/logout', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'logout'])->name('konstruktor.logout');
 Route::middleware(\App\Http\Middleware\EnsureStudent::class)->group(function () {
     Route::get('/konstruktor', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'show'])->name('konstruktor.show');
+    Route::post('/konstruktor/downloaded', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'markDownload'])->name('konstruktor.downloaded')->middleware('throttle:20,1');
     Route::get('/konstruktor/csrf', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'csrf'])->name('konstruktor.csrf');
     Route::put('/konstruktor/state', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'saveState'])->name('konstruktor.state');
     Route::post('/konstruktor/send-file', [\App\Http\Controllers\Konstruktor\KonstruktorController::class, 'sendFile'])->name('konstruktor.sendFile')->middleware('throttle:10,1');
