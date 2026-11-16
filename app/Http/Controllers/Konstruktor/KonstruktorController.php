@@ -110,9 +110,22 @@ class KonstruktorController extends Controller
             return response()->json(['error' => 'bad_state'], 422);
         }
 
+        // Старая копия (другое устройство, старая вкладка) не затирает более свежую.
+        $old = is_array($student->state) ? (int) ($student->state['savedAt'] ?? 0) : 0;
+        $new = (int) ($data['savedAt'] ?? 0);
+        if ($old && $new && $new < $old) {
+            return response()->json(['error' => 'stale', 'state' => $student->state], 409);
+        }
+
         $student->update(['state' => $data]);
 
         return response()->noContent();
+    }
+
+    /** Свежий CSRF-код, когда старый истёк, а приложение было долго открыто. */
+    public function csrf(Request $request)
+    {
+        return response()->json(['csrf' => csrf_token()]);
     }
 
     public function logout(Request $request)

@@ -49,6 +49,34 @@ class Telegram
         return true;
     }
 
+    /**
+     * true — участник канала, false — точно не участник,
+     * null — Telegram не ответил (сеть, сбой, лимит): решить нельзя.
+     */
+    public function channelMembership(int $telegramId): ?bool
+    {
+        try {
+            $res = Http::timeout(5)->asForm()->post('https://api.telegram.org/bot'.config('telegram.bot_token').'/getChatMember', [
+                'chat_id' => config('telegram.channel_id'), 'user_id' => $telegramId,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Telegram getChatMember failed: '.$e->getMessage());
+            return null;
+        }
+        if ($res->status() === 429 || $res->serverError()) {
+            Log::warning('Telegram getChatMember unavailable: '.$res->status());
+            return null;
+        }
+        if (! $res->ok() || ! $res->json('ok')) {
+            return false;
+        }
+        $r = $res->json('result');
+        $status = $r['status'] ?? null;
+
+        return in_array($status, ['member', 'administrator', 'creator'], true)
+            || ($status === 'restricted' && ($r['is_member'] ?? false) === true);
+    }
+
     /** true — человек состоит в закрытом канале курса. */
     public function isChannelMember(int $telegramId): bool
     {

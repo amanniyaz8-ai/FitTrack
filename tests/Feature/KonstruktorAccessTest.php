@@ -230,4 +230,37 @@ class KonstruktorAccessTest extends TestCase
         $this->get('/pricing')->assertOk();
         $this->get('/dashboard')->assertRedirect();
     }
+
+    public function test_older_state_does_not_overwrite_newer(): void
+    {
+        $s = Student::create(['telegram_id' => 11, 'membership_checked_at' => now()]);
+        $this->withSession(['konstruktor_student_id' => $s->id]);
+        $this->putJson('/konstruktor/state', ['S' => ['goal' => 'Сила'], 'savedAt' => 2000])->assertNoContent();
+        $this->putJson('/konstruktor/state', ['S' => ['goal' => 'Набор массы'], 'savedAt' => 1000])->assertStatus(409);
+        $this->assertSame('Сила', $s->fresh()->state['S']['goal']);
+        $this->putJson('/konstruktor/state', ['S' => ['goal' => 'Жиросжигание'], 'savedAt' => 3000])->assertNoContent();
+        $this->assertSame('Жиросжигание', $s->fresh()->state['S']['goal']);
+    }
+
+    public function test_csrf_refresh_for_student(): void
+    {
+        $s = Student::create(['telegram_id' => 12, 'membership_checked_at' => now()]);
+        $this->getJson('/konstruktor/csrf')->assertStatus(401);
+        $this->withSession(['konstruktor_student_id' => $s->id])->getJson('/konstruktor/csrf')->assertOk()->assertJsonStructure(['csrf']);
+    }
+
+    public function test_telegram_outage_keeps_student_inside(): void
+    {
+        Http::fake(['api.telegram.org/*' => Http::response('down', 502)]);
+        $s = Student::create(['telegram_id' => 13, 'membership_checked_at' => now()->subDays(2)]);
+        $this->withSession(['konstruktor_student_id' => $s->id])->get('/konstruktor')->assertOk();
+        $this->assertTrue($s->fresh()->membership_checked_at->lt(now()->subDay()));
+    }
+
+    public function test_left_channel_still_denied(): void
+    {
+        Http::fake(['api.telegram.org/*' => Http::response(['ok' => false, 'error_code' => 400, 'description' => 'Bad Request: user not found'], 400)]);
+        $s = Student::create(['telegram_id' => 14, 'membership_checked_at' => now()->subDays(2)]);
+        $this->withSession(['konstruktor_student_id' => $s->id])->get('/konstruktor')->assertRedirect();
+    }
 }

@@ -164,6 +164,10 @@ dl.terms dd{margin:0;color:var(--muted)}
 .alarm{border:2px solid var(--bad);background:var(--bad-bg);border-radius:14px;padding:18px 20px;display:grid;gap:8px}
 .alarm h3{color:var(--bad);text-transform:uppercase}
 .alarm ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.qi{display:inline-grid;place-items:center;width:18px;height:18px;margin-left:4px;padding:0;border:0;border-radius:50%;background:var(--sunk);color:inherit;font:700 11px/1 inherit;cursor:pointer;vertical-align:middle}
+.exnote{font-size:13px;color:var(--muted);margin:2px 0 4px}
+.qibox{position:fixed;left:16px;right:16px;bottom:16px;z-index:1000;max-width:480px;margin:0 auto;padding:16px;border-radius:14px;background:var(--surface);color:var(--fg);border:1px solid var(--line);box-shadow:0 10px 40px rgba(0,0,0,.25);display:grid;gap:12px}
+.qibox[hidden]{display:none}.qibox p{margin:0;line-height:1.45}
 .cycle{display:grid;gap:10px;padding:16px;border-radius:12px;background:var(--sunk)}
 .cycle b.big{font-family:var(--f-display);font-size:17px;font-weight:700}
 .cyc{display:grid;gap:12px;padding:14px 16px;border-radius:12px;background:var(--sunk)}
@@ -259,7 +263,7 @@ dl.terms dd{margin:0;color:var(--muted)}
 </head><body>
 @endverbatim
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>window.TP_API = {!! json_encode(['state' => $student->state, 'saveUrl' => route('konstruktor.state'), 'browserLink' => route('konstruktor.browserLink'), 'sendFile' => route('konstruktor.sendFile'), 'csrf' => csrf_token()], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
+<script>window.TP_API = {!! json_encode(['state' => $student->state, 'uid' => $student->id, 'saveUrl' => route('konstruktor.state'), 'csrfUrl' => route('konstruktor.csrf'), 'browserLink' => route('konstruktor.browserLink'), 'sendFile' => route('konstruktor.sendFile'), 'csrf' => csrf_token()], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
 <form method="POST" action="{{ route('konstruktor.logout') }}" style="position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:20;margin:0">
     @csrf
     <button type="submit" style="font:600 12px system-ui,sans-serif;padding:6px 12px;border-radius:999px;border:1px solid #D3D8E1;background:#fff;color:#5B6474;cursor:pointer">Выйти{{ $student->first_name ? ' · '.e($student->first_name) : '' }}</button>
@@ -495,7 +499,7 @@ const RPE_TXT={"6":"легко, 4 повтора в запасе","7":"3 пов�
 // Основное получает +dSets из LEVEL_T (+1 для Среднего/Продвинутого)
 function fl(m,w,d,role){const rpe=["7","7-8","8","6"][w],tempo=role!=="Кор/Финишер"?"2-0-1":"—";
  if(role==="Кор/Финишер")return{sets:[2,2,3,2][w],reps:["30-45 сек","40-50 сек","45-60 сек","30-45 сек"][w],rpe,rest:"—",tempo};
- const restS={Основное:["90 с","75 с","75 с","90 с"],Вторичное:["75 с","60 с","60 с","75 с"],Подсобное:["60 с","60 с","60 с","60 с"]}[role]||["60 с","60 с","60 с","60 с"];
+ const restS={Основное:["2 мин","2 мин","2 мин","90 с"],Вторичное:["90 с","90 с","90 с","75 с"],Подсобное:["60 с","60 с","60 с","60 с"]}[role]||["60 с","60 с","60 с","60 с"];
  const pct=role==="Основное"?[[60,65,70,55],[62,67,72,55],[65,70,75,55]][m-1][w]:null;
  return{sets:[3,3,3,2][w],reps:["12-15","10-12","8-10","12-15"][w],pct,rpe,rest:restS[w],tempo};}
 function hy(m,w,d,role){const rpe=["7","7-8","8","6"][w];
@@ -525,7 +529,7 @@ const LEVEL_T={"Жиросжигание":{"Новичок":[0,0,"Темп 2-0-1
  "Набор массы":{"Новичок":[0,-5,"Обычные подходы. Главное — чувствовать работающую мышцу, а не просто поднимать вес."],"Средний":[1,0,"Два главных — 4 подхода. В последнем подходе останавливайся за 1–2 повтора до отказа."],"Продвинутый":[1,2.5,"Добавляй дроп-сеты в последнем подходе упражнений 3–4: снял 20% веса и продолжил."]},
  "Сила":{"Новичок":[0,-5,"Работаешь на 5–8 повторов. Цель — выучить движение. Каждый повтор одинаково чистый."],"Средний":[1,0,"Два главных — на 1 подход больше. Отдых 3–5 минут. Каждый повтор одинаковый."],"Продвинутый":[1,2.5,"Добавляй скоростные подходы: 50–60% × 3 быстрых подхода × 2–3 повтора после главных."]}};
 const WEEK_METHOD={
- "Жиросжигание":{1:["Вход в режим. Учим технику, подбираем веса. 3 подхода, 12–15 повторов.","Добавляем плотность: меньше отдых, точнее техника. 3 подхода, 10–12.","Пик блока: 8–10 повторов, тяжелее вес. Средний/продвинутый — 4 подхода в главных.","Разгрузка: 2 подхода, легче. В конце — замеры."],
+ "Жиросжигание":{1:["Вход в режим. Учим технику, подбираем веса. 3 подхода, 12–15 повторов.","Чуть тяжелее: точнее техника, вес растёт. 3 подхода, 10–12.","Пик блока: 8–10 повторов, тяжелее вес. Средний/продвинутый — 4 подхода в главных.","Разгрузка: 2 подхода, легче. В конце — замеры."],
   2:["Второй цикл с теми же упражнениями, но уже привычнее. Веса чуть больше прошлого блока.","Добавляем вес +2,5–5 кг к прошлому циклу.","Пик: 8–10 повторов, максимальный рабочий вес за блок.","Разгрузка. Замеры."],
   3:["Третий цикл — веса выше прошлых блоков. 3 подхода.","Работаем с максимальным объёмом.","Пик всего курса. Максимальный вес за 12 недель.","Итоговые замеры за 3 месяца."]},
  "Набор массы":{1:["Вход: 3 подхода, 10–12 повторов, 2 повтора в запасе. Запоминаем рабочий вес.","Накопление: добавляем вес +2,5–5%. 3 подхода.","Пик блока: средний/продвинутый — 4 подхода в главных, 6–8 повторов.","Разгрузка. Замеры: вес, обхваты, фото."],
@@ -533,12 +537,12 @@ const WEEK_METHOD={
   3:["Третий цикл — самый тяжёлый. 3 подхода.","Пик объёма. Добавляй дроп-сеты (Продвинутый).","Максимальный пик: 4 подхода, рекордные веса.","Итоговые замеры за 3 месяца."]},
  "Сила":{1:["Техника и базовый объём. 3 подхода × 5 повторов. Строго — каждый повтор одинаковый.","+1 подход в главных для Среднего/Продвинутого. Вес +2,5–5%.","Пик: 4 подхода × 4 повтора в главных. Максимально строгая техника.","Разгрузка. 70% от рабочего."],
   2:["Второй цикл тяжелее. 3 подхода × 4 повтора.","Прогрессия. +1 подход в главных для Среднего/Продвинутого.","Пик: 4 подхода × 3 повтора — ощути реальную силу.","Разгрузка."],
-  3:["Подводка к максимуму. 3 подхода × 3 повтора — строгая техника.","Пик нагрузки. 4 подхода × 2 повтора в главных.","Тест: 1–3 повтора с максимальным весом. Впиши в шаг 1.","Итоговые замеры и результаты."]}};
+  3:["Подводка к максимуму. 3 подхода × 3 повтора — строгая техника.","Пик нагрузки. 4 подхода × 2 повтора в главных.","Контрольный подход: 3–5 повторов, оставь 1–2 в запасе. Без отказа и только со страховкой. Впиши вес в шаг 1.","Итоговые замеры и результаты."]}};
 const MESO_NAME={"Жиросжигание":["Вход","Объём","Интенсивность"],"Набор массы":["Накопление","Прогрессия","Пик"],"Сила":["Техника","Объём","Пик"]};
 const MACRO={
  "Жиросжигание":[["Нед. 1–4","Блок 1 · Вход","3 подхода, 12–15 повторов. Цель — выучить технику и запомнить рабочий вес."],["Нед. 5–8","Блок 2 · Объём","3–4 подхода, 10–12 повторов. Веса растут. Ждём: самочувствие лучше, одежда свободнее."],["Нед. 9–12","Блок 3 · Интенсивность","8–10 повторов, тяжелее. Итоговые замеры."],["Нед. 13+","Дальше · Набор мышц","Поменяй цель на «Набрать мышцы», калории в норму. Через 1–2 месяца — снова «Похудеть», если нужно."]],
  "Набор массы":[["Нед. 1–4","Блок 1 · Накопление","3 подхода, 10–12 повторов. Ждём: рабочие веса +5–10% к 3-й неделе."],["Нед. 5–8","Блок 2 · Прогрессия","3–4 подхода, 8–10 повторов. Веса растут. База для дальнейшего роста."],["Нед. 9–12","Блок 3 · Пик","3–4 подхода, 6–8 повторов. Максимальные веса за курс. Замеры."],["Нед. 13+","Дальше · Сила","Поменяй цель на «Стать сильнее» на 1 месяц, потом снова масса с новыми весами."]],
- "Сила":[["Нед. 1–4","Блок 1 · Техника","5 повторов, 75% от максимума. Цель — навык и чистое движение."],["Нед. 5–8","Блок 2 · Объём","3–4 повтора, 80–85%. Прогрессия каждую неделю."],["Нед. 9–12","Блок 3 · Пик","2–3 повтора, 85–90%. В конце — тест максимума."],["Нед. 13+","Дальше · Набор мышц","Больше мышц = больше силы в следующем цикле. Поменяй цель на «Набрать мышцы»."]]};
+ "Сила":[["Нед. 1–4","Блок 1 · Техника","5 повторов, 75% от максимума. Цель — навык и чистое движение."],["Нед. 5–8","Блок 2 · Объём","3–4 повтора, 80–85%. Прогрессия каждую неделю."],["Нед. 9–12","Блок 3 · Пик","2–3 повтора, 85–90%. В конце — контрольный подход на 3–5 повторов с запасом."],["Нед. 13+","Дальше · Набор мышц","Больше мышц = больше силы в следующем цикле. Поменяй цель на «Набрать мышцы»."]]};
 const RAMP_D=["Ролл бёдер и спины 2 мин → ягодичный мост 2×10, «мёртвый жук» 2×8 → глубокий присед с поворотом 2×5, выпад с наклоном 2×4 на ногу","Ролл грудного отдела 2 мин → тяга резины к груди 2×15, отжимания лопатками 2×10 → «червяк» + выпад с поворотом 2×4, «ангелы» у стены 2×8","Ролл ягодиц и задней поверхности бедра 2 мин → мост на одной ноге 2×8, «птица-собака» 2×6 → наклон с палкой 2×8, боковой выпад 2×5"];
 const RAMP_P={"Жиросжигание":"→ 1 подход первого упражнения с половиной рабочего веса","Набор массы":"→ 2 разминочных подхода первого упражнения: 50%×10, 70%×5","Сила":"→ лесенка в главном: гриф×8, 50%×5, 70%×3, 80%×1"};
 const FLR=["Основное","Основное","Вторичное","Вторичное","Подсобное","Подсобное","Кор/Финишер"],HYR=["Основное","Основное","Вторичное","Вторичное","Подсобное","Подсобное","Кор/Финишер"];
@@ -668,10 +672,20 @@ const HOME_TPL=[
   ["Отжимания от края дивана","Отжимания с колен"],
   ["Отведение ноги в сторону стоя","Боковые выпады"],
   ["Подъём колена к локтю стоя","«Скалолаз» в медленном темпе"],
-  ["«Лодочка» лёжа на животе","«Лодочка» с разведением рук"],
+  ["Тяга полотенца к груди стоя","Тяга полотенца к груди в наклоне"],
   ["Боковая планка с колен","Планка с касанием плеч"]]];
 // по блокам 1–3: работа, отдых (сек), круги
 const HOME_LV=[{work:[30,35,40],rest:[30,25,25],rounds:[2,3,3]},{work:[40,40,45],rest:[20,20,15],rounds:[3,3,4]}];
+const EX_NOTE={"Тяга полотенца к груди стоя":"Возьми полотенце за концы, руки вперёд. Растягивай его в стороны изо всех сил и тяни к груди, сводя лопатки. Медленно верни.","Тяга полотенца к груди в наклоне":"То же, но в наклоне вперёд с ровной спиной: растягивай полотенце и тяни к низу груди."};
+function tempoTxt(t){const m=String(t).match(/^(\d)-(\d)-(\d)/);
+ if(m)return`Темп ${t} — это скорость одного повтора в секундах: ${m[1]} с опускаешь вес, ${m[2]==="0"?"без паузы внизу":m[2]+" с пауза внизу"}, ${m[3]} с поднимаешь. Медленно вниз — мышца работает больше, а суставам безопаснее.`;
+ if(/взрыв/.test(t))return"«Вверх взрывно» — опускаешь вес под контролем, а поднимаешь максимально быстро, но технично. Вес большой, поэтому само движение всё равно будет небыстрым — главное намерение.";
+ return"Темп — скорость выполнения повтора. «Медленно» — без рывков, под полным контролем.";}
+const QI_TXT={ton:"Тоннаж — сколько всего килограммов ты поднял в упражнении: вес × повторы, сложенные по всем подходам. Пример: 3 подхода по 10 раз с 20 кг = 600 кг. Растёт тоннаж от недели к неделе — значит, ты прогрессируешь, даже если вес на штанге тот же."};
+document.addEventListener("click",ev=>{const b=ev.target.closest(".qi");if(!b)return;ev.preventDefault();ev.stopPropagation();
+ const t=b.dataset.q==="tempo"?tempoTxt(b.dataset.t):QI_TXT[b.dataset.q];let box=document.getElementById("qiBox");
+ if(!box){box=document.createElement("div");box.id="qiBox";box.className="qibox";box.setAttribute("role","dialog");document.body.appendChild(box);box.addEventListener("click",()=>box.hidden=true);}
+ box.innerHTML=`<p>${t}</p><button type="button" class="btn">Понятно</button>`;box.hidden=false;},true);
 const HOME_ROLE=["Основное","Основное","Вторичное","Вторичное","Подсобное","Подсобное","Кор/Финишер"];
 const HOME_MESO=["Знакомство","Темп","Пик"];
 const HOME_WEEK=[["Учим движения: спокойный темп, ровное дыхание.","Тот же круг — двигайся увереннее.","Самая бодрая неделя блока.","Лёгкая неделя: на круг меньше, восстанавливаемся."],
@@ -690,7 +704,7 @@ const RAMP_STEPS=[
  [["Раскатка","ролл грудного отдела и широчайших — 2 мин"],["Активация","тяга резины к груди 2×15, отжимания только лопатками 2×10"],["Подвижность","«червяк» + выпад с поворотом 2×4, «ангелы» у стены 2×8"]],
  [["Раскатка","ролл ягодиц и задней поверхности бедра — 2 мин"],["Активация","мост на одной ноге 2×8, «птица-собака» 2×6 на сторону"],["Подвижность","наклон с палкой на спине 2×8, боковой выпад 2×5 на ногу"]]];
 const RAMP_PREP={"Жиросжигание":"1 подход первого упражнения с половиной рабочего веса × 10 повторов","Набор массы":"2 разминочных подхода первого упражнения: 50% веса × 10, 70% × 5","Сила":"лесенка в главном упражнении: пустой гриф × 8, 50% × 5, 70% × 3, 80% × 1"};
-const KEY="tp-constructor-v2";
+const KEY="tp-constructor-v2"+(window.TP_API&&window.TP_API.uid?"-u"+window.TP_API.uid:"");
 let S={goal:"Жиросжигание",level:"Средний",W:0,pace:1,days:[0,2,4],log:{},injs:[]};
 const FIELDS=["name","sex","age","height","weight","start","fl_kg","fl_mo","fl_mv","rm_sq","rm_bp","rm_dl","rm_ohp","cyc_start","cyc_len","cyc_per"];
 const $=id=>document.getElementById(id);
@@ -703,13 +717,26 @@ const plural=(n,a,b,c)=>{const m10=n%10,m100=n%100;return m10===1&&m100!==11?a:(
 let touched=false;
 /* Storage: on FitTrack the server injects window.TP_API = {state, saveUrl, csrf}; otherwise browser storage */
 const API=window.TP_API||null;let _saveT=null;
-function load(){try{let d=null;if(API&&API.state&&API.state.S)d=API.state;else{const raw=localStorage.getItem(KEY);if(raw)d=JSON.parse(raw);}if(!d)return false;Object.assign(S,d.S||{});S.log=S.log||{};
+function load(){try{let d=null,loc=null;try{const raw=localStorage.getItem(KEY);if(raw)loc=JSON.parse(raw);}catch(e){}
+ if(API&&API.state&&API.state.S){d=API.state;if(loc&&loc.S&&(loc.savedAt||0)>(d.savedAt||0)){d=loc;_dirty=true;}}else d=loc;if(!d)return false;Object.assign(S,d.S||{});S.log=S.log||{};
  FIELDS.forEach(f=>{if(d.f&&d.f[f]!==undefined)$(f).value=d.f[f]});if(d.cycOn!==undefined)$("cyc_on").checked=d.cycOn;touched=!!d.touched;return true;}catch(e){return false}}
-function save(){const f={};FIELDS.forEach(k=>f[k]=$(k).value);const body=JSON.stringify({S,f,touched,cycOn:$("cyc_on").checked});
- try{localStorage.setItem(KEY,body)}catch(e){}
- if(API&&API.saveUrl){clearTimeout(_saveT);_saveT=setTimeout(()=>{fetch(API.saveUrl,{method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json","Accept":"application/json","X-CSRF-TOKEN":API.csrf||""},body})
-  .then(r=>{const el=document.getElementById("syncMsg");if(el)el.textContent=r.ok?"Сохранено в личном кабинете":"Не удалось сохранить — проверь интернет";})
-  .catch(()=>{const el=document.getElementById("syncMsg");if(el)el.textContent="Не удалось сохранить — проверь интернет";});},1200);}}
+let _dirty=false,_body=null;
+function syncMsg(t){const el=document.getElementById("syncMsg");if(el)el.textContent=t;}
+function save(){const f={};FIELDS.forEach(k=>f[k]=$(k).value);_body=JSON.stringify({S,f,touched,cycOn:$("cyc_on").checked,savedAt:Date.now()});
+ try{localStorage.setItem(KEY,_body)}catch(e){}
+ if(API&&API.saveUrl){_dirty=true;clearTimeout(_saveT);_saveT=setTimeout(()=>push(),1200);}}
+function putState(body,keep){return fetch(API.saveUrl,{method:"PUT",credentials:"same-origin",keepalive:!!keep,headers:{"Content-Type":"application/json","Accept":"application/json","X-CSRF-TOKEN":API.csrf||""},body});}
+async function push(retry){if(!_dirty||!_body)return;const body=_body;
+ try{let r=await putState(body);
+  if(r.status===419&&!retry&&API.csrfUrl){const t=await fetch(API.csrfUrl,{credentials:"same-origin",headers:{"Accept":"application/json"}}).then(x=>x.ok?x.json():null).catch(()=>null);
+   if(t&&t.csrf){API.csrf=t.csrf;return push(true);}}
+  if(r.status===409){_dirty=false;syncMsg("Есть более новые данные с другого устройства — обновляю…");try{localStorage.removeItem(KEY)}catch(e){}setTimeout(()=>location.reload(),1200);return;}
+  if(r.ok){if(body===_body)_dirty=false;syncMsg("Сохранено в личном кабинете");}else syncMsg("Не удалось сохранить — проверь интернет");}
+ catch(e){syncMsg("Не удалось сохранить — проверь интернет");}}
+// Закрыли или свернули приложение — отправляем сразу, не ждём таймер.
+function flush(){if(!API||!API.saveUrl||!_dirty||!_body)return;clearTimeout(_saveT);try{putState(_body,true)}catch(e){}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flush();});
+window.addEventListener("pagehide",flush);
 
 /* ---------- calories ---------- */
 const PACE={"Жиросжигание":[["Мягко",-0.10],["Оптимально",-0.15],["Быстро",-0.20]],"Набор массы":[["Чисто",0.05],["Оптимально",0.10],["Быстро",0.15]],"Сила":[["В норме",0],["Чуть больше",0.05]]};
@@ -718,7 +745,7 @@ function renderKcal(){
  $("paceBox").hidden=fat;$("flBox").hidden=!fat;
  if(!fat){$("paceLabel").textContent=g==="Набор массы"?"Насколько быстро набираем":"Калории для силы";
   $("paceSeg").innerHTML=opts.map((o,i)=>`<button type="button" aria-pressed="${i===S.pace}" data-pace="${i}">${o[0]} · ${o[1]>0?"+":""}${Math.round(o[1]*100)}%</button>`).join("");}
- const nd=N(),coef=isHome()?1.375:nd>=4?1.55:1.375;
+ const nd=N(),coef=isHome()?1.375:nd>=4?1.465:1.375;
  $("coefLine").textContent=`Коэффициент активности ${dec(coef)} — ${nd>=4?"4–5":"1–3"} ${plural(nd,"тренировка","тренировки","тренировок")} в неделю (из шага 1). Тренировки уже внутри нормы — второй раз их не прибавляем.`;
  $("k_hint").textContent=fat?"Считаем по формуле Миффлина — Сан Жеора. Формула ошибается до 10%, поэтому раз в 2–3 недели сверяйся с весами: вес стоит — убери ещё 100–150 ккал; уходит быстрее 1% веса в неделю — добавь немного еды."
   :"Считаем по формуле Миффлина — Сан Жеора. Это точка старта: смотри средний вес за неделю. Вес стоит 2–3 недели — добавь 150–200 ккал; растёт заметно быстрее плана вместе с талией — убери 150–200.";
@@ -796,11 +823,11 @@ function exRow(W,t,s,i){
   if((ph.key==="mens"||ph.key==="pms")&&role==="Кор/Финишер"){e.name="Спокойная ходьба или растяжка";e.reps="10-15 мин";e.sets=1;e.rest="—";e.tempo="—";e.rpeTxt="комфортно";}
  }
  return e;}
-const PH={mens:{name:"Менструальная фаза",mul:0.75,dSets:-1,rpe:"легко, 3–4 повтора в запасе",col:"var(--plate-red)",adv:"Снизь веса на 20–30% и сделай на 1 подход меньше. Без прыжков, скручиваний и сильного натуживания. Болит живот или нет сил — замени тренировку прогулкой и растяжкой."},
- foll:{name:"Фолликулярная фаза",mul:1,dSets:0,col:"var(--plate-green)",adv:"Энергии больше, мышцы быстрее восстанавливаются. Лучшее время прибавлять в весах — работай по плану."},
- ovu:{name:"Овуляторная фаза",mul:1,dSets:0,col:"var(--plate-blue)",adv:"Пик силы и выносливости, но связки мягче — выше риск растяжений. Разминка 15 минут, без резких движений под большим весом."},
- lut:{name:"Лютеиновая фаза",mul:0.95,dSets:0,rpe:"2–3 повтора в запасе",col:"var(--plate-yellow)",adv:"Устаёшь быстрее, может держаться вода. Веса чуть легче (−5%), до отказа не доходи."},
- pms:{name:"Перед месячными (ПМС)",mul:0.65,dSets:-1,rpe:"легко, 3–4 повтора в запасе",col:"var(--muted)",adv:"Разгрузка: снизь веса на 30–40% и сделай на 1 подход меньше — или замени тренировку прогулкой. Тяжесть сейчас — гормоны, а не слабость."}};
+const PH={mens:{name:"Месячные",mul:0.9,dSets:0,rpe:"2–3 повтора в запасе",col:"var(--plate-red)",adv:"Веса уже чуть легче (−10%). Самочувствие нормальное — работай по плану. Тяжело — снизь ещё на 10%, болит живот или нет сил — замени тренировку прогулкой и растяжкой."},
+ foll:{name:"Фолликулярная фаза",mul:1,dSets:0,col:"var(--plate-green)",adv:"Работай по плану. Многие девушки в эти дни чувствуют больше энергии — хорошее время прибавлять в весах."},
+ ovu:{name:"Овуляторная фаза",mul:1,dSets:0,col:"var(--plate-blue)",adv:"Работай по плану. Хорошо разомнись перед тяжёлыми подходами."},
+ lut:{name:"Лютеиновая фаза",mul:1,dSets:0,col:"var(--plate-yellow)",adv:"Работай по плану. Если устаёшь быстрее обычного — не доходи до отказа, оставляй 2–3 повтора в запасе."},
+ pms:{name:"Перед месячными (ПМС)",mul:0.9,dSets:0,rpe:"2–3 повтора в запасе",col:"var(--muted)",adv:"Веса уже чуть легче (−10%). Чувствуешь силы — работай по плану. Тяжело — снизь ещё на 10% или замени тренировку прогулкой. Это нормально и временно."}};
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 function cycleOn(){return $("sex").value==="f"&&$("cyc_on").checked&&!!$("cyc_start").value;}
 function cycLen(){return clamp(Math.round(num("cyc_len"))||28,21,40);}
@@ -830,7 +857,7 @@ function baseW(P){const m=Math.max(...P.v.map(x=>x.w)),mu=P.e.ph?.mul||1;if(!(mu
 function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
  const b=baseW(P),mu=e.ph?.mul||1,dl=W%4===3,easy=(P.e.ph?.mul||1)<1,[lo,up]=lowUp(P.e.reps),nup=lowUp(e.reps)[1];
  let t=b,why="",cls="same";
- if(dl){why=`Разгрузка: 80% от ${dec(b)} кг`;t=b*0.8;}
+ if(dl){why=`Разгрузка: 65% от ${dec(b)} кг — лёгкая неделя для восстановления`;t=b*0.65;}
  else if(W%4===0&&W>=4){const B=findPrev(W-3,i,s);cls="up";
   if(B&&B.W===W-4){t=heavier(baseW(B));why=`Новый блок: +5% к 1-й неделе прошлого блока (${dec(baseW(B))} кг)`;}else{t=b*0.9;why=`Новый блок: 90% от ${dec(b)} кг`;}}
  else if(!up){t=b;}
@@ -839,7 +866,7 @@ function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
  else if(P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)){t=b+(b<20?1:2.5);cls="up";why=`Прошлый раз ${dec(b)} кг на ${up}+ во всех подходах`;}
  else if(P.v.some(x=>x.r<lo)){cls="down";why=`Прошлый раз ${dec(b)} кг было тяжело — оставь вес или сними 5–10%`;}
  else why=`Оставь ${dec(b)} кг и добавь по 1 повтору`;
- if(mu<1){if(dl){if(mu<0.8){t=b*mu;why=`Разгрузка совпала с фазой «${e.ph.name}»: −${Math.round((1-mu)*100)}% от ${dec(b)} кг`;}}
+ if(mu<1){if(dl){if(mu<0.65){t=b*mu;why=`Разгрузка совпала с фазой «${e.ph.name}»: −${Math.round((1-mu)*100)}% от ${dec(b)} кг`;}}
   else{why+=`${why?". ":""}По плану ${dec(rr(t))} кг, по циклу −${Math.round((1-mu)*100)}%`;t=t*mu;cls="same";}}
  return{w:rr(t),why,cls};}
 function sugW(W,i,s,e){const I=sugInfo(W,i,s,e);return I?I.w:null;}
@@ -865,15 +892,15 @@ function renderProgram(){
  for(let i=0;i<N();i++){const t=tplOf(W,i);let rows="",tot=0;
   for(let s=0;s<7;s++){const e=exRow(W,t,s,i),L=S.log[lk(W,i,s)]||{},ton=exTon(W,i,s,e);tot+=ton;
    const [col,cls]=PLATE[e.role],timed=lowUp(e.reps)[1]===0,isPair=false;
-   const meta=[`отдых <b>${esc(e.rest)}</b>`];if(e.rpeTxt)meta.push(e.rpeTxt);if(e.tempo&&e.tempo!=="—")meta.push(`темп ${esc(e.tempo)}`);if(e.rec&&!sugW(W,i,s,e))meta.push(`рабочий вес ≈ <b>${dec(e.rec)} кг</b>`);
+   const meta=[`отдых <b>${esc(e.rest)}</b>`];if(e.rpeTxt)meta.push(e.rpeTxt);if(e.tempo&&e.tempo!=="—")meta.push(`темп ${esc(e.tempo)} <button type="button" class="qi" data-q="tempo" data-t="${esc(e.tempo)}" aria-label="Что такое темп">?</button>`);if(e.rec&&!sugW(W,i,s,e))meta.push(`рабочий вес ≈ <b>${dec(e.rec)} кг</b>`);
    let body="";
    if(timed){body=`<div class="exfoot"><label class="check"><input type="checkbox" id="c_${i}_${s}" data-k="${lk(W,i,s)}" data-f="done" ${L.done?"checked":""}>Сделано</label></div>`;}
    else{const sv=setVals(W,i,s,e);let cells="";const arr=L.sets||[];const sg=sugW(W,i,s,e);let ph=sg?dec(sg):e.rec?dec(e.rec):"";
     for(let k=0;k<e.sets;k++){const c=arr[k]||{};const done=!!sv[k]&&(c.w||c.r);
      cells+=`<div class="set ${done?"done":""}" id="set_${i}_${s}_${k}"><span class="n">${k+1}</span><input aria-label="Подход ${k+1}, вес кг" inputmode="decimal" id="w_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="w" value="${esc(c.w??"")}" placeholder="${ph||"кг"}"><em>×</em><input aria-label="Подход ${k+1}, повторы" inputmode="numeric" id="r_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="r" value="${esc(c.r??"")}" placeholder="${lowUp(e.reps)[0]}"></div>`;
      if(c.w)ph=c.w;}
-    body=`<div class="sets">${cells}</div><div class="exfoot"><span>Тоннаж: <span class="ton" id="t_${i}_${s}">${fmt(ton)} кг</span></span>${tip(W,i,s,e)}</div>`;}
-   rows+=`<div class="ex"><span class="plate ${cls}" style="background:${col}">${e.block}</span><div><div class="exname">${esc(e.name)}</div>${TECH[e.name]?`<button type="button" class="techbtn" data-tech="${esc(e.name)}">▶ Техника</button>`:""}<div class="exmeta">${meta.map(x=>`<span>${x}</span>`).join("")}</div></div>${scheme(e)}
+    body=`<div class="sets">${cells}</div><div class="exfoot"><span>Тоннаж <button type="button" class="qi" data-q="ton" aria-label="Что такое тоннаж">?</button>: <span class="ton" id="t_${i}_${s}">${fmt(ton)} кг</span></span>${tip(W,i,s,e)}</div>`;}
+   rows+=`<div class="ex"><span class="plate ${cls}" style="background:${col}">${e.block}</span><div><div class="exname">${esc(e.name)}</div>${EX_NOTE[e.name]?`<div class="exnote">${EX_NOTE[e.name]}</div>`:""}${TECH[e.name]?`<button type="button" class="techbtn" data-tech="${esc(e.name)}">▶ Техника</button>`:""}<div class="exmeta">${meta.map(x=>`<span>${x}</span>`).join("")}</div></div>${scheme(e)}
     ${e.orig?`<div class="swapnote"><b>Вместо «${esc(e.orig)}»</b> — бережнее к пояснице</div>`:""}${isPair?`<div class="pair">${e.block} + ${e.block.replace("1","2")}: делай подряд без отдыха, отдых после второго</div>`:""}${body}</div>`;}
   const st=RAMP_STEPS[t],ph=phaseFor(W,i);
   html+=`<article class="panel day"><div class="dayhead"><h3>Тренировка ${i+1} · ${DAYL[t]}</h3><span>${dateFor(W,i)}</span></div>
@@ -931,7 +958,8 @@ let resetArmed=false;
 $("resetBtn").addEventListener("click",()=>{if(!resetArmed){resetArmed=true;$("resetBtn").textContent="Точно очистить? Нажми ещё раз";$("resetMsg").textContent="";return;}
  S.log={};resetArmed=false;$("resetBtn").textContent="Очистить мои записи весов";$("resetMsg").textContent="Записи очищены";renderProgram();renderBars();save();});
 
-if(!load()){
+const _loaded=load();if(_loaded&&_dirty)setTimeout(save,0);
+if(!_loaded){
  const ex={0:[[40,15],[42.5,13],[42.5,12]],2:[[50,12],[50,12],[50,11]],4:[[12,15],[12,15]],5:[[10,15],[10,14]]};
  Object.entries(ex).forEach(([s,arr])=>{S.log[`Жиросжигание|Средний|024|0|0|${s}`]={sets:arr.map(([w,r])=>({w:String(w),r:String(r)}))};});}
 
@@ -1201,7 +1229,7 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
        ws.getCell(row,14).value={formula:`IF(${pre}I${P.row}="","",${pre}I${P.row}/${P.mul})`};
        ws.getCell(row,15).value={formula:`IF(${pre}K${P.row}="","",${pre}K${P.row}/${P.mul})`};
        const cyc=mu<1&&!dl?` · по циклу вес −${Math.round((1-mu)*100)}%`:"";let x,reps,hint;
-       if(dl){const k=Math.min(0.8,mu);x=`${N0}*${k}`;reps=`${lo}`;hint=`"Разгрузка: ${Math.round(k*100)}% от рабочего веса"`;}
+       if(dl){const k=Math.min(0.65,mu);x=`${N0}*${k}`;reps=`${lo}`;hint=`"Разгрузка: ${Math.round(k*100)}% от рабочего веса"`;}
        else if(top<P.top){x=`MAX(${N0}+${st},CEILING(${N0}*1.05,${st}))*${mu}`;reps=`${lo}`;hint=`"Повторов по плану меньше — вес +5%. Получается легко — делай до ${top}${cyc}"`;}
        else{const tg=`ROUND(O${row}*(1+${PADDR}),2)`,wp=`MAX(${N0},CEILING(${tg}/(C${row}*${top})-0.001,${st}))`;x=`${wp}*${mu}`;
         reps=`MAX(${lo},MIN(${top},ROUNDUP(${tg}/(C${row}*${wp})-0.001,0)))`;

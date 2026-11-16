@@ -27,12 +27,16 @@ class EnsureStudent
 
         $hours = config('telegram.recheck_hours');
         if (! $student->membership_checked_at || $student->membership_checked_at->lt(now()->subHours($hours))) {
-            if (! $this->tg->isChannelMember($student->telegram_id)) {
+            $member = $this->tg->channelMembership((int) $student->telegram_id);
+            if ($member === false) {
                 $request->session()->forget(self::SESSION_KEY);
                 Cookie::queue(Cookie::forget(self::COOKIE));
                 return $this->deny($request, 'Доступ к конструктору есть только у участников закрытого канала курса.');
             }
-            $student->update(['membership_checked_at' => now()]);
+            // null — Telegram не ответил: пускаем, проверим в следующий раз.
+            if ($member === true) {
+                $student->update(['membership_checked_at' => now()]);
+            }
         }
 
         $request->session()->put(self::SESSION_KEY, $student->id);
