@@ -848,6 +848,11 @@ function sessDate(W,i){const st=$("start").value;if(!st)return null;const d0=new
  const dt=new Date(mon);dt.setDate(mon.getDate()+W*7+S.days[i]);return dt;}
 function dateFor(W,i){const dt=sessDate(W,i);if(!dt)return"";return `${DAYN[S.days[i]]}, ${String(dt.getDate()).padStart(2,"0")}.${String(dt.getMonth()+1).padStart(2,"0")}`;}
 function idxOf(P){return P.i;}
+// Почти верх: во всех подходах вместе не хватает до верхней границы не больше 2 повторов (15/15/13 при 12–15).
+function topAll(P){const u=lowUp(P.e.reps)[1];return u>0&&P.v.length>=P.e.sets&&P.v.reduce((a,x)=>a+Math.min(x.r,u),0)>=P.e.sets*u-2;}
+function prevDown(w){const st=w<=20?2:2.5;return Math.max(st,Math.ceil(w/st-1e-9)*st-st);}
+// Сколько обычных (не разгрузочных) недель между прошлой записью и текущей прошли совсем без тренировок
+function gapWeeks(from,to){let g=0;for(let w=from+1;w<to;w++){if(w%4===3)continue;let any=false;for(let k=0;k<N()&&!any;k++)for(let s=0;s<7&&!any;s++){const L=S.log[lk(w,k,s)];if(L&&(L.done||(L.sets||[]).some(c=>c&&(c.w||c.r))))any=true;}if(!any)g++;}return g;}
 function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
  while(w>=0){if(k<0){w--;k=N()-1;continue;}if(w%4!==3&&tplOf(w,k)===t){const e=exRow(w,t,s,k),v=setVals(w,k,s,e).filter(Boolean);if(v.length)return{W:w,i:k,e,v};}k--;}return null;}
 function tip(W,i,s,e){const I=sugInfo(W,i,s,e);if(!I||!I.why)return"";
@@ -864,10 +869,15 @@ function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
  let t=b,why="",cls="same";
  if(dl){why=`Разгрузка: 65% от ${dec(b)} кг — лёгкая неделя для восстановления`;t=b*0.65;}
  else if(W%4===0&&W>=4){const B=blockStart(W,i,s);cls="up";
-  if(B){t=heavier(baseW(B));why=`Новый блок: +5% к 1-й неделе прошлого блока (${dec(baseW(B))} кг)`;}else{t=b*0.8;cls="same";why=`Новый блок: 80% от ${dec(b)} кг — повторов снова больше`;}}
+  if(B){const bb=baseW(B),h=heavier(bb);if(h/bb>1.1&&!topAll(B)){t=bb;cls="same";why=`Новый блок: вес 1-й недели прошлого блока (${dec(bb)} кг) — шаг до ${dec(h)} кг пока велик, прибавь повторы`;}else{t=h;why=`Новый блок: +5% к 1-й неделе прошлого блока (${dec(bb)} кг)`;}}else{t=b*0.8;cls="same";why=`Новый блок: 80% от ${dec(b)} кг — повторов снова больше`;}}
  else if(!up){t=b;}
- else if(!easy&&P.v.some(x=>x.r<lo)){cls="down";why=`Прошлый раз ${dec(b)} кг было тяжело — оставь этот вес и добери повторы`;}
- else if(nup&&nup<up){t=heavier(b);cls="up";why=`Повторов меньше, чем прошлый раз — вес больше (было ${dec(b)} кг)`;}
+ else if(!easy&&P.v.some(x=>x.r<lo)){cls="down";
+  const Q=findPrev(P.W,idxOf(P),s),qlo=Q?lowUp(Q.e.reps)[0]:0,again=Q&&(Q.e.ph?.mul||1)>=1&&Math.max(...Q.v.map(x=>x.w))>=b&&Q.v.some(x=>x.r<qlo);
+  if(again&&b>2){t=prevDown(b);why=`${dec(b)} кг два раза подряд было тяжело — сними до ${dec(t)} кг, доберёшь повторы и вернёшься`;}
+  else why=`Прошлый раз ${dec(b)} кг было тяжело — оставь этот вес и добери повторы`;}
+ else if(nup&&nup<up){const h=heavier(b);
+  if(h/b>1.1&&!topAll(P)){why=`Повторов по плану меньше. Шаг до ${dec(h)} кг слишком большой — оставь ${dec(b)} кг и делай повторы до верха`;}
+  else{t=h;cls="up";why=`Повторов меньше, чем прошлый раз — вес больше (было ${dec(b)} кг)`;}}
  else if(easy){why=`Прошлая тренировка была облегчена по циклу — твой рабочий вес ${dec(b)} кг`;}
  else if(P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)){
   // При 4–5 тренировках в неделю вес растёт, только если верх повторов взят 2 раза подряд — иначе прибавка была бы почти каждую тренировку.
@@ -875,6 +885,7 @@ function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
   if(twice){t=nextUp(b);cls="up";why=`Прошлый раз ${dec(b)} кг на ${up}+ во всех подходах`;}
   else why=`Отлично, ${dec(b)} кг на ${up}+! Повтори ещё раз — если снова получится, добавим вес`;}
  else why=`Оставь ${dec(b)} кг и добавь по 1 повтору`;
+ if(!dl&&gapWeeks(P.W,W)>0){t=t*0.9;cls="down";why=`После перерыва в тренировках −10%: ${why?why.charAt(0).toLowerCase()+why.slice(1):"вес как прошлый раз"}`;}
  if(mu<1){if(dl){if(mu<0.65){t=b*mu;why=`Разгрузка совпала с фазой «${e.ph.name}»: −${Math.round((1-mu)*100)}% от ${dec(b)} кг`;}}
   else{why+=`${why?". ":""}По плану ${dec(rr(t))} кг, по циклу −${Math.round((1-mu)*100)}%`;t=t*mu;cls="same";}}
  return{w:rr(t),why,cls};}
