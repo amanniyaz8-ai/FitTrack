@@ -84,6 +84,12 @@ class TelegramWebhookController extends Controller
             return;
         }
 
+        // /post_channel — только Аману: бот публикует в закрытом канале пост с кнопкой конструктора и закрепляет его
+        if (trim((string) ($msg['text'] ?? '')) === '/post_channel' && config('telegram.admin_id') && $uid === (int) config('telegram.admin_id')) {
+            $this->postToChannel($chatId);
+            return;
+        }
+
         // Любой текст / команда: участнику — меню конструктора, остальным — продажа
         if ($this->tg->isChannelMember($uid)) {
             $this->upsertStudent($from);
@@ -226,5 +232,26 @@ class TelegramWebhookController extends Controller
         }
 
         return implode("\n", $lines);
+    }
+
+    private function postToChannel(int $chatId): void
+    {
+        $bot = ltrim((string) (config('telegram.bot_username') ?: 'samsebetrener_kz_bot'), '@');
+        $text = "🏋️ Твой конструктор программы\n\n"
+            ."Ответь на вопросы анкеты — и получишь программу на 12 недель под себя: упражнения, подходы, рекомендованный вес на каждую тренировку, калории и таблицу Excel.\n\n"
+            ."Как открыть: нажми кнопку ниже → «Старт» → «Открыть конструктор».";
+        $sent = $this->tg->sendMessage((int) config('telegram.channel_id'), $text, [
+            [['text' => '🏋️ Открыть конструктор', 'url' => "https://t.me/{$bot}?start=konstruktor"]],
+        ]);
+        if (! $sent) {
+            $this->tg->sendMessage($chatId, 'Не получилось опубликовать. Проверь, что бот — администратор закрытого канала с правом публиковать сообщения.');
+            return;
+        }
+        $pinned = $this->tg->call('pinChatMessage', [
+            'chat_id' => config('telegram.channel_id'), 'message_id' => $sent['message_id'] ?? 0, 'disable_notification' => 'true',
+        ]);
+        $this->tg->sendMessage($chatId, $pinned
+            ? '✅ Пост опубликован в закрытом канале и закреплён.'
+            : '✅ Пост опубликован в закрытом канале. Закрепить не получилось — закрепи его вручную (зажми пост → «Закрепить»).');
     }
 }

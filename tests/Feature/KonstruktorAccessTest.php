@@ -299,4 +299,21 @@ class KonstruktorAccessTest extends TestCase
         $txt = collect($this->sent('sendMessage'))->pluck('text')->first(fn ($t) => str_contains($t, 'Статистика'));
         $this->assertStringContainsString('Пока никто не заходил', $txt);
     }
+
+    public function test_admin_posts_pinned_button_to_channel(): void
+    {
+        config(['telegram.webhook_secret' => 's3cret', 'telegram.channel_id' => -100555, 'telegram.bot_username' => 'samsebetrener_kz_bot']);
+        Http::fake([
+            'api.telegram.org/*sendMessage' => Http::response(['ok' => true, 'result' => ['message_id' => 42]]),
+            'api.telegram.org/*' => Http::response(['ok' => true, 'result' => true]),
+        ]);
+        $this->hook($this->msg(999, ['text' => '/post_channel']));
+        $this->assertEmpty(collect($this->sent('sendMessage'))->where('chat_id', -100555)->all());
+
+        $this->hook($this->msg(self::ADMIN, ['text' => '/post_channel']));
+        $post = collect($this->sent('sendMessage'))->firstWhere('chat_id', -100555);
+        $this->assertNotNull($post);
+        $this->assertSame('https://t.me/samsebetrener_kz_bot?start=konstruktor', $this->buttons($post)[0]['url']);
+        $this->assertSame(42, (int) $this->sent('pinChatMessage')[0]['message_id']);
+    }
 }
