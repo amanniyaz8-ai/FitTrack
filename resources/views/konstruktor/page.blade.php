@@ -847,14 +847,17 @@ function weekTon(W){let x=0;for(let i=0;i<N();i++)x+=sessTon(W,i);return x;}
 function sessDate(W,i){const st=$("start").value;if(!st)return null;const d0=new Date(st+"T00:00:00");if(isNaN(d0))return null;const mon=new Date(d0);mon.setDate(d0.getDate()-((d0.getDay()+6)%7));
  const dt=new Date(mon);dt.setDate(mon.getDate()+W*7+S.days[i]);return dt;}
 function dateFor(W,i){const dt=sessDate(W,i);if(!dt)return"";return `${DAYN[S.days[i]]}, ${String(dt.getDate()).padStart(2,"0")}.${String(dt.getMonth()+1).padStart(2,"0")}`;}
+function idxOf(P){return P.i;}
 function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
- while(w>=0){if(k<0){w--;k=N()-1;continue;}if(w%4!==3&&tplOf(w,k)===t){const e=exRow(w,t,s,k),v=setVals(w,k,s,e).filter(Boolean);if(v.length)return{W:w,e,v};}k--;}return null;}
+ while(w>=0){if(k<0){w--;k=N()-1;continue;}if(w%4!==3&&tplOf(w,k)===t){const e=exRow(w,t,s,k),v=setVals(w,k,s,e).filter(Boolean);if(v.length)return{W:w,i:k,e,v};}k--;}return null;}
 function tip(W,i,s,e){const I=sugInfo(W,i,s,e);if(!I||!I.why)return"";
  return`<span class="tip ${I.cls}">${{up:"▲",down:"▼",same:"="}[I.cls]} ${I.why} → ставь ${dec(I.w)} кг</span>`;}
-function heavier(w){const st=w<20?1:2.5;return Math.max(w+st,Math.round(w*1.05/st)*st);}
-function rr(x){return x<20?Math.round(x):Math.round(x/2.5)*2.5;}
+// Следующий вес по сетке: до 20 кг шаг 2, дальше 2,5. 15 → 16, 60 → 62,5.
+function nextUp(w){const st=w<20?2:2.5;return Math.floor(w/st+1e-9)*st+st;}
+function heavier(w){const st=w<20?2:2.5;return Math.max(nextUp(w),Math.round(w*1.05/st)*st);}
+function rr(x){return x<20?Math.round(x/2)*2:Math.round(x/2.5)*2.5;}
 // Вес, снятый в лёгкую фазу цикла, пересчитывается обратно в рабочий — иначе скидки копятся и прогресс теряется.
-function baseW(P){const m=Math.max(...P.v.map(x=>x.w)),mu=P.e.ph?.mul||1;if(!(mu<1))return m;const x=m/mu,st=x<20?1:2.5;return Math.round(x/st)*st;}
+function baseW(P){const m=Math.max(...P.v.map(x=>x.w)),mu=P.e.ph?.mul||1;if(!(mu<1))return m;const x=m/mu,st=x<20?2:2.5;return Math.round(x/st)*st;}
 function blockStart(W,i,s){const t=tplOf(W,i),w0=W-4;for(let k=0;k<N();k++){if(tplOf(w0,k)!==t)continue;const e=exRow(w0,t,s,k),v=setVals(w0,k,s,e).filter(Boolean);if(v.length)return{W:w0,e,v};}return null;}
 function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
  const b=baseW(P),mu=e.ph?.mul||1,dl=W%4===3,easy=(P.e.ph?.mul||1)<1,[lo,up]=lowUp(P.e.reps),nup=lowUp(e.reps)[1];
@@ -866,7 +869,11 @@ function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
  else if(!easy&&P.v.some(x=>x.r<lo)){cls="down";why=`Прошлый раз ${dec(b)} кг было тяжело — оставь этот вес и добери повторы`;}
  else if(nup&&nup<up){t=heavier(b);cls="up";why=`Повторов меньше, чем прошлый раз — вес больше (было ${dec(b)} кг)`;}
  else if(easy){why=`Прошлая тренировка была облегчена по циклу — твой рабочий вес ${dec(b)} кг`;}
- else if(P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)){t=b+(b<20?1:2.5);cls="up";why=`Прошлый раз ${dec(b)} кг на ${up}+ во всех подходах`;}
+ else if(P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)){
+  // При 4–5 тренировках в неделю вес растёт, только если верх повторов взят 2 раза подряд — иначе прибавка была бы почти каждую тренировку.
+  const Q=N()>=4?findPrev(P.W,idxOf(P),s):null,twice=N()<4||!!Q&&(Q.e.reps===P.e.reps&&Math.max(...Q.v.map(x=>x.w))>=b&&Q.v.length>=Q.e.sets&&Q.v.every(x=>x.r>=up));
+  if(twice){t=nextUp(b);cls="up";why=`Прошлый раз ${dec(b)} кг на ${up}+ во всех подходах`;}
+  else why=`Отлично, ${dec(b)} кг на ${up}+! Повтори ещё раз — если снова получится, добавим вес`;}
  else why=`Оставь ${dec(b)} кг и добавь по 1 повтору`;
  if(mu<1){if(dl){if(mu<0.65){t=b*mu;why=`Разгрузка совпала с фазой «${e.ph.name}»: −${Math.round((1-mu)*100)}% от ${dec(b)} кг`;}}
   else{why+=`${why?". ":""}По плану ${dec(rr(t))} кг, по циклу −${Math.round((1-mu)*100)}%`;t=t*mu;cls="same";}}
@@ -1228,11 +1235,11 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
       const H=hist[key]||(hist[key]=[]),mu=e.ph?e.ph.mul:1,dl=w===3;
       let P=null;for(let k=H.length-1;k>=0;k--)if(!H[k].dl){P=H[k];break;}
       let nb=0;if(w===0&&W>=4){const B=H.find(x=>x.W===W-4);if(B){P=B;nb=1;}else nb=2;}
-      if(P){const pre=P.m===m?"":`'Блок ${P.m+1}'!`,N0=`N${row}`,st=`IF(${N0}<20,1,2.5)`,rnd=x=>`IF(${x}<20,ROUND(${x},0),MROUND(${x},2.5))`;
+      if(P){const pre=P.m===m?"":`'Блок ${P.m+1}'!`,N0=`N${row}`,st=`IF(${N0}<20,2,2.5)`,rnd=x=>`IF(${x}<20,MROUND(${x},2),MROUND(${x},2.5))`;
        ws.getCell(row,14).value={formula:P.mul<1?`IF(${pre}I${P.row}="","",${rnd(`${pre}I${P.row}/${P.mul}`)})`:`IF(${pre}I${P.row}="","",${pre}I${P.row})`};
        ws.getCell(row,15).value={formula:`IF(${pre}K${P.row}="","",${pre}K${P.row}/${P.mul})`};
        const cyc=mu<1&&!dl?` · по циклу вес −${Math.round((1-mu)*100)}%`:"";let x,reps,hint;
-       const up5=`MAX(${N0}+${st},MROUND(${N0}*1.05,${st}))`;
+       const up5=`MAX(FLOOR(${N0},${st})+${st},MROUND(${N0}*1.05,${st}))`;
        if(dl){const k=Math.min(0.65,mu);x=`${N0}*${k}`;reps=`${lo}`;hint=`"Разгрузка: ${Math.round(k*100)}% от рабочего веса"`;}
        else if(nb===1){x=`${up5}*${mu}`;reps=`${lo}`;hint=`"Новый блок: +5% к 1-й неделе прошлого блока${cyc}"`;}
        else if(nb===2){x=`${N0}*0.8*${mu}`;reps=`${lo}`;hint=`"Новый блок: 80% от прошлого веса — повторов снова больше${cyc}"`;}
