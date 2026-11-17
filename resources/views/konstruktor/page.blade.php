@@ -795,7 +795,8 @@ function homeRow(W,t,s,i){
  const e={role:HOME_ROLE[s],block:String(s+1),name:HOME_TPL[t][s][lv],sets:Math.max(1,H.rounds[b]-(dl?1:0)),reps:`${H.work[b]-(dl?5:0)} сек`,rest:`${H.rest[b]+(dl?5:0)} с`,tempo:"—",rec:null,rpe:"",
   rpeTxt:lv?"бодро, но можешь говорить":"спокойно, дыхание ровное"};
  const ph=phaseFor(W,i);e.ph=ph;
- if(ph&&(ph.key==="mens"||ph.key==="pms")){e.sets=Math.max(1,e.sets-1);e.rpeTxt="очень легко, по самочувствию";}
+ // Дома круги не урезаем автоматически (иначе с разгрузкой выходит 15 минут) — решает самочувствие.
+ if(ph&&(ph.key==="mens"||ph.key==="pms"))e.rpeTxt="по самочувствию: тяжело — сделай на 1 круг меньше";
  return e;}
 function exRow(W,t,s,i){
  if(isHome())return homeRow(W,t,s,i);
@@ -849,7 +850,7 @@ function sessDate(W,i){const st=$("start").value;if(!st)return null;const d0=new
 function dateFor(W,i){const dt=sessDate(W,i);if(!dt)return"";return `${DAYN[S.days[i]]}, ${String(dt.getDate()).padStart(2,"0")}.${String(dt.getMonth()+1).padStart(2,"0")}`;}
 function idxOf(P){return P.i;}
 // Почти верх: во всех подходах вместе не хватает до верхней границы не больше 2 повторов (15/15/13 при 12–15).
-function topAll(P){const u=lowUp(P.e.reps)[1];return u>0&&P.v.length>=P.e.sets&&P.v.reduce((a,x)=>a+Math.min(x.r,u),0)>=P.e.sets*u-2;}
+function topAll(P){if((P.e.ph?.mul||1)<1)return false;const u=lowUp(P.e.reps)[1];return u>0&&P.v.length>=P.e.sets&&P.v.reduce((a,x)=>a+Math.min(x.r,u),0)>=P.e.sets*u-2;}
 function prevDown(w){const st=w<=20?2:2.5;return Math.max(st,Math.ceil(w/st-1e-9)*st-st);}
 // Сколько обычных (не разгрузочных) недель между прошлой записью и текущей прошли совсем без тренировок
 function gapWeeks(from,to){let g=0;for(let w=from+1;w<to;w++){if(w%4===3)continue;let any=false;for(let k=0;k<N()&&!any;k++)for(let s=0;s<7&&!any;s++){const L=S.log[lk(w,k,s)];if(L&&(L.done||(L.sets||[]).some(c=>c&&(c.w||c.r))))any=true;}if(!any)g++;}return g;}
@@ -875,10 +876,10 @@ function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
   const Q=findPrev(P.W,idxOf(P),s),qlo=Q?lowUp(Q.e.reps)[0]:0,again=Q&&(Q.e.ph?.mul||1)>=1&&Math.max(...Q.v.map(x=>x.w))>=b&&Q.v.some(x=>x.r<qlo);
   if(again&&b>2){t=prevDown(b);why=`${dec(b)} кг два раза подряд было тяжело — сними до ${dec(t)} кг, доберёшь повторы и вернёшься`;}
   else why=`Прошлый раз ${dec(b)} кг было тяжело — оставь этот вес и добери повторы`;}
+ else if(easy){why=`Прошлая тренировка была облегчена по циклу — возвращаемся к рабочему весу ${dec(b)} кг`;}
  else if(nup&&nup<up){const h=heavier(b);
   if(h/b>1.1&&!topAll(P)){why=`Повторов по плану меньше. Шаг до ${dec(h)} кг слишком большой — оставь ${dec(b)} кг и делай повторы до верха`;}
   else{t=h;cls="up";why=`Повторов меньше, чем прошлый раз — вес больше (было ${dec(b)} кг)`;}}
- else if(easy){why=`Прошлая тренировка была облегчена по циклу — твой рабочий вес ${dec(b)} кг`;}
  else if(P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)){
   // При 4–5 тренировках в неделю вес растёт, только если верх повторов взят 2 раза подряд — иначе прибавка была бы почти каждую тренировку.
   const Q=N()>=4?findPrev(P.W,idxOf(P),s):null,twice=N()<4||!!Q&&(Q.e.reps===P.e.reps&&Math.max(...Q.v.map(x=>x.w))>=b&&Q.v.length>=Q.e.sets&&Q.v.every(x=>x.r>=up));
