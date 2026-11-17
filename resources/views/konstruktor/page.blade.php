@@ -811,6 +811,10 @@ function exRow(W,t,s,i){
  const rm=link?num("rm_"+link):NaN;
  const rec=(pct&&rm>0)?Math.round(rm*pct/100/2.5)*2.5:null;
  const e={role,block,name:tp[li],sets,reps,rpe:p.rpe,rest:p.rest,tempo:p.tempo,rec,rpeTxt:RPE_TXT[p.rpe]||""};
+ // Изоляция (махи, руки, отведения) не уходит в 6–8 повторов — там только травмы и провалы.
+ if(role!=="Кор/Финишер"&&/Махи|Отведение| \+ /.test(e.name)){const lu=lowUp(e.reps);if(lu[0]&&lu[0]<10)e.reps=w===3?"12-15":"10-12";}
+ // Планка — на время, а не на повторы с весом.
+ if(role==="Кор/Финишер"&&/планка/i.test(e.name)&&!/сек|мин/.test(e.reps))e.reps="30-45 сек";
  if(S.injs.length){const nm=safeNames(t)[s];if(nm!==e.name){e.orig=e.name;e.name=nm;e.rec=null;}
   if(/тест/.test(e.reps)){e.reps="3-5";e.rpe="7";e.rpeTxt="2–3 повтора в запасе";}
   {const lu=lowUp(e.reps);if(lu[1]>0&&lu[0]<5){e.reps="5-6";e.rec=null;}}
@@ -851,7 +855,7 @@ function dateFor(W,i){const dt=sessDate(W,i);if(!dt)return"";return `${DAYN[S.da
 function idxOf(P){return P.i;}
 // Почти верх: во всех подходах вместе не хватает до верхней границы не больше 2 повторов (15/15/13 при 12–15).
 function topAll(P){if((P.e.ph?.mul||1)<1)return false;const u=lowUp(P.e.reps)[1];return u>0&&P.v.length>=P.e.sets&&P.v.reduce((a,x)=>a+Math.min(x.r,u),0)>=P.e.sets*u-2;}
-function prevDown(w){const st=w<=20?2:2.5;return Math.max(st,Math.ceil(w/st-1e-9)*st-st);}
+function prevDown(w){const st=stp(w-0.01);return Math.max(st,Math.ceil(w/st-1e-9)*st-st);}
 // Сколько обычных (не разгрузочных) недель между прошлой записью и текущей прошли совсем без тренировок
 function gapWeeks(from,to){let g=0;for(let w=from+1;w<to;w++){if(w%4===3)continue;let any=false;for(let k=0;k<N()&&!any;k++)for(let s=0;s<7&&!any;s++){const L=S.log[lk(w,k,s)];if(L&&(L.done||(L.sets||[]).some(c=>c&&(c.w||c.r))))any=true;}if(!any)g++;}return g;}
 function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
@@ -859,11 +863,12 @@ function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
 function tip(W,i,s,e){const I=sugInfo(W,i,s,e);if(!I||!I.why)return"";
  return`<span class="tip ${I.cls}">${{up:"▲",down:"▼",same:"="}[I.cls]} ${I.why} → ставь ${dec(I.w)} кг</span>`;}
 // Следующий вес по сетке: до 20 кг шаг 2, дальше 2,5. 15 → 16, 60 → 62,5.
-function nextUp(w){const st=w<20?2:2.5;return Math.floor(w/st+1e-9)*st+st;}
-function heavier(w){const st=w<20?2:2.5;return Math.max(nextUp(w),Math.round(w*1.05/st)*st);}
-function rr(x){return x<20?Math.round(x/2)*2:Math.round(x/2.5)*2.5;}
+function stp(w){return w<10?1:w<20?2:2.5;}
+function nextUp(w){const st=stp(w);return Math.floor(w/st+1e-9)*st+st;}
+function heavier(w){const st=stp(w);return Math.max(nextUp(w),Math.round(w*1.05/st)*st);}
+function rr(x){const st=stp(x);return Math.round(x/st)*st;}
 // Вес, снятый в лёгкую фазу цикла, пересчитывается обратно в рабочий — иначе скидки копятся и прогресс теряется.
-function baseW(P){const m=Math.max(...P.v.map(x=>x.w)),mu=P.e.ph?.mul||1;if(!(mu<1))return m;const x=m/mu,st=x<20?2:2.5;return Math.round(x/st)*st;}
+function baseW(P){const m=Math.max(...P.v.map(x=>x.w)),mu=P.e.ph?.mul||1;if(!(mu<1))return m;const x=m/mu,st=stp(x);return Math.round(x/st)*st;}
 function blockStart(W,i,s){const t=tplOf(W,i),w0=W-4;for(let k=0;k<N();k++){if(tplOf(w0,k)!==t)continue;const e=exRow(w0,t,s,k),v=setVals(w0,k,s,e).filter(Boolean);if(v.length)return{W:w0,e,v};}return null;}
 function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
  const b=baseW(P),mu=e.ph?.mul||1,dl=W%4===3,easy=(P.e.ph?.mul||1)<1,[lo,up]=lowUp(P.e.reps),nup=lowUp(e.reps)[1];
@@ -1089,6 +1094,7 @@ const LUMBAR={
  "Гребной тренажёр — интервалы":["Эллипс — интервалы"],"Велотренажёр — интервалы":["Велотренажёр со спинкой — интервалы"],
  "Степ-платформа — интервалы":["Ходьба в горку на дорожке"]};
 const KNEE={
+ "Выпады с гантелями":["Выпады назад с опорой (неглубоко)"],"Шагающие выпады с гантелями":["Выпады назад с опорой (неглубоко)"],"Гакк-присед в тренажёре":["Присед к скамье (до безболезненной глубины)"],
  "Присед со штангой на спине":["Присед к скамье (до безболезненной глубины)"],"Фронтальный присед со штангой":["Присед к скамье (до безболезненной глубины)"],
  "Фронтальный присед":["Гоблет-присед к высокой скамье"],"Фронтальный присед с гантелями":["Гоблет-присед к высокой скамье"],
  "Присед со штангой (лёгкий, быстрый)":["Ягодичный мост со штангой","Гоблет-присед к высокой скамье"],
@@ -1247,7 +1253,7 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
       const H=hist[key]||(hist[key]=[]),mu=e.ph?e.ph.mul:1,dl=w===3;
       let P=null;for(let k=H.length-1;k>=0;k--)if(!H[k].dl){P=H[k];break;}
       let nb=0;if(w===0&&W>=4){const B=H.find(x=>x.W===W-4);if(B){P=B;nb=1;}else nb=2;}
-      if(P){const pre=P.m===m?"":`'Блок ${P.m+1}'!`,N0=`N${row}`,st=`IF(${N0}<20,2,2.5)`,rnd=x=>`IF(${x}<20,MROUND(${x},2),MROUND(${x},2.5))`;
+      if(P){const pre=P.m===m?"":`'Блок ${P.m+1}'!`,N0=`N${row}`,st=`IF(${N0}<10,1,IF(${N0}<20,2,2.5))`,rnd=x=>`IF(${x}<10,ROUND(${x},0),IF(${x}<20,MROUND(${x},2),MROUND(${x},2.5)))`;
        ws.getCell(row,14).value={formula:P.mul<1?`IF(${pre}I${P.row}="","",${rnd(`${pre}I${P.row}/${P.mul}`)})`:`IF(${pre}I${P.row}="","",${pre}I${P.row})`};
        ws.getCell(row,15).value={formula:`IF(${pre}K${P.row}="","",${pre}K${P.row}/${P.mul})`};
        const cyc=mu<1&&!dl?` · по циклу вес −${Math.round((1-mu)*100)}%`:"";let x,reps,hint;
