@@ -675,7 +675,7 @@ const HOME_TPL=[
   ["Боковая планка с колен","Планка с касанием плеч"]]];
 // по блокам 1–3: работа, отдых (сек), круги
 // Круг = 7 упражнений ≈ 7 мин + 1 мин отдыха между кругами. 4 круга ≈ 30 мин, с разминкой ~35.
-const HOME_LV=[{work:[30,35,40],rest:[30,25,20],rounds:[4,4,4]},{work:[40,45,45],rest:[20,15,15],rounds:[4,4,5]}];
+const HOME_LV=[{work:[30,35,40],rest:[30,25,20],rounds:[4,4,4]},{work:[40,45,45],rest:[20,15,15],rounds:[4,4,4]}];
 const EX_NOTE={"Тяга полотенца к груди стоя":"Возьми полотенце за концы, руки вперёд. Растягивай его в стороны изо всех сил и тяни к груди, сводя лопатки. Медленно верни.","Тяга полотенца к груди в наклоне":"То же, но в наклоне вперёд с ровной спиной: растягивай полотенце и тяни к низу груди."};
 function tempoTxt(t){const m=String(t).match(/^(\d)-(\d)-(\d)/);
  if(m)return`Темп ${t} — это скорость одного повтора в секундах: ${m[1]} с опускаешь вес, ${m[2]==="0"?"без паузы внизу":m[2]+" с пауза внизу"}, ${m[3]} с поднимаешь. Медленно вниз — мышца работает больше, а суставам безопаснее.`;
@@ -851,21 +851,22 @@ function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
  while(w>=0){if(k<0){w--;k=N()-1;continue;}if(w%4!==3&&tplOf(w,k)===t){const e=exRow(w,t,s,k),v=setVals(w,k,s,e).filter(Boolean);if(v.length)return{W:w,e,v};}k--;}return null;}
 function tip(W,i,s,e){const I=sugInfo(W,i,s,e);if(!I||!I.why)return"";
  return`<span class="tip ${I.cls}">${{up:"▲",down:"▼",same:"="}[I.cls]} ${I.why} → ставь ${dec(I.w)} кг</span>`;}
-function heavier(w){const st=w<20?1:2.5;return Math.max(w+st,Math.ceil(w*1.05/st)*st);}
+function heavier(w){const st=w<20?1:2.5;return Math.max(w+st,Math.round(w*1.05/st)*st);}
 function rr(x){return x<20?Math.round(x):Math.round(x/2.5)*2.5;}
 // Вес, снятый в лёгкую фазу цикла, пересчитывается обратно в рабочий — иначе скидки копятся и прогресс теряется.
-function baseW(P){const m=Math.max(...P.v.map(x=>x.w)),mu=P.e.ph?.mul||1;if(!(mu<1))return m;const x=m/mu-0.01,st=x<20?1:2.5;return Math.ceil(x/st)*st;}
+function baseW(P){const m=Math.max(...P.v.map(x=>x.w)),mu=P.e.ph?.mul||1;if(!(mu<1))return m;const x=m/mu,st=x<20?1:2.5;return Math.round(x/st)*st;}
+function blockStart(W,i,s){const t=tplOf(W,i),w0=W-4;for(let k=0;k<N();k++){if(tplOf(w0,k)!==t)continue;const e=exRow(w0,t,s,k),v=setVals(w0,k,s,e).filter(Boolean);if(v.length)return{W:w0,e,v};}return null;}
 function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
  const b=baseW(P),mu=e.ph?.mul||1,dl=W%4===3,easy=(P.e.ph?.mul||1)<1,[lo,up]=lowUp(P.e.reps),nup=lowUp(e.reps)[1];
  let t=b,why="",cls="same";
  if(dl){why=`Разгрузка: 65% от ${dec(b)} кг — лёгкая неделя для восстановления`;t=b*0.65;}
- else if(W%4===0&&W>=4){const B=findPrev(W-3,i,s);cls="up";
-  if(B&&B.W===W-4){t=heavier(baseW(B));why=`Новый блок: +5% к 1-й неделе прошлого блока (${dec(baseW(B))} кг)`;}else{t=b*0.9;why=`Новый блок: 90% от ${dec(b)} кг`;}}
+ else if(W%4===0&&W>=4){const B=blockStart(W,i,s);cls="up";
+  if(B){t=heavier(baseW(B));why=`Новый блок: +5% к 1-й неделе прошлого блока (${dec(baseW(B))} кг)`;}else{t=b*0.8;cls="same";why=`Новый блок: 80% от ${dec(b)} кг — повторов снова больше`;}}
  else if(!up){t=b;}
+ else if(!easy&&P.v.some(x=>x.r<lo)){cls="down";why=`Прошлый раз ${dec(b)} кг было тяжело — оставь этот вес и добери повторы`;}
  else if(nup&&nup<up){t=heavier(b);cls="up";why=`Повторов меньше, чем прошлый раз — вес больше (было ${dec(b)} кг)`;}
  else if(easy){why=`Прошлая тренировка была облегчена по циклу — твой рабочий вес ${dec(b)} кг`;}
  else if(P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)){t=b+(b<20?1:2.5);cls="up";why=`Прошлый раз ${dec(b)} кг на ${up}+ во всех подходах`;}
- else if(P.v.some(x=>x.r<lo)){cls="down";why=`Прошлый раз ${dec(b)} кг было тяжело — оставь вес или сними 5–10%`;}
  else why=`Оставь ${dec(b)} кг и добавь по 1 повтору`;
  if(mu<1){if(dl){if(mu<0.65){t=b*mu;why=`Разгрузка совпала с фазой «${e.ph.name}»: −${Math.round((1-mu)*100)}% от ${dec(b)} кг`;}}
   else{why+=`${why?". ":""}По плану ${dec(rr(t))} кг, по циклу −${Math.round((1-mu)*100)}%`;t=t*mu;cls="same";}}
@@ -1226,13 +1227,16 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
       ws.getCell(row,11).value={formula:`IF(I${row}="","",C${row}*IF(J${row}="",M${row},J${row})*I${row})`};ws.getCell(row,11).numFmt="#,##0";ws.getCell(row,11).font={name:F,bold:true,size:10};
       const H=hist[key]||(hist[key]=[]),mu=e.ph?e.ph.mul:1,dl=w===3;
       let P=null;for(let k=H.length-1;k>=0;k--)if(!H[k].dl){P=H[k];break;}
-      if(w===0&&W>=4){const B=H.find(x=>x.W===W-4);if(B)P=B;}
+      let nb=0;if(w===0&&W>=4){const B=H.find(x=>x.W===W-4);if(B){P=B;nb=1;}else nb=2;}
       if(P){const pre=P.m===m?"":`'Блок ${P.m+1}'!`,N0=`N${row}`,st=`IF(${N0}<20,1,2.5)`,rnd=x=>`IF(${x}<20,ROUND(${x},0),MROUND(${x},2.5))`;
-       ws.getCell(row,14).value={formula:`IF(${pre}I${P.row}="","",${pre}I${P.row}/${P.mul})`};
+       ws.getCell(row,14).value={formula:P.mul<1?`IF(${pre}I${P.row}="","",${rnd(`${pre}I${P.row}/${P.mul}`)})`:`IF(${pre}I${P.row}="","",${pre}I${P.row})`};
        ws.getCell(row,15).value={formula:`IF(${pre}K${P.row}="","",${pre}K${P.row}/${P.mul})`};
        const cyc=mu<1&&!dl?` · по циклу вес −${Math.round((1-mu)*100)}%`:"";let x,reps,hint;
+       const up5=`MAX(${N0}+${st},MROUND(${N0}*1.05,${st}))`;
        if(dl){const k=Math.min(0.65,mu);x=`${N0}*${k}`;reps=`${lo}`;hint=`"Разгрузка: ${Math.round(k*100)}% от рабочего веса"`;}
-       else if(top<P.top){x=`MAX(${N0}+${st},CEILING(${N0}*1.05,${st}))*${mu}`;reps=`${lo}`;hint=`"Повторов по плану меньше — вес +5%. Получается легко — делай до ${top}${cyc}"`;}
+       else if(nb===1){x=`${up5}*${mu}`;reps=`${lo}`;hint=`"Новый блок: +5% к 1-й неделе прошлого блока${cyc}"`;}
+       else if(nb===2){x=`${N0}*0.8*${mu}`;reps=`${lo}`;hint=`"Новый блок: 80% от прошлого веса — повторов снова больше${cyc}"`;}
+       else if(top<P.top){x=`${up5}*${mu}`;reps=`${lo}`;hint=`"Повторов по плану меньше — вес +5%. Получается легко — делай до ${top}${cyc}"`;}
        else{const tg=`ROUND(O${row}*(1+${PADDR}),2)`,wp=`MAX(${N0},CEILING(${tg}/(C${row}*${top})-0.001,${st}))`;x=`${wp}*${mu}`;
         reps=`MAX(${lo},MIN(${top},ROUNDUP(${tg}/(C${row}*${wp})-0.001,0)))`;
         hint=`IF(${N0}*C${row}*${top}>=${tg},"Цель — тоннаж "&ROUND(${tg},0)&" кг: вес тот же, повторов больше${cyc}","Повторы были на максимуме — вес вверх${cyc}")`;}
