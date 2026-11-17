@@ -859,7 +859,7 @@ function prevDown(w){const st=stp(w-0.01);return Math.max(st,Math.ceil(w/st-1e-9
 // Сколько обычных (не разгрузочных) недель между прошлой записью и текущей прошли совсем без тренировок
 function gapWeeks(from,to){let g=0;for(let w=from+1;w<to;w++){if(w%4===3)continue;let any=false;for(let k=0;k<N()&&!any;k++)for(let s=0;s<7&&!any;s++){const L=S.log[lk(w,k,s)];if(L&&(L.done||(L.sets||[]).some(c=>c&&(c.w||c.r))))any=true;}if(!any)g++;}return g;}
 function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
- while(w>=0){if(k<0){w--;k=N()-1;continue;}if(w%4!==3&&tplOf(w,k)===t){const e=exRow(w,t,s,k),v=setVals(w,k,s,e).filter(Boolean);if(v.length)return{W:w,i:k,e,v};}k--;}return null;}
+ while(w>=0){if(k<0){w--;k=N()-1;continue;}if(w%4!==3&&tplOf(w,k)===t){const e=exRow(w,t,s,k),v=setVals(w,k,s,e).filter(Boolean);if(v.length)return{W:w,i:k,s,e,v};}k--;}return null;}
 function tip(W,i,s,e){const I=sugInfo(W,i,s,e);if(!I||!I.why)return"";
  return`<span class="tip ${I.cls}">${{up:"▲",down:"▼",same:"="}[I.cls]} ${I.why} → ставь ${dec(I.w)} кг</span>`;}
 // Следующий вес по сетке: до 20 кг шаг 2, дальше 2,5. 15 → 16, 60 → 62,5.
@@ -868,8 +868,9 @@ function nextUp(w){const st=stp(w);return Math.floor(w/st+1e-9)*st+st;}
 function heavier(w){const st=stp(w);return Math.max(nextUp(w),Math.round(w*1.05/st)*st);}
 function rr(x){const st=stp(x);return Math.round(x/st)*st;}
 // Вес, снятый в лёгкую фазу цикла, пересчитывается обратно в рабочий — иначе скидки копятся и прогресс теряется.
-function baseW(P){const m=Math.max(...P.v.map(x=>x.w)),mu=P.e.ph?.mul||1;if(!(mu<1))return m;const x=m/mu,st=stp(x);return Math.round(x/st)*st;}
-function blockStart(W,i,s){const t=tplOf(W,i),w0=W-4;for(let k=0;k<N();k++){if(tplOf(w0,k)!==t)continue;const e=exRow(w0,t,s,k),v=setVals(w0,k,s,e).filter(Boolean);if(v.length)return{W:w0,e,v};}return null;}
+// Скидка по циклу снимается, только если тот вес ставили по нашей подсказке. Первый раз человек выбирает вес сам — он уже рабочий.
+function baseW(P){const m=Math.max(...P.v.map(x=>x.w)),mu=P.e.ph?.mul||1;if(!(mu<1))return m;if(P.s!=null&&!findPrev(P.W,P.i,P.s))return m;const x=m/mu,st=stp(x);return Math.round(x/st)*st;}
+function blockStart(W,i,s){const t=tplOf(W,i),w0=W-4;for(let k=0;k<N();k++){if(tplOf(w0,k)!==t)continue;const e=exRow(w0,t,s,k),v=setVals(w0,k,s,e).filter(Boolean);if(v.length)return{W:w0,i:k,s,e,v};}return null;}
 function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
  const b=baseW(P),mu=e.ph?.mul||1,dl=W%4===3,easy=(P.e.ph?.mul||1)<1,[lo,up]=lowUp(P.e.reps),nup=lowUp(e.reps)[1];
  let t=b,why="",cls="same";
