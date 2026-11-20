@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureStudent;
 use App\Models\Student;
 use App\Models\StudentLoginToken;
+use App\Services\CoursePrice;
 use App\Services\Telegram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -38,6 +39,9 @@ class KonstruktorController extends Controller
             'kind' => ['required', 'in:html,xlsx'],
         ]);
         $student = $request->attributes->get('student');
+        if (! $student->isPaid()) {
+            return response()->json(['error' => 'not_paid'], 402);
+        }
         $name = ($data['kind'] === 'xlsx' ? 'Таблица тренировок' : 'Программа тренировок').'.'.$data['kind'];
         $caption = $data['kind'] === 'xlsx'
             ? 'Таблица тренировок. Открой в Google Таблицах или Excel — вписывай веса, рекомендации посчитаются сами.'
@@ -83,14 +87,15 @@ class KonstruktorController extends Controller
         if (! $user) {
             return response()->json(['error' => 'bad_signature'], 403);
         }
-        if (! $tg->isChannelMember((int) $user['id'])) {
-            return response()->json(['error' => 'not_member'], 403);
-        }
-
+        // Войти может любой из Telegram: без оплаты откроется бесплатная 1-я неделя.
+        $member = $tg->channelMembership((int) $user['id']);
         $student = Student::updateOrCreate(
             ['telegram_id' => (int) $user['id']],
             ['telegram_username' => $user['username'] ?? null, 'first_name' => $user['first_name'] ?? null, 'membership_checked_at' => now()]
         );
+        if ($member && ! $student->paid_at) {
+            $this->mark($student, ['paid_at' => now()]);
+        }
         $this->loginStudent($request, $student);
 
         return response()->json(['ok' => true, 'redirect' => route('konstruktor.show')]);
@@ -134,6 +139,7 @@ class KonstruktorController extends Controller
         }
         $student->update(['state' => $data]);
         $this->mark($student, $marks);
+        $this->nudgeAfterWeek1($student, $data);
 
         return response()->noContent();
     }
@@ -150,6 +156,36 @@ class KonstruktorController extends Controller
             $student->refresh();
             \Illuminate\Support\Facades\Log::warning('Student marks skipped: '.$e->getMessage());
         }
+    }
+
+    /** Бесплатный ученик прошёл 1-ю неделю — бот один раз предлагает открыть всю программу. */
+    private function nudgeAfterWeek1(Student $student, array $data): void
+    {
+        if ($student->isPaid() || $student->week1_nudged_at) {
+            return;
+        }
+        $sessions = [];
+        foreach ((array) ($data['S']['log'] ?? []) as $key => $ex) {
+            $p = explode('|', (string) $key);
+            $n = count($p);
+            if ($n < 3 || $p[$n - 3] !== '0') {
+                continue;
+            }
+            $filled = ! empty($ex['done']) || collect((array) ($ex['sets'] ?? []))->contains(fn ($s) => ! empty($s['w']) || ! empty($s['r']));
+            if ($filled) {
+                $sessions[$p[$n - 2]] = true;
+            }
+        }
+        $need = min(3, max(1, count((array) ($data['S']['days'] ?? [0, 2, 4]))));
+        if (count($sessions) < $need) {
+            return;
+        }
+        $this->mark($student, ['week1_nudged_at' => now()]);
+        app(Telegram::class)->sendMessage((int) $student->telegram_id,
+            "Первая неделя пройдена 💪\n\nДальше — 11 недель, которые программа уже подготовила под тебя: веса растут каждую неделю, разгрузки, 3 блока. Плюс видеокурс «Сам себе тренер».\n\n💰 ".CoursePrice::line(), [
+                [['text' => '💳 Открыть всю программу — '.CoursePrice::text(), 'url' => CoursePrice::payUrl()]],
+                [['text' => config('bot_texts.btn_paid'), 'callback_data' => 'paid']],
+            ]);
     }
 
     /** Сколько подходов ученик вписал (вес или повторы) — растёт, значит тренируется. */

@@ -165,7 +165,9 @@ class KonstruktorAccessTest extends TestCase
     public function test_mini_app_rejects_non_member(): void
     {
         $this->fakeTelegram('left');
-        $this->postJson('/konstruktor/telegram-auth', ['initData' => $this->initData(2)])->assertForbidden()->assertJson(['error' => 'not_member']);
+        // Бесплатная неделя: войти может любой, но без оплаты
+        $this->postJson('/konstruktor/telegram-auth', ['initData' => $this->initData(2)])->assertOk();
+        $this->assertNull(Student::where('telegram_id', 2)->first()->paid_at);
     }
 
     public function test_expired_token_rejected(): void
@@ -198,7 +200,8 @@ class KonstruktorAccessTest extends TestCase
         $this->fakeTelegram('left');
         $s = Student::create(['telegram_id' => 3, 'membership_checked_at' => now()->subDays(2)]);
         $this->withSession(['konstruktor_student_id' => $s->id]);
-        $this->get('/konstruktor')->assertRedirect(route('konstruktor.login'));
+        // вышел из канала — остаётся в конструкторе, но без оплаты видна только 1-я неделя
+        $this->get('/konstruktor')->assertOk()->assertSee('"paid":false', false);
     }
 
     public function test_browser_link_logs_in_once(): void
@@ -218,6 +221,9 @@ class KonstruktorAccessTest extends TestCase
         $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('p.html', '<html>программа</html>');
         $this->post('/konstruktor/send-file', ['kind' => 'html', 'file' => $file], ['Accept' => 'application/json'])->assertStatus(401);
         $s = Student::create(['telegram_id' => 5, 'membership_checked_at' => now()]);
+        $this->withSession(['konstruktor_student_id' => $s->id])
+            ->post('/konstruktor/send-file', ['kind' => 'html', 'file' => $file], ['Accept' => 'application/json'])->assertStatus(402);
+        $s->update(['paid_at' => now()]);
         $this->withSession(['konstruktor_student_id' => $s->id])
             ->post('/konstruktor/send-file', ['kind' => 'html', 'file' => $file], ['Accept' => 'application/json'])->assertOk();
         Http::assertSent(fn ($r) => str_contains($r->url(), '/sendDocument') && str_contains($r->body(), 'name="chat_id"') && str_contains($r->body(), "\r\n\r\n5\r\n"));
@@ -257,11 +263,56 @@ class KonstruktorAccessTest extends TestCase
         $this->assertTrue($s->fresh()->membership_checked_at->lt(now()->subDay()));
     }
 
-    public function test_left_channel_still_denied(): void
+    public function test_channel_member_becomes_paid(): void
     {
-        Http::fake(['api.telegram.org/*' => Http::response(['ok' => false, 'error_code' => 400, 'description' => 'Bad Request: user not found'], 400)]);
+        $this->fakeTelegram('member');
         $s = Student::create(['telegram_id' => 14, 'membership_checked_at' => now()->subDays(2)]);
-        $this->withSession(['konstruktor_student_id' => $s->id])->get('/konstruktor')->assertRedirect();
+        $this->withSession(['konstruktor_student_id' => $s->id])->get('/konstruktor')->assertOk()->assertSee('"paid":true', false);
+        $this->assertNotNull($s->fresh()->paid_at);
+    }
+
+    public function test_presale_price_then_regular(): void
+    {
+        config(['course.presale_from' => now()->subDay()->toDateTimeString(), 'course.presale_limit' => 2]);
+        CoursePurchase::create(['telegram_id' => 1, 'status' => 'approved', 'decided_at' => now()->subDays(5)]); // старая покупка не считается
+        $this->assertSame('9 990 ₸', \App\Services\CoursePrice::text());
+        $this->assertStringContainsString('осталось 2 из 2', \App\Services\CoursePrice::line());
+        CoursePurchase::create(['telegram_id' => 2, 'status' => 'approved', 'decided_at' => now()]);
+        $this->assertStringContainsString('осталось 1 из 2', \App\Services\CoursePrice::line());
+        CoursePurchase::create(['telegram_id' => 3, 'status' => 'approved', 'decided_at' => now()]);
+        $this->assertSame('15 990 ₸', \App\Services\CoursePrice::line());
+    }
+
+    public function test_start_shows_free_try_and_approve_unlocks(): void
+    {
+        config(['telegram.webhook_secret' => 's3cret']);
+        $this->fakeTelegram('left');
+        $this->hook($this->msg(31, ['text' => '/start']));
+        $m = collect($this->sent('sendMessage'))->firstWhere('chat_id', 31);
+        $this->assertStringContainsString('бесплатно', $m['text']);
+        $b = $this->buttons($m);
+        $this->assertArrayHasKey('web_app', $b[0]);
+        $this->assertStringContainsString('9 990', $b[1]['text']);
+
+        $p = CoursePurchase::create(['telegram_id' => 31, 'status' => 'pending']);
+        $this->hook($this->cb(self::ADMIN, 'ap:'.$p->id));
+        $this->assertNotNull(Student::where('telegram_id', 31)->first()->paid_at);
+    }
+
+    public function test_week1_done_nudges_once(): void
+    {
+        $this->fakeTelegram('left');
+        $s = Student::create(['telegram_id' => 32, 'membership_checked_at' => now()]);
+        $this->withSession(['konstruktor_student_id' => $s->id]);
+        $log = [];
+        foreach ([0, 1, 2] as $i) {
+            $log["Жиросжигание|Новичок|024|0|$i|0"] = ['sets' => [['w' => '20', 'r' => '12']]];
+        }
+        $this->putJson('/konstruktor/state', ['S' => ['days' => [0, 2, 4], 'log' => $log]])->assertNoContent();
+        $this->putJson('/konstruktor/state', ['S' => ['days' => [0, 2, 4], 'log' => $log]])->assertNoContent();
+        $msgs = collect($this->sent('sendMessage'))->where('chat_id', 32)->filter(fn ($m) => str_contains($m['text'], 'Первая неделя пройдена'));
+        $this->assertCount(1, $msgs);
+        $this->assertNotNull($s->fresh()->week1_nudged_at);
     }
 
     public function test_activity_marks_and_admin_stats(): void

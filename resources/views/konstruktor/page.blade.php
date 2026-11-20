@@ -168,6 +168,10 @@ dl.terms dd{margin:0;color:var(--muted)}
 .exnote{font-size:13px;color:var(--muted);margin:2px 0 4px}
 .qibox{position:fixed;left:16px;right:16px;bottom:16px;z-index:1000;max-width:480px;margin:0 auto;padding:16px;border-radius:14px;background:var(--surface);color:var(--fg);border:1px solid var(--line);box-shadow:0 10px 40px rgba(0,0,0,.25);display:grid;gap:12px}
 .qibox[hidden]{display:none}.qibox p{margin:0;line-height:1.45}
+.lockwrap{position:relative;min-height:420px}.lockblur{filter:blur(5px);opacity:.55;pointer-events:none;user-select:none;max-height:640px;overflow:hidden}
+.lockov{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;padding:40px 12px}
+.lockcard{max-width:380px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.18);display:grid;gap:8px;text-align:center}
+.lockcard p{margin:0}.lockcard .btn{text-decoration:none;justify-content:center}
 .cycle{display:grid;gap:10px;padding:16px;border-radius:12px;background:var(--sunk)}
 .cycle b.big{font-family:var(--f-display);font-size:17px;font-weight:700}
 .cyc{display:grid;gap:12px;padding:14px 16px;border-radius:12px;background:var(--sunk)}
@@ -263,7 +267,7 @@ dl.terms dd{margin:0;color:var(--muted)}
 </head><body>
 @endverbatim
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>window.TP_API = {!! json_encode(['state' => $student->state, 'uid' => $student->id, 'saveUrl' => route('konstruktor.state'), 'csrfUrl' => route('konstruktor.csrf'), 'dlMark' => route('konstruktor.downloaded'), 'browserLink' => route('konstruktor.browserLink'), 'sendFile' => route('konstruktor.sendFile'), 'csrf' => csrf_token()], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
+<script>window.TP_API = {!! json_encode(['state' => $student->state, 'uid' => $student->id, 'saveUrl' => route('konstruktor.state'), 'csrfUrl' => route('konstruktor.csrf'), 'dlMark' => route('konstruktor.downloaded'), 'browserLink' => route('konstruktor.browserLink'), 'sendFile' => route('konstruktor.sendFile'), 'csrf' => csrf_token(), 'paid' => $student->isPaid(), 'price' => \App\Services\CoursePrice::text(), 'priceLine' => \App\Services\CoursePrice::line(), 'payUrl' => \App\Services\CoursePrice::payUrl(), 'bot' => 'https://t.me/'.ltrim((string) (config('telegram.bot_username') ?: 'samsebetrener_kz_bot'), '@')], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
 <form method="POST" action="{{ route('konstruktor.logout') }}" style="position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:20;margin:0">
     @csrf
     <button type="submit" style="font:600 12px system-ui,sans-serif;padding:6px 12px;border-radius:999px;border:1px solid #D3D8E1;background:#fff;color:#5B6474;cursor:pointer">Выйти{{ $student->first_name ? ' · '.e($student->first_name) : '' }}</button>
@@ -902,9 +906,18 @@ function scheme(e){const lu=lowUp(e.reps);
   return`<div class="scheme t"><div><b>${esc(dash(e.reps))}</b><span>работа / отдых</span></div></div>`;}
  const lab=/тест/.test(e.reps)?"тест":plural(lu[1],"повтор","повтора","повторов");
  return`<div class="scheme"><div><b>${e.sets}</b><span>${plural(e.sets,"подход","подхода","подходов")}</span></div><i>×</i><div><b>${esc(dash(e.reps))}</b><span>${lab}</span></div></div>`;}
+// Бесплатный доступ: без оплаты открыта только 1-я неделя.
+const FREE=()=>!!(API&&API.paid===false),locked=W=>FREE()&&W>0;
+function payBox(){const tg=window.Telegram?.WebApp;return`<div class="lockov"><div class="lockcard"><b>🔒 Ещё 11 недель уже готовы под тебя</b>
+ <p>Веса растут каждую неделю, разгрузки, 3 блока — всё по твоим записям. Плюс видеокурс «Сам себе тренер».</p>
+ <a class="btn" id="payBtn" href="${esc(API.payUrl||"#")}" target="_blank" rel="noopener">Открыть всё — ${esc(API.price||"")}</a>
+ <p class="hint">${esc(API.priceLine||"")}</p>
+ <p class="hint">Оплатил в Kaspi? Пришли чек боту — <a href="${esc(API.bot||"#")}" id="botLink" target="_blank" rel="noopener">открыть бота</a>. После проверки откроется всё, твои веса сохранятся.</p></div></div>`;}
+document.addEventListener("click",ev=>{const a=ev.target.closest("#payBtn,#botLink");if(!a)return;const tg=window.Telegram?.WebApp;if(!tg)return;ev.preventDefault();
+ if(a.id==="botLink"&&tg.openTelegramLink)tg.openTelegramLink(a.href);else if(tg.openLink)tg.openLink(a.href);else location.href=a.href;});
 function renderWeekMap(){const g=S.goal;let h="";
  for(let m=0;m<3;m++){h+=`<div class="blk"><span class="bt"><b>Блок ${m+1}</b> · ${MESO_NAME[g][m]}</span><div class="wk">`;
-  for(let w=0;w<4;w++){const W=m*4+w;h+=`<button type="button" class="${w===3?"dl":""}" aria-pressed="${W===S.W}" data-w="${W}" aria-label="Неделя ${W+1}${w===3?", разгрузка":""}">${W+1}</button>`;}
+  for(let w=0;w<4;w++){const W=m*4+w;h+=`<button type="button" class="${w===3?"dl":""}" aria-pressed="${W===S.W}" data-w="${W}" aria-label="Неделя ${W+1}${w===3?", разгрузка":""}${locked(W)?", закрыта":""}">${locked(W)?"🔒":W+1}</button>`;}
   h+=`</div></div>`;}
  $("weekMap").innerHTML=h;}
 function renderProgram(){
@@ -935,7 +948,7 @@ function renderProgram(){
    <div class="warm"><h4>Сначала разминка · ${isHome()?"5":ph&&ph.key==="ovu"?"15":"10"} минут. Не пропускай</h4><ol>${warmSteps(t).map(x=>`<li><span><b>${x[0]}:</b> ${esc(x[1])}</span></li>`).join("")}</ol></div>
    ${isHome()?`<p class="hint" style="margin:0 0 4px"><b>По кругу:</b> упражнения подряд — работа и отдых по таймеру, как написано у каждого. Прошёл все 7 — отдых 1 минута и следующий круг.</p>`:""}<div class="exlist">${rows}</div>
    <div class="daytot"><span>${isHome()?`Между кругами — 1 минута отдыха. Вся тренировка ≈ ${homeMin(W,t,i)} мин + разминка. Заминка: 3 минуты спокойно походи по дому + растяжка ног, спины и груди.`:"Заминка: 5 минут спокойно на дорожке + растяжка мышц, которые работали."}</span>${isHome()?"":`<span>Тоннаж тренировки: <b id="dt_${i}">${fmt(tot)}</b> кг</span>`}</div></article>`;}
- $("daysOut").innerHTML=html;
+ $("daysOut").innerHTML=locked(W)?`<div class="lockwrap"><div class="lockblur" aria-hidden="true" inert>${html}</div>${payBox()}</div>`:html;
  $("prevW").disabled=W===0;$("nextW").disabled=W===11;
  renderBars();}
 function renderBars(){const t=[...Array(12)].map((_,W)=>N()>=2?weekTon(W):0),mx=Math.max(...t,1);
@@ -975,7 +988,7 @@ document.addEventListener("input",ev=>{const el=ev.target;
  if(el.id==="c_w"||el.id==="c_r"){const w=num("c_w"),r=num("c_r");$("c_out").textContent=(w>0&&r>0)?`≈ максимум ${dec(Math.round(w*(1+r/30)*2)/2)} кг`:"≈ максимум появится здесь";}});
 document.addEventListener("change",ev=>{if(ev.target.dataset&&ev.target.dataset.f==="done"){const k=ev.target.dataset.k;S.log[k]=S.log[k]||{};S.log[k].done=ev.target.checked;save();return;}
  if(["sex","fl_mv","cyc_on"].includes(ev.target.id)){markTouched();renderKcal();renderProgram();save();}});
-$("copyBtn").addEventListener("click",()=>{const W=S.W;let t=`${$("name").value||"Клиент"} — ${GOAL_RU[S.goal]}, ${S.level.toLowerCase()}, неделя ${W+1} из 12 (${WEEKNAMES[W%4].toLowerCase()})\n`;
+$("copyBtn").addEventListener("click",()=>{const W=S.W;if(locked(W)){$("copyMsg").textContent="Эта неделя откроется после оплаты";return;}let t=`${$("name").value||"Клиент"} — ${GOAL_RU[S.goal]}, ${S.level.toLowerCase()}, неделя ${W+1} из 12 (${WEEKNAMES[W%4].toLowerCase()})\n`;
  for(let i=0;i<N();i++){const tt=tplOf(W,i);t+=`\nТренировка ${i+1} · ${DAYL[tt]} ${dateFor(W,i)}\n`;
   for(let s=0;s<7;s++){const e=exRow(W,tt,s,i),sv=setVals(W,i,s,e);const done=sv.filter(Boolean).map(v=>`${dec(v.w)}×${v.r}`).join(", ");t+=`${e.block} ${e.name}: ${e.sets}×${dash(e.reps)}${done?` — ${done}`:""}\n`;}}
  t+=`\nТоннаж недели: ${fmt(weekTon(W))} кг`;
@@ -1032,6 +1045,7 @@ let tgLink=null;
 function tgPrefetch(){if(!IN_TG||!API?.browserLink)return;fetch(API.browserLink,{method:"POST",credentials:"same-origin",headers:{"Accept":"application/json","X-CSRF-TOKEN":API.csrf||""}}).then(r=>r.ok?r.json():null).then(j=>{if(j?.url)tgLink={url:j.url,at:Date.now()};}).catch(()=>{});}
 tgPrefetch();setInterval(()=>{if(!tgLink||Date.now()-tgLink.at>20*60000)tgPrefetch();},5*60000);
 async function doSave(kind){
+ if(FREE()){$("dlMsg").innerHTML=`Скачать таблицу на все 12 недель можно после оплаты. <a href="${esc(API.payUrl||"#")}" id="payBtn" style="color:var(--accent)">Открыть всё — ${esc(API.price||"")}</a>`;return;}
  if(IN_TG&&API?.sendFile){
   // В Telegram файлы не скачиваются — бот присылает их прямо в чат
   $("dlMsg").textContent=kind==="csv"?"Собираю таблицу…":"Собираю программу…";

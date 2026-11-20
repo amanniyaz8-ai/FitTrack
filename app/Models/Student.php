@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class Student extends Model
 {
-    protected $fillable = ['telegram_id', 'telegram_username', 'first_name', 'state', 'membership_checked_at', 'last_login_at', 'first_open_at', 'onboarded_at', 'downloaded_at', 'last_log_at'];
+    protected $fillable = ['telegram_id', 'telegram_username', 'first_name', 'state', 'membership_checked_at', 'last_login_at', 'first_open_at', 'onboarded_at', 'downloaded_at', 'last_log_at', 'paid_at', 'week1_nudged_at'];
 
     protected $casts = [
         'state' => 'array',
@@ -18,7 +18,15 @@ class Student extends Model
         'onboarded_at' => 'datetime',
         'downloaded_at' => 'datetime',
         'last_log_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'week1_nudged_at' => 'datetime',
     ];
+
+    /** Оплатил курс (одобренный чек или участник закрытого канала). Без оплаты открыта только 1-я неделя. */
+    public function isPaid(): bool
+    {
+        return $this->paid_at !== null;
+    }
 
     public function loginTokens(): HasMany
     {

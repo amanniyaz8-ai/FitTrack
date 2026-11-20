@@ -26,16 +26,22 @@ class EnsureStudent
         }
 
         $hours = config('telegram.recheck_hours');
-        if (! $student->membership_checked_at || $student->membership_checked_at->lt(now()->subHours($hours))) {
+        // Неоплатившего проверяем чаще (раз в 10 минут) — вдруг уже вступил в канал после оплаты.
+        $every = $student->paid_at ? now()->subHours($hours) : now()->subMinutes(10);
+        if (! $student->membership_checked_at || $student->membership_checked_at->lt($every)) {
+            // Конструктор открыт всем: без оплаты — бесплатная 1-я неделя. Участник закрытого канала считается оплатившим.
+            // null — Telegram не ответил: ничего не меняем, проверим в следующий раз.
             $member = $this->tg->channelMembership((int) $student->telegram_id);
-            if ($member === false) {
-                $request->session()->forget(self::SESSION_KEY);
-                Cookie::queue(Cookie::forget(self::COOKIE));
-                return $this->deny($request, 'Доступ к конструктору есть только у участников закрытого канала курса.');
-            }
-            // null — Telegram не ответил: пускаем, проверим в следующий раз.
-            if ($member === true) {
-                $student->update(['membership_checked_at' => now()]);
+            if ($member !== null) {
+                $upd = ['membership_checked_at' => now()];
+                if ($member && ! $student->paid_at) {
+                    $upd['paid_at'] = now();
+                }
+                try {
+                    $student->update($upd);
+                } catch (\Throwable $e) {
+                    $student->update(['membership_checked_at' => now()]);
+                }
             }
         }
 

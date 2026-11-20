@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Konstruktor;
 use App\Http\Controllers\Controller;
 use App\Models\CoursePurchase;
 use App\Models\Student;
+use App\Services\CoursePrice;
 use App\Services\Telegram;
 use Illuminate\Http\Request;
 
@@ -33,7 +34,8 @@ class TelegramWebhookController extends Controller
     private function t(string $key): string
     {
         return strtr(config("bot_texts.$key"), [
-            '{price}' => config('bot_texts.price'),
+            '{price}' => CoursePrice::line(),
+            '{price_short}' => CoursePrice::text(),
             '{support}' => config('telegram.support_contact'),
             '{presale_price}' => config('bot_texts.presale_price'),
             '{start_date}' => config('bot_texts.start_date'),
@@ -47,8 +49,10 @@ class TelegramWebhookController extends Controller
 
     private function salesMenu(int $chatId): void
     {
+        $this->tg->setMenuButton(route('konstruktor.app'), $chatId);
         $this->tg->sendMessage($chatId, $this->t('start'), [
-            [['text' => $this->t('btn_pay'), 'url' => config('telegram.pay_url')]],
+            [['text' => $this->t('btn_try'), 'web_app' => ['url' => route('konstruktor.app')]]],
+            [['text' => $this->t('btn_pay'), 'url' => CoursePrice::payUrl()]],
             [['text' => $this->t('btn_paid'), 'callback_data' => 'paid']],
             [['text' => $this->t('btn_free_channel'), 'url' => config('telegram.public_channel_url')]],
         ]);
@@ -143,10 +147,6 @@ class TelegramWebhookController extends Controller
 
         if ($data === 'login') {
             $this->tg->answerCallback($cb['id']);
-            if (! $this->tg->isChannelMember($uid)) {
-                $this->salesMenu($chatId);
-                return;
-            }
             $student = $this->upsertStudent($cb['from']);
             $this->tg->sendMessage($chatId, $this->t('login_link'), [[
                 ['text' => $this->t('btn_app'), 'url' => route('konstruktor.enter', $student->issueLoginToken(30))],
@@ -177,6 +177,13 @@ class TelegramWebhookController extends Controller
                     return;
                 }
                 $p->update(['status' => 'approved', 'invite_link' => $link, 'decided_at' => now()]);
+                $st = Student::firstOrCreate(['telegram_id' => (int) $p->telegram_id], ['telegram_username' => $p->telegram_username, 'first_name' => $p->first_name]);
+                try {
+                    if (! $st->paid_at) {
+                        $st->update(['paid_at' => now()]);
+                    }
+                } catch (\Throwable $e) {
+                }
                 $this->tg->setMenuButton(route('konstruktor.app'), (int) $p->telegram_id);
                 $this->tg->sendMessage($p->telegram_id, $this->t('approved'), [
                     [['text' => $this->t('btn_join'), 'url' => $link]],
@@ -213,6 +220,9 @@ class TelegramWebhookController extends Controller
             '📊 Статистика конструктора',
             '',
             "Купили (одобрено): $paid".($pending ? " · ждут проверки: $pending" : ''),
+            'Цена сейчас: '.CoursePrice::line(),
+            'Попробовали бесплатно: '.$students->whereNull('paid_at')->whereNotNull('first_open_at')->count()
+                .' · оплатили после пробы: '.$students->whereNotNull('paid_at')->whereNotNull('week1_nudged_at')->count(),
             'Зашли в конструктор: '.$students->whereNotNull('first_open_at')->count(),
             'Прошли анкету: '.$students->whereNotNull('onboarded_at')->count(),
             'Скачали таблицу: '.$students->whereNotNull('downloaded_at')->count(),
