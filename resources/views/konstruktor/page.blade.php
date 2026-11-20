@@ -912,6 +912,7 @@ function payBox(){const tg=window.Telegram?.WebApp;return`<div class="lockov"><d
  <p>Веса растут каждую неделю, разгрузки, 3 блока — всё по твоим записям. Плюс видеокурс «Сам себе тренер».</p>
  <a class="btn" id="payBtn" href="${esc(API.payUrl||"#")}" target="_blank" rel="noopener">Открыть всё — ${esc(API.price||"")}</a>
  <p class="hint">${esc(API.priceLine||"")}</p>
+ <p class="hint"><b>В Kaspi впиши сумму ${esc(API.price||"")}</b></p>
  <p class="hint">Оплатил в Kaspi? Пришли чек боту — <a href="${esc(API.bot||"#")}" id="botLink" target="_blank" rel="noopener">открыть бота</a>. После проверки откроется всё, твои веса сохранятся.</p></div></div>`;}
 document.addEventListener("click",ev=>{const a=ev.target.closest("#payBtn,#botLink");if(!a)return;const tg=window.Telegram?.WebApp;if(!tg)return;ev.preventDefault();
  if(a.id==="botLink"&&tg.openTelegramLink)tg.openTelegramLink(a.href);else if(tg.openLink)tg.openLink(a.href);else location.href=a.href;});

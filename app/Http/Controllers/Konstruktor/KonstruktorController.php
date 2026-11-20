@@ -182,7 +182,7 @@ class KonstruktorController extends Controller
         }
         $this->mark($student, ['week1_nudged_at' => now()]);
         app(Telegram::class)->sendMessage((int) $student->telegram_id,
-            "Первая неделя пройдена 💪\n\nДальше — 11 недель, которые программа уже подготовила под тебя: веса растут каждую неделю, разгрузки, 3 блока. Плюс видеокурс «Сам себе тренер».\n\n💰 ".CoursePrice::line(), [
+            "Первая неделя пройдена 💪\n\nДальше — 11 недель, которые программа уже подготовила под тебя: веса растут каждую неделю, разгрузки, 3 блока. Плюс видеокурс «Сам себе тренер».\n\n💰 ".CoursePrice::line()."\nВ Kaspi впиши сумму ".CoursePrice::text().", потом пришли сюда чек.", [
                 [['text' => '💳 Открыть всю программу — '.CoursePrice::text(), 'url' => CoursePrice::payUrl()]],
                 [['text' => config('bot_texts.btn_paid'), 'callback_data' => 'paid']],
             ]);
