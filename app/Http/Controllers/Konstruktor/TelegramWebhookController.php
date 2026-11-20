@@ -228,14 +228,15 @@ class TelegramWebhookController extends Controller
             'Скачали таблицу: '.$students->whereNotNull('downloaded_at')->count(),
             'Вносили веса за 7 дней: '.$students->filter(fn ($s) => $s->last_log_at && $s->last_log_at->gte($week))->count(),
             '',
-            'По ученикам (вход · анкета · таблица · веса):',
+            'По ученикам (💳 оплатил / 🆓 бесплатно · вход · анкета · таблица · веса):',
         ];
         foreach ($students as $s) {
             $name = $s->first_name ?: 'Без имени';
             if ($s->telegram_username) {
                 $name .= ' (@'.$s->telegram_username.')';
             }
-            $lines[] = "• $name — ".$d($s->first_open_at).' · '.($s->onboarded_at ? '✅' : '—').' · '.($s->downloaded_at ? '✅' : '—').' · '.$d($s->last_log_at);
+            $paidMark = $s->paid_at ? '💳 ' : '🆓 ';
+            $lines[] = "• $paidMark$name (id {$s->telegram_id}) — ".$d($s->first_open_at).' · '.($s->onboarded_at ? '✅' : '—').' · '.($s->downloaded_at ? '✅' : '—').' · '.$d($s->last_log_at);
         }
         if ($students->isEmpty()) {
             $lines[] = 'Пока никто не заходил.';
