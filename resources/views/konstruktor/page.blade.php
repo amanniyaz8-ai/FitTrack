@@ -95,6 +95,9 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
 .navrow{display:flex;justify-content:space-between;gap:10px}
 /* workout */
 .panel.day{display:grid;gap:0;padding:0;overflow:hidden}
+details.kbox>summary{list-style:none;cursor:pointer;display:grid;gap:4px;margin-bottom:12px}details.kbox>summary::-webkit-details-marker{display:none}
+details.kbox>summary h2::after{content:" ▸";opacity:.6}details.kbox[open]>summary h2::after{content:" ▾"}
+.ksum{font-size:16px;font-weight:600}
 .panel.day>summary{list-style:none;cursor:pointer}.panel.day>summary::-webkit-details-marker{display:none}
 .panel.day>summary h3::after{content:" ▾";opacity:.7}.panel.day:not([open])>summary h3::after{content:" ▸"}
 .dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:16px 20px;background:var(--fg);color:var(--bg)}
@@ -385,7 +388,7 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
 
 
   <section aria-labelledby="s3">
-    <h2 id="s3">Сколько есть</h2>
+    <details class="kbox"><summary><h2 id="s3">Сколько есть</h2><span class="ksum" id="kSum"></span></summary>
     <div class="panel">
       <p class="hint" id="coefLine"></p>
       <div id="paceBox"><b id="paceLabel">Темп</b><div class="seg" id="paceSeg" style="margin-top:8px"></div></div>
@@ -421,6 +424,7 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
       <p class="note" id="k_note">—</p>
       <p class="hint" id="k_hint"></p>
     </div>
+  </details>
   </section>
 
   <section aria-labelledby="s4">
@@ -815,7 +819,7 @@ function renderKcal(){
  $("k_target").textContent=fmt(target);$("m_p").textContent=p;$("m_f").textContent=f;$("m_c").textContent=c;
  $("m_p_s").textContent=`${pTxt} · ${fmt(p*4)} ккал`;$("m_f_s").textContent=`г · ${dec(fat?0.8:1)} г на кг${fat?" желаемого":""} веса · ${fmt(f*9)} ккал`;$("m_c_s").textContent=`г · остаток · ${fmt(c*4)} ккал`;
  const tot=p*4+f*9+c*4||1;$("b_p").style.width=(p*4/tot*100)+"%";$("b_f").style.width=(f*9/tot*100)+"%";$("b_c").style.width=(c*4/tot*100)+"%";
- $("k_note").textContent=note;}
+ $("k_note").textContent=note;$("kSum").textContent=`Ешь ${fmt(target)} ккал в день · белки ${p} · жиры ${f} · углеводы ${c} г`;}
 
 /* ---------- program over 12 weeks ---------- */
 const N=()=>S.days.length;
