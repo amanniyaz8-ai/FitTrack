@@ -18,3 +18,17 @@ Artisan::command('telegram:set-webhook', function (\App\Services\Telegram $tg) {
     $tg->setDescriptions(config('bot_texts.description'), config('bot_texts.short_description'));
     $this->line('descriptions: ok');
 })->purpose('Подключить вебхук и кнопку «Конструктор» Telegram-бота');
+
+// Раз в 2 недели просим ученика прислать вес — бот сам поправит калории
+Artisan::command('konstruktor:weigh-checkin', function (\App\Services\Telegram $tg) {
+    $n = 0;
+    foreach (\App\Services\WeighCheckin::due() as $s) {
+        if ($tg->sendMessage((int) $s->telegram_id, \App\Services\WeighCheckin::askText($s))) {
+            $s->forceFill(['weigh_asked_at' => now()])->save();
+            $n++;
+        }
+    }
+    $this->info("Спросили вес: $n");
+})->purpose('Напомнить ученикам взвеситься (раз в 2 недели)');
+
+\Illuminate\Support\Facades\Schedule::command('konstruktor:weigh-checkin')->dailyAt('09:00')->timezone('Asia/Almaty');

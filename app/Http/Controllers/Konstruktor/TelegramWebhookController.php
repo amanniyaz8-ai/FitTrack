@@ -94,6 +94,19 @@ class TelegramWebhookController extends Controller
             return;
         }
 
+        // Ответ на «пришли свой вес» — поправляем калории
+        if (($kg = \App\Services\WeighCheckin::parseKg((string) ($msg['text'] ?? ''))) !== null) {
+            $st = Student::where('telegram_id', $uid)->first();
+            if ($st && $st->weigh_asked_at) {
+                try {
+                    $this->tg->sendMessage($chatId, \App\Services\WeighCheckin::apply($st, $kg), [[$this->appButton()]]);
+                } catch (\Throwable $e) {
+                    $this->tg->sendMessage($chatId, 'Не получилось записать вес — попробуй ещё раз чуть позже.');
+                }
+                return;
+            }
+        }
+
         // Любой текст / команда: участнику — меню конструктора, остальным — продажа
         if ($this->tg->isChannelMember($uid)) {
             $this->upsertStudent($from);

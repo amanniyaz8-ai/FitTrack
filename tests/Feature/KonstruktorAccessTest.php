@@ -367,4 +367,40 @@ class KonstruktorAccessTest extends TestCase
         $this->assertSame('https://t.me/samsebetrener_kz_bot?start=konstruktor', $this->buttons($post)[0]['url']);
         $this->assertSame(42, (int) $this->sent('pinChatMessage')[0]['message_id']);
     }
+
+    public function test_weigh_checkin_asks_and_adjusts_calories(): void
+    {
+        $this->fakeTelegram('left');
+        $st = Student::create(['telegram_id' => 7001, 'first_name' => 'Гуля', 'paid_at' => now()->subDays(20), 'onboarded_at' => now()->subDays(15),
+            'state' => ['S' => ['goal' => 'Жиросжигание', 'kadj' => 0], 'f' => ['weight' => 80, 'fl_kg' => 8, 'fl_mo' => 4], 'savedAt' => 1]]);
+        Student::create(['telegram_id' => 7002, 'paid_at' => now(), 'onboarded_at' => now()->subDays(3), 'state' => ['f' => ['weight' => 70]]]);
+
+        $this->artisan('konstruktor:weigh-checkin');
+        $asked = $this->sent('sendMessage');
+        $this->assertCount(1, $asked);
+        $this->assertSame(7001, (int) $asked[0]['chat_id']);
+        $this->assertNotNull($st->fresh()->weigh_asked_at);
+
+        // второй запуск в тот же день — не спамим
+        $this->artisan('konstruktor:weigh-checkin');
+        $this->assertCount(1, $this->sent('sendMessage'));
+
+        // за 2 недели −0,2 кг при плане −0,46 кг/нед → −150 ккал
+        $this->hook($this->msg(7001, ['text' => '79,8']))->assertNoContent();
+        $s = $st->fresh();
+        $this->assertSame(-150, $s->state['S']['kadj']);
+        $this->assertEquals(79.8, $s->state['f']['weight']);
+        $this->assertNull($s->weigh_asked_at);
+        $this->assertGreaterThan(1, $s->state['savedAt']);
+        $reply = collect($this->sent('sendMessage'))->last();
+        $this->assertStringContainsString('Убираю 150', $reply['text']);
+    }
+
+    public function test_number_from_not_asked_user_is_ignored_by_checkin(): void
+    {
+        $this->fakeTelegram('left');
+        Student::create(['telegram_id' => 7003, 'state' => ['S' => [], 'f' => ['weight' => 70]]]);
+        $this->hook($this->msg(7003, ['text' => '71']))->assertNoContent();
+        $this->assertSame(70, Student::where('telegram_id', 7003)->first()->state['f']['weight']);
+    }
 }

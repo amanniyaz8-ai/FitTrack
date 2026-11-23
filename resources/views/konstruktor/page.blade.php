@@ -390,6 +390,7 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
   <section aria-labelledby="s3">
     <details class="kbox"><summary><h2 id="s3">Сколько есть</h2><span class="ksum" id="kSum"></span></summary>
     <div class="panel">
+      <div><b>Твой обычный день</b><div class="seg" id="actSeg" style="margin-top:8px"></div></div>
       <p class="hint" id="coefLine"></p>
       <div id="paceBox"><b id="paceLabel">Темп</b><div class="seg" id="paceSeg" style="margin-top:8px"></div></div>
       <div id="flBox" style="display:grid;gap:12px" hidden>
@@ -403,7 +404,7 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
               <option value="5000" selected>+5 000 шагов</option>
               <option value="7500">+7 500 шагов</option>
             </select>
-            <small>Сверх того, что ходишь сейчас: прогулка, пешком до работы, лестница</small>
+            <small>Сверх твоего обычного дня: прогулка, пешком до работы, лестница</small>
           </label>
         </div>
         <div class="split" id="splitBox"></div>
@@ -740,7 +741,7 @@ const RAMP_STEPS=[
  [["Раскатка","ролл ягодиц и задней поверхности бедра — 2 мин"],["Активация","мост на одной ноге 2×8, «птица-собака» 2×6 на сторону"],["Подвижность","наклон с палкой на спине 2×8, боковой выпад 2×5 на ногу"]]];
 const RAMP_PREP={"Жиросжигание":"1 подход первого упражнения с половиной рабочего веса × 10 повторов","Набор массы":"2 разминочных подхода первого упражнения: 10 раз с половиной веса, потом 5 раз чуть тяжелее","Сила":"лесенка в главном упражнении: пустой гриф × 8, 50% × 5, 70% × 3, 80% × 1"};
 const KEY="tp-constructor-v2"+(window.TP_API&&window.TP_API.uid?"-u"+window.TP_API.uid:"");
-let S={goal:"Жиросжигание",level:"Средний",W:0,pace:1,days:[0,2,4],log:{},injs:[]};
+let S={goal:"Жиросжигание",level:"Средний",W:0,pace:1,days:[0,2,4],log:{},injs:[],act:0,kadj:0};
 const FIELDS=["name","sex","age","height","weight","start","fl_kg","fl_mo","fl_mv","rm_sq","rm_bp","rm_dl","rm_ohp","cyc_start","cyc_len","cyc_per"];
 const $=id=>document.getElementById(id);
 const num=id=>parseFloat(($(id).value||"").replace(",","."));
@@ -774,20 +775,22 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 window.addEventListener("pagehide",flush);
 
 /* ---------- calories ---------- */
+const ACT=[["Почти весь день сижу","Офис, учёба, за рулём, дома · обычно до 6 000 шагов"],["Много на ногах","Продавец, учитель, повар, официант · 7 000–11 000 шагов"],["Весь день в движении","Пеший курьер, стройка, склад · больше 11 000 шагов"]],ACT_ADD=[0,0.15,0.3];
 const PACE={"Жиросжигание":[["Мягко",-0.10],["Оптимально",-0.15],["Быстро",-0.20]],"Набор массы":[["Чисто",0.05],["Оптимально",0.08],["Быстро",0.10]],"Сила":[["В норме",0],["Чуть больше",0.05]]};
 function renderKcal(){
  const g=S.goal,fat=g==="Жиросжигание",opts=PACE[g];if(S.pace>=opts.length)S.pace=1;
  $("paceBox").hidden=fat;$("flBox").hidden=!fat;
+ $("actSeg").innerHTML=ACT.map((o,i)=>`<button type="button" aria-pressed="${(S.act|0)===i}" data-actf="${i}">${o[0]}</button>`).join("");
  if(!fat){$("paceLabel").textContent=g==="Набор массы"?"Насколько быстро набираем":"Калории для силы";
   $("paceSeg").innerHTML=opts.map((o,i)=>`<button type="button" aria-pressed="${i===S.pace}" data-pace="${i}">${o[0]} · ${o[1]>0?"+":""}${Math.round(o[1]*100)}%</button>`).join("");}
- const nd=N(),coef=isHome()?1.375:nd>=4?1.465:1.375;
- $("coefLine").textContent=`Коэффициент активности ${dec(coef)} — ${nd>=4?"4–5":"1–3"} ${plural(nd,"тренировка","тренировки","тренировок")} в неделю . Тренировки уже внутри нормы — второй раз их не прибавляем.`;
+ const nd=N(),act=S.act|0,trn=isHome()?0.15:nd>=4?0.25:0.15,coef=Math.round((1.2+ACT_ADD[act]+trn)*1000)/1000;
+ $("coefLine").textContent=`Коэффициент активности ${dec(coef)}: обычный день «${ACT[act][0].toLowerCase()}» + ${nd} ${plural(nd,"тренировка","тренировки","тренировок")} в неделю.${S.kadj?` Поправка по твоему весу: ${S.kadj>0?"+":"−"}${Math.abs(S.kadj)} ккал.`:""}`;
  $("k_hint").textContent=fat?"Считаем по формуле Миффлина — Сан Жеора. Формула ошибается до 10%, поэтому раз в 2–3 недели сверяйся с весами: вес стоит — убери ещё 100–150 ккал; уходит быстрее 1% веса в неделю — добавь немного еды."
   :"Считаем по формуле Миффлина — Сан Жеора. Это точка старта: смотри средний вес за неделю. Вес стоит 2–3 недели — добавь 150–200 ккал; растёт заметно быстрее плана вместе с талией — убери 150–200.";
  const sex=$("sex").value,a=num("age"),h=num("height"),w=num("weight");
  const blank=m=>{["k_tdee","k_target","k_fc","m_p","m_f","m_c"].forEach(i=>$(i).textContent="—");$("k_note").textContent=m;$("splitBox").innerHTML="";};
  if(!(a>0&&h>0&&w>0))return blank("Впиши возраст, рост и вес в анкете (кнопка «Изменить»).");
- const bmr=10*w+6.25*h-5*a+(sex==="m"?5:-161),tdee=bmr*coef;
+ const bmr=10*w+6.25*h-5*a+(sex==="m"?5:-161),tdee=bmr*coef+(S.kadj|0);
  let target,p,pTxt,f,fBase,note,floored=false;
  $("k_tdee").textContent=fmt(tdee);
  if(fat){const kg=num("fl_kg"),mo=num("fl_mo");
@@ -1033,6 +1036,7 @@ document.addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b
  else if(b.dataset.level){S.level=b.dataset.level;markTouched();renderAll();save();}
  else if(b.dataset.inj){const k=b.dataset.inj;S.injs=k==="none"?[]:S.injs.includes(k)?S.injs.filter(x=>x!==k):[...S.injs,k];markTouched();renderInj();renderProgram();save();}
  else if(b.dataset.pace){S.pace=+b.dataset.pace;renderKcal();save();}
+ else if(b.dataset.actf){S.act=+b.dataset.actf;renderKcal();save();}
  else if(b.dataset.day){const d=+b.dataset.day;if(S.days.includes(d)){S.days=S.days.filter(x=>x!==d);}else if(S.days.length<5){S.days=[...S.days,d].sort((a,b)=>a-b);}else{$("dayMsg").textContent="Максимум 5 дней — телу нужны дни отдыха.";return;}
   markTouched();renderDays();renderKcal();renderProgram();save();}
  else if(b.dataset.w){S.W=+b.dataset.w;renderProgram();renderTimeline();save();}
@@ -1396,6 +1400,7 @@ function obSteps(){const st=[
  if(!isHome())st.push({k:"goal",q:"Какая у тебя цель?",t:"pick",opts:[["Жиросжигание","Похудеть","Убрать жир, сохранить мышцы"],["Набор массы","Набрать мышцы","Рост мышц, профицит калорий"]]});
  if(S.goal==="Жиросжигание")st.push({k:"fl",q:"Сколько хочешь сбросить?",t:"fl"});
  st.push(isHome()?{k:"level",q:"Как у тебя с нагрузкой?",t:"pick",opts:[["Новичок","Лёгкий","Только начинаю, давно не двигался"],["Средний","Средний","Немного двигаюсь, хочу бодрее"]]}:{k:"level",q:"Какой у тебя опыт в зале?",t:"pick",opts:[["Новичок","Новичок","Меньше 6 месяцев или после долгого перерыва"],["Средний","Средний","6 месяцев – 2 года, знаю технику базовых"],["Продвинутый","Продвинутый","Больше 2 лет, большие веса"]]},
+  {k:"act",q:"Как проходит твой обычный день, не считая тренировок?",t:"act"},
   {k:"days",q:"В какие дни будешь тренироваться?",t:"days"},
   {k:"start",q:"С какого дня начнём?",t:"start"},
   {k:"injs",q:"Есть травмы или ограничения?",t:"injs"});
@@ -1415,6 +1420,7 @@ function obRender(){const st=obSteps(),s=st[obI],b=$("obBody");$("obSay").textCo
  if(s.t==="pick"){const cur=s.k==="sex"?$("sex").value:S[s.k];h+=`<div class="ob-opts">${s.opts.map(o=>`<button type="button" class="ob-opt" data-v="${o[0]}" aria-pressed="${touched&&o[0]===cur}"><b>${o[1]}</b>${o[2]?`<span>${o[2]}</span>`:""}</button>`).join("")}</div>`;}
  if(s.t==="fl")h+=`<div class="ob-num"><input class="ob-in" id="obV" type="number" inputmode="decimal" min="1" max="80" step="0.5" value="${esc($("fl_kg").value)}"><span>кг</span></div><div class="ob-num"><input class="ob-in" id="obV2" type="number" inputmode="numeric" min="1" max="24" value="${esc($("fl_mo").value)}"><span>месяцев</span></div><p class="hint">Безопасно — до 1% веса в неделю.</p>`;
  if(s.t==="days")h+=`<div class="ob-days">${DAYN.map((d,i)=>`<button type="button" class="ob-day" data-d="${i}" aria-pressed="${S.days.includes(i)}">${d}</button>`).join("")}</div><p class="hint" id="obErr">Отметь 2–5 дней. Между тренировками лучше день отдыха.</p>`;
+ if(s.t==="act")h+=`<div class="ob-opts">${ACT.map((o,i)=>`<button type="button" class="ob-opt" data-act="${i}" aria-pressed="${touched&&(S.act|0)===i}"><b>${o[0]}</b><span>${o[1]}</span></button>`).join("")}</div><p class="hint">Шаги можно посмотреть в телефоне — среднее за неделю. Не уверен — выбери вариант пониже.</p>`;
  if(s.t==="start"){const td=new Date(),iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   h+=`<input class="ob-in" id="obV" type="date" min="${iso(td)}" value="${esc(touched&&$("start").value>=iso(td)?$("start").value:iso(td))}"><p class="hint" id="obErr">Первая тренировка — в ближайший выбранный день с этой даты.</p>`;}
  if(s.t==="injs")h+=`<div class="ob-opts">${[["none","Нет, всё хорошо"],["lumbar","Поясница: грыжа, протрузия"],["knee","Колено"],["shoulder","Плечо"]].map(o=>`<button type="button" class="ob-opt" data-inj="${o[0]}" aria-pressed="${o[0]==="none"?!S.injs.length:S.injs.includes(o[0])}"><b>${o[1]}</b></button>`).join("")}</div><p class="hint">Можно выбрать несколько.</p>`;
@@ -1428,7 +1434,7 @@ function obRender(){const st=obSteps(),s=st[obI],b=$("obBody");$("obSay").textCo
 async function obNext(){const st=obSteps(),s=st[obI],v=$("obV"),err=t=>{const e=$("obErr");if(e)e.textContent=t;else alert(t);};
  if(s.t==="text"){if(!v.value.trim())return;$("name").value=v.value.trim();}
  if(s.t==="num"){const x=parseFloat(String(v.value).replace(",","."));if(!(x>=s.min&&x<=s.max))return err(`Впиши число от ${s.min} до ${s.max}`);$(s.k).value=x;}
- if(s.t==="pick"&&!document.querySelector('#obBody .ob-opt[aria-pressed="true"]'))return;
+ if((s.t==="pick"||s.t==="act")&&!document.querySelector('#obBody .ob-opt[aria-pressed="true"]'))return;
  if(s.t==="fl"){const kg=parseFloat(v.value),mo=parseFloat($("obV2").value);if(!(kg>0&&mo>0))return;$("fl_kg").value=kg;$("fl_mo").value=mo;}
  if(s.t==="days"&&(S.days.length<2||S.days.length>5))return err("Нужно от 2 до 5 дней.");
  if(s.t==="start"){if(!v.value)return err("Выбери дату");$("start").value=v.value;}
@@ -1474,7 +1480,8 @@ $("ob").addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)
   b.parentElement.querySelectorAll(".ob-opt").forEach(x=>x.setAttribute("aria-pressed",x===b));$("obSay").textContent=["Отличный выбор!","Принято 👍","Записал!"][obI%3];kbJump();return;}
  if(b.dataset.d!=null){const d=+b.dataset.d;if(S.days.includes(d))S.days=S.days.filter(x=>x!==d);else if(S.days.length<5)S.days=[...S.days,d].sort((a,c)=>a-c);obRender();return;}
  if(b.dataset.inj){const k=b.dataset.inj;S.injs=k==="none"?[]:S.injs.includes(k)?S.injs.filter(x=>x!==k):[...S.injs,k];obRender();return;}
- if(b.dataset.cyc){$("cyc_on").checked=b.dataset.cyc==="1";obRender();return;}});
+ if(b.dataset.cyc){$("cyc_on").checked=b.dataset.cyc==="1";obRender();return;}
+ if(b.dataset.act!=null){S.act=+b.dataset.act;b.parentElement.querySelectorAll(".ob-opt").forEach(x=>x.setAttribute("aria-pressed",x===b));kbJump();return;}});
 $("ob").addEventListener("keydown",ev=>{if(ev.key==="Enter"&&ev.target.tagName==="INPUT"){ev.preventDefault();obNext();}});
 $("obAgain").addEventListener("click",obOpen);
 $("meEdit").addEventListener("click",()=>editMode(true));$("setEdit").addEventListener("click",()=>editMode(true));$("editDone").addEventListener("click",()=>editMode(false));
