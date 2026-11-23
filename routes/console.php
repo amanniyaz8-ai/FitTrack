@@ -31,4 +31,3 @@ Artisan::command('konstruktor:weigh-checkin', function (\App\Services\Telegram $
     $this->info("Спросили вес: $n");
 })->purpose('Напомнить ученикам взвеситься (раз в 2 недели)');
 
-\Illuminate\Support\Facades\Schedule::command('konstruktor:weigh-checkin')->dailyAt('09:00')->timezone('Asia/Almaty');

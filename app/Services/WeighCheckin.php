@@ -41,7 +41,8 @@ class WeighCheckin
     /** Разобрать ответ. null — это не вес. */
     public static function parseKg(string $text): ?float
     {
-        if (! preg_match('/^\s*(\d{2,3}(?:[.,]\d{1,2})?)\s*(кг|kg)?\s*$/iu', $text, $m)) {
+        // «84,5», «84.5 кг», «вес 84,5», «актуальный вес: 84.5»
+        if (! preg_match('/^\s*(?:[а-яёa-z ]{0,25}?вес\s*:?\s*)?(\d{2,3}(?:[.,]\d{1,2})?)\s*(кг|kg)?\.?\s*$/iu', $text, $m)) {
             return null;
         }
         $kg = (float) str_replace(',', '.', $m[1]);
@@ -49,15 +50,32 @@ class WeighCheckin
         return $kg >= 30 && $kg <= 250 ? $kg : null;
     }
 
+    public const MIN_DAYS = 10;
+
     /** Применить вес, вернуть текст ответа. */
     public static function apply(Student $s, float $kg): string
     {
         $st = $s->state ?? [];
         $S = $st['S'] ?? [];
         $f = $st['f'] ?? [];
-        $prev = (float) ($s->weigh_kg ?? ($f['weight'] ?? $kg));
-        $since = $s->weigh_at ?? $s->onboarded_at ?? now()->subDays(self::EVERY_DAYS);
-        $weeks = max(1, $since->diffInDays(now()) / 7);
+        // Точка отсчёта: прошлое «зачётное» взвешивание, а до него — вес из анкеты
+        if ($s->weigh_kg === null) {
+            $s->weigh_kg = (float) ($f['weight'] ?? $kg);
+            $s->weigh_at = $s->onboarded_at ?? $s->created_at ?? now();
+        }
+        $days = (int) floor($s->weigh_at->diffInDays(now()));
+        if ($days < self::MIN_DAYS) {
+            // Рано делать выводы — вес скачет от воды. Обновляем только вес (норма пересчитается под него).
+            $f['weight'] = $kg;
+            $st['f'] = $f;
+            $st['savedAt'] = (int) (microtime(true) * 1000);
+            $s->forceFill(['state' => $st])->save();
+            $left = self::MIN_DAYS - $days;
+
+            return "Записал: ".rtrim(rtrim(number_format($kg, 1, ',', ''), '0'), ',')." кг ✅\n\nНорму под новый вес конструктор уже пересчитал. Сравнить с планом и поправить калории смогу через {$left} ".self::dn($left).' — раньше вес скачет из-за воды, вывод был бы неточным.';
+        }
+        $prev = (float) $s->weigh_kg;
+        $weeks = max(1, $days / 7);
         $perWeek = ($kg - $prev) / $weeks; // + набрал, − сбросил
         $goal = ($S['goal'] ?? 'Жиросжигание') === 'Набор массы' ? 'mass' : 'fat';
         $adj = 0;
@@ -101,6 +119,12 @@ class WeighCheckin
 
         $s->forceFill(['state' => $st, 'weigh_kg' => $kg, 'weigh_at' => now(), 'weigh_asked_at' => null])->save();
 
-        return "{$line}\n\n{$verdict}\n\nКонструктор уже пересчитал — открой «Сколько есть». Следующая проверка через 2 недели.";
+        return "{$line}\n\n{$verdict}\n\nКонструктор уже пересчитал — открой «Сколько есть». Следующий раз пришли вес через 10–14 дней.";
+    }
+
+    private static function dn(int $n): string
+    {
+        $a = $n % 10; $b = $n % 100;
+        return ($a === 1 && $b !== 11) ? 'день' : (($a >= 2 && $a <= 4 && ($b < 12 || $b > 14)) ? 'дня' : 'дней');
     }
 }

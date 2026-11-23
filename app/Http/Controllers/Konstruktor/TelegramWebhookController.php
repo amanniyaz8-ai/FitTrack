@@ -94,10 +94,10 @@ class TelegramWebhookController extends Controller
             return;
         }
 
-        // Ответ на «пришли свой вес» — поправляем калории
+        // Ученик сам прислал вес — пересчитываем калории по его цели
         if (($kg = \App\Services\WeighCheckin::parseKg((string) ($msg['text'] ?? ''))) !== null) {
             $st = Student::where('telegram_id', $uid)->first();
-            if ($st && $st->weigh_asked_at) {
+            if ($st && ! empty($st->state['f']['weight'])) {
                 try {
                     $this->tg->sendMessage($chatId, \App\Services\WeighCheckin::apply($st, $kg), [[$this->appButton()]]);
                 } catch (\Throwable $e) {
@@ -113,6 +113,7 @@ class TelegramWebhookController extends Controller
             $this->tg->setMenuButton(route('konstruktor.app'), $chatId);
             $this->tg->sendMessage($chatId, $this->t('member_welcome'), [
                 [$this->appButton()],
+                [['text' => $this->t('btn_weigh'), 'callback_data' => 'weigh']],
                 [['text' => $this->t('btn_login_link'), 'callback_data' => 'login']],
             ]);
             return;
@@ -155,6 +156,12 @@ class TelegramWebhookController extends Controller
         if ($data === 'paid') {
             $this->tg->answerCallback($cb['id']);
             $this->tg->sendMessage($chatId, $this->t('send_receipt'));
+            return;
+        }
+
+        if ($data === 'weigh') {
+            $this->tg->answerCallback($cb['id']);
+            $this->tg->sendMessage($chatId, $this->t('weigh_how'));
             return;
         }
 
