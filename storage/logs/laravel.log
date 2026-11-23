@@ -996,3 +996,23 @@
 #66 /Users/amanniyaz8gmail.com/Desktop/Код/fittrack/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('/Users/amanniya...')
 #67 {main}
 "} 
+[2026-11-16 23:19:36] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-16 23:33:03] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-16 23:35:40] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-16 23:41:07] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-16 23:41:50] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-16 23:50:27] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-17 21:59:33] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-17 21:59:41] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-17 22:06:12] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-17 22:10:34] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-17 22:18:20] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-17 22:23:11] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-17 22:31:46] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-17 22:37:14] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-20 14:59:37] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-20 14:59:42] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-20 15:00:00] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-20 15:00:32] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-20 15:02:17] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-20 16:52:33] testing.WARNING: Telegram getChatMember unavailable: 502  
