@@ -1053,8 +1053,12 @@ async function doSave(kind){
   try{const data=kind==="csv"?await buildXLSX():buildHTML();
    const fd=new FormData();fd.append("kind",kind==="csv"?"xlsx":"html");fd.append("file",new Blob([data]),kind==="csv"?"p.xlsx":"p.html");
    $("dlMsg").textContent="Отправляю в чат…";
-   const r=await fetch(API.sendFile,{method:"POST",credentials:"same-origin",headers:{"Accept":"application/json","X-CSRF-TOKEN":API.csrf||""},body:fd});
+   const send=()=>fetch(API.sendFile,{method:"POST",credentials:"same-origin",headers:{"Accept":"application/json","X-CSRF-TOKEN":API.csrf||""},body:fd});
+   let r=await send();
+   // Окно долго было открыто (часто на компьютере) — токен устарел: берём новый и повторяем
+   if(r.status===419&&API.csrfUrl){const t=await fetch(API.csrfUrl,{credentials:"same-origin",headers:{"Accept":"application/json"}}).then(x=>x.ok?x.json():null).catch(()=>null);if(t&&t.csrf){API.csrf=t.csrf;r=await send();}}
    if(r.ok){$("dlMsg").innerHTML="✅ Готово! Файл в чате с ботом — закрой конструктор и посмотри сообщения.";return;}
+   if(r.status===401||r.status===419){$("dlMsg").innerHTML="Сессия устарела — закрой конструктор и открой его снова кнопкой в боте, потом нажми ещё раз.";return;}
   }catch(e){}
   $("dlMsg").innerHTML=tgLink?`Не получилось отправить. <a href="${tgLink.url}" style="color:var(--accent)">Открыть в браузере и скачать</a>`:"Не получилось отправить — попробуй ещё раз через минуту.";return;}
  if(IN_TG){const tg=window.Telegram?.WebApp;
