@@ -47,7 +47,7 @@ p{margin:0}
 .step{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--fg);color:var(--bg);font-family:var(--f-data);font-size:15px;flex:none}
 section{display:grid;gap:16px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:16px;min-width:0}
-.hint{color:var(--muted);font-size:13px}
+.hint{color:#4A5262;font-size:15px}
 .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
 label.f{display:grid;gap:6px;font-weight:600;font-size:14px}
 label.f small{font-weight:400;color:var(--muted)}
@@ -86,6 +86,8 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
 .wk{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 .wk button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;padding:8px 0;font-family:var(--f-data);font-weight:700;font-size:14px}
 .wk button.dl{background:var(--sunk);color:var(--muted)}
+.wk button small{display:block;font:600 11px var(--f-body);color:var(--muted);margin-top:2px}
+.wk button[aria-pressed="true"] small{color:inherit}
 .wk button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
 @media (max-width:560px){.weekmap{grid-template-columns:1fr}}
 .weekinfo{display:grid;gap:4px;padding:14px 16px;border-radius:12px;background:var(--accent-soft)}
@@ -107,7 +109,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
 .plate{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-data);font-weight:800;font-size:13px;color:#fff;border:3px solid rgba(0,0,0,.18)}
 .plate.y{color:#1A1F29}
 .exname{font-weight:800;font-size:17px;line-height:1.25}
-.exmeta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted);margin-top:4px}
+.exmeta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--muted);margin-top:4px}
 .exmeta b{color:var(--fg);font-weight:700}
 .scheme{display:flex;align-items:stretch;border:2px solid var(--fg);border-radius:12px;overflow:hidden;font-family:var(--f-data);min-width:0}
 .scheme div{display:grid;place-items:center;padding:6px 12px;min-width:64px;text-align:center}
@@ -124,6 +126,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
 .set.done{border-color:var(--good);background:var(--good-bg)}
 .exfoot{grid-column:2/4;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:13px}
 .ton{font-family:var(--f-data);font-weight:700}
+.firstw{background:#EEF3FF;border-radius:12px;padding:10px 12px;margin:0 0 10px;font-size:14px;line-height:1.45;color:#1A1F29}
 .check{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
 .check input{width:22px;height:22px;accent-color:var(--good)}
 .tip{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px}
@@ -165,7 +168,7 @@ dl.terms dd{margin:0;color:var(--muted)}
 .alarm h3{color:var(--bad);text-transform:uppercase}
 .alarm ul{margin:0;padding-left:20px;display:grid;gap:4px}
 .qi{display:inline-grid;place-items:center;width:18px;height:18px;margin-left:4px;padding:0;border:0;border-radius:50%;background:var(--sunk);color:inherit;font:700 11px/1 inherit;cursor:pointer;vertical-align:middle}
-.exnote{font-size:13px;color:var(--muted);margin:2px 0 4px}
+.exnote{font-size:14px;color:#4A5262;margin:2px 0 4px}
 .qibox{position:fixed;left:16px;right:16px;bottom:16px;z-index:1000;max-width:480px;margin:0 auto;padding:16px;border-radius:14px;background:var(--surface);color:var(--fg);border:1px solid var(--line);box-shadow:0 10px 40px rgba(0,0,0,.25);display:grid;gap:12px}
 .qibox[hidden]{display:none}.qibox p{margin:0;line-height:1.45}
 .lockwrap{position:relative;min-height:420px}.lockblur{filter:blur(5px);opacity:.55;pointer-events:none;user-select:none;max-height:640px;overflow:hidden}
@@ -239,6 +242,14 @@ dl.terms dd{margin:0;color:var(--muted)}
 .ob-nav{display:flex;justify-content:space-between;gap:10px}
 .ob-back,.ob-next{font:700 16px var(--f-body);padding:14px 20px;border-radius:14px;border:0;cursor:pointer}
 .ob-back{background:transparent;color:var(--muted)}.ob-next{background:var(--accent);color:var(--accent-fg);flex:1}
+.me{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:600}
+.done .setup,.done .intro{display:none}.done.edit .setup{display:block}
+.obopen .wrap{visibility:hidden}
+details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details.howto[open]{display:grid;gap:14px}
+.exrole{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.tempo1{font-size:14px;color:#4A5262;margin:0 0 8px}
+.ob-step{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.settings .row{flex-wrap:wrap}#logoutForm{margin:0}#logoutForm button{color:#B3261E}
 .ob-skip{background:none;border:0;color:var(--muted);font:13px var(--f-body);text-decoration:underline;cursor:pointer;justify-self:center}
 
 .ob-hero{display:flex;align-items:center;gap:12px;min-height:124px}
@@ -268,7 +279,7 @@ dl.terms dd{margin:0;color:var(--muted)}
 @endverbatim
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>window.TP_API = {!! json_encode(['state' => $student->state, 'uid' => $student->id, 'saveUrl' => route('konstruktor.state'), 'csrfUrl' => route('konstruktor.csrf'), 'dlMark' => route('konstruktor.downloaded'), 'browserLink' => route('konstruktor.browserLink'), 'sendFile' => route('konstruktor.sendFile'), 'csrf' => csrf_token(), 'paid' => $student->isPaid(), 'price' => \App\Services\CoursePrice::text(), 'priceLine' => \App\Services\CoursePrice::line(), 'payUrl' => \App\Services\CoursePrice::payUrl(), 'bot' => 'https://t.me/'.ltrim((string) (config('telegram.bot_username') ?: 'samsebetrener_kz_bot'), '@')], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
-<form method="POST" action="{{ route('konstruktor.logout') }}" style="position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:20;margin:0">
+<form id="logoutForm" method="POST" action="{{ route('konstruktor.logout') }}" style="position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:20;margin:0">
     @csrf
     <button type="submit" style="font:600 12px system-ui,sans-serif;padding:6px 12px;border-radius:999px;border:1px solid #D3D8E1;background:#fff;color:#5B6474;cursor:pointer">Выйти{{ $student->first_name ? ' · '.e($student->first_name) : '' }}</button>
 </form>
@@ -279,8 +290,9 @@ dl.terms dd{margin:0;color:var(--muted)}
     <p class="hint" id="syncMsg" style="justify-self:end"></p>
     <span class="eyebrow">Тренировки · питание · 12 недель</span>
     <h1>Конструктор тренировок <em>и КБЖУ</em></h1>
-    <p class="lead">Заполни 3 шага — получишь программу тренировок на 12 недель, свои калории и понятный план, как расти. Ты вписываешь только вес и повторы на тренировке, остальное считается само. Всё сохраняется в этом браузере.</p>
-    <p><button type="button" class="btn ghost" id="obAgain">Пройти анкету заново</button></p>
+    <div class="me" id="meBar" hidden><span id="meTxt"></span><button type="button" class="btn ghost" id="meEdit">Изменить</button></div>
+    <p class="lead intro">Заполни 3 шага — получишь программу тренировок на 12 недель, свои калории и понятный план, как расти. Ты вписываешь только вес и повторы на тренировке, остальное считается само. Всё сохраняется в этом браузере.</p>
+    
     <div class="panel" id="dlTop" hidden style="border:2px solid var(--accent);display:grid;gap:12px">
       <b style="font-size:20px">Твоя программа готова — скачай её</b>
       <div class="row"><button type="button" class="btn" id="dlTopHtml">Скачать программу (для печати)</button><button type="button" class="btn ghost" id="dlTopCsv">Скачать таблицу (Excel)</button></div>
@@ -288,10 +300,10 @@ dl.terms dd{margin:0;color:var(--muted)}
     </div>
   </header>
 
-  <section aria-labelledby="s1">
+  <section aria-labelledby="s1" class="setup">
     <h2 id="s1"><span class="step">1</span>О тебе</h2>
     <div class="panel form">
-      <div class="row"><span class="example" id="exTag">Пример — впиши свои данные</span></div>
+      <div class="row"><button type="button" class="btn ghost" id="obAgain">Пройти анкету заново</button><span class="example" id="exTag">Пример — впиши свои данные</span></div>
       <div class="grid">
         <label class="f">Имя<input id="name" type="text" value="Айдос"></label>
         <label class="f">Пол<select id="sex"><option value="m">Мужской</option><option value="f">Женский</option></select></label>
@@ -355,7 +367,7 @@ dl.terms dd{margin:0;color:var(--muted)}
     </div>
   </section>
 
-  <section aria-labelledby="s2">
+  <section aria-labelledby="s2" class="setup">
     <h2 id="s2"><span class="step">2</span>Где и зачем тренируешься</h2>
     <div class="choices" id="placeChoices" role="group" aria-label="Где тренируешься" style="margin-bottom:14px">
       <button class="choice" data-place="gym"><b>В зале</b><span>Штанга, гантели, тренажёры — программа по технике и весам</span></button>
@@ -366,10 +378,50 @@ dl.terms dd{margin:0;color:var(--muted)}
       <button class="choice" data-goal="Жиросжигание"><b>Похудеть</b><span>Убрать жир, сохранить мышцы. Связки упражнений, короткий отдых, дефицит калорий</span></button>
       <button class="choice" data-goal="Набор массы"><b>Набрать мышцы</b><span>Рост мышц. 8–15 повторов, профицит калорий, много белка</span></button>
     </div>
+    <p style="margin-top:16px"><button type="button" class="btn" id="editDone">Готово — к программе</button></p>
+  </section>
+
+
+  <section aria-labelledby="s4">
+    <h2 id="s4"><span class="step">3</span>Программа на 12 недель</h2>
+    <div class="panel">
+      <div class="weekinfo" id="weekInfo"></div>
+      <div id="injInfo" style="display:grid;gap:12px" hidden></div>
+      <details class="howto"><summary>Как устроена программа?</summary>
+      <div class="cycle">
+        <b class="big">12 недель = 3 блока по 4 недели</b>
+        <p>Каждый блок решает свою задачу: сначала тело привыкает, потом нагрузка растёт, в конце — пик. Внутри блока недели идут по кругу: <b>вход → накопление → пик → разгрузка</b>. Разгрузка — лёгкая неделя, в неё тело восстанавливается и растёт.</p>
+        <p class="hint" id="cycleEnd"></p>
+      </div>
+      <div class="note"><b>Перед каждой тренировкой — разминка 10 минут.</b> Она расписана в начале каждой тренировки. Холодные мышцы и суставы — главная причина травм в зале.</div>
+      <div class="note" id="levelOrg"></div>
+      
+      <div class="cycinfo" id="cycInfo" hidden>
+        <b class="big">Программа подстроена под твой цикл</b>
+        <p>У каждой тренировки указана фаза. Веса, подходы и подсказки уже пересчитаны под неё.</p>
+        <div class="tablewrap" id="cycTable"></div>
+      </div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--plate-red)"></span>Главное упражнение</span>
+        <span><span class="dot" style="background:var(--plate-blue)"></span>Второе по важности</span>
+        <span><span class="dot" style="background:var(--plate-yellow)"></span>Дополнительное</span>
+        <span><span class="dot" style="background:var(--plate-green)"></span>Пресс / финишер</span>
+      </div>
+      <p class="hint">В каждом подходе впиши вес и сколько раз сделал. Тоннаж (сколько килограммов ты поднял всего) посчитается сам. Со второй тренировки появится подсказка, добавлять ли вес.</p>
+</details>
+    </div>
+    <div id="daysOut" style="display:grid;gap:32px"></div>
+    <div class="navrow"><button class="btn ghost" id="prevW">← Прошлая неделя</button><button class="btn" id="nextW">Следующая неделя →</button></div>
+    <div class="panel"><div style="display:grid;gap:8px"><b>Выбери неделю</b><div class="weekmap" id="weekMap"></div><p class="hint">Лёгкая неделя — меньше веса, тело восстанавливается и растёт.</p></div></div>
+    <div class="panel">
+      <h3>Тоннаж по неделям, кг</h3>
+      <div class="bars" id="bars"></div>
+      <p class="hint">Так и должно быть: внутри блока недели 2–3 выше 1-й, неделя разгрузки (серая) ниже на 30–50%.</p>
+    </div>
   </section>
 
   <section aria-labelledby="s3">
-    <h2 id="s3"><span class="step">3</span>Сколько есть</h2>
+    <h2 id="s3"><span class="step">4</span>Сколько есть</h2>
     <div class="panel">
       <p class="hint" id="coefLine"></p>
       <div id="paceBox"><b id="paceLabel">Темп</b><div class="seg" id="paceSeg" style="margin-top:8px"></div></div>
@@ -407,44 +459,6 @@ dl.terms dd{margin:0;color:var(--muted)}
     </div>
   </section>
 
-  <section aria-labelledby="s4">
-    <h2 id="s4"><span class="step">4</span>Программа на 12 недель</h2>
-    <div class="panel">
-      <div class="cycle">
-        <b class="big">12 недель = 3 блока по 4 недели</b>
-        <p>Каждый блок решает свою задачу: сначала тело привыкает, потом нагрузка растёт, в конце — пик. Внутри блока недели идут по кругу: <b>вход → накопление → пик → разгрузка</b>. Разгрузка — лёгкая неделя, в неё тело восстанавливается и растёт.</p>
-        <p class="hint" id="cycleEnd"></p>
-      </div>
-      <div style="display:grid;gap:8px"><b>Выбери неделю</b><div class="weekmap" id="weekMap"></div></div>
-      <div class="weekinfo" id="weekInfo"></div>
-      <div class="note"><b>Перед каждой тренировкой — разминка 10 минут.</b> Она расписана в начале каждой тренировки. Холодные мышцы и суставы — главная причина травм в зале.</div>
-      <div class="note" id="levelOrg"></div>
-      <div id="injInfo" style="display:grid;gap:12px" hidden></div>
-      <div class="cycinfo" id="cycInfo" hidden>
-        <b class="big">Программа подстроена под твой цикл</b>
-        <p>У каждой тренировки указана фаза. Веса, подходы и подсказки уже пересчитаны под неё.</p>
-        <div class="tablewrap" id="cycTable"></div>
-      </div>
-      <div class="legend">
-        <span><span class="dot" style="background:var(--plate-red)"></span>Главное упражнение</span>
-        <span><span class="dot" style="background:var(--plate-blue)"></span>Второе по важности</span>
-        <span><span class="dot" style="background:var(--plate-yellow)"></span>Дополнительное</span>
-        <span><span class="dot" style="background:var(--plate-green)"></span>Пресс / финишер</span>
-      </div>
-      <p class="hint">В каждом подходе впиши вес и сколько раз сделал. Тоннаж (сколько килограммов ты поднял всего) посчитается сам. Со второй тренировки появится подсказка, добавлять ли вес.</p>
-    </div>
-    <div id="daysOut" style="display:grid;gap:32px"></div>
-    <div class="navrow"><button class="btn ghost" id="prevW">← Прошлая неделя</button><button class="btn" id="nextW">Следующая неделя →</button></div>
-    <div class="panel">
-      <h3>Тоннаж по неделям, кг</h3>
-      <div class="bars" id="bars"></div>
-      <p class="hint">Так и должно быть: внутри блока недели 2–3 выше 1-й, неделя разгрузки (серая) ниже на 30–50%.</p>
-      <div class="row" id="dlRow"><button class="btn" id="dlHtml">Скачать программу (для печати)</button><button class="btn ghost" id="dlCsv">Скачать таблицу (Excel)</button><span class="hint" id="dlMsg"></span></div>
-      <div class="row"><button class="btn ghost" id="copyBtn">Скопировать неделю для тренера</button><span class="hint" id="copyMsg"></span></div>
-      <textarea id="copyArea" hidden readonly></textarea>
-    </div>
-  </section>
-
   <section aria-labelledby="s5">
     <h2 id="s5"><span class="step">5</span>Что дальше</h2>
     <p class="lead">Три блока — полный цикл. Потом меняем цель, чтобы тело не привыкало.</p>
@@ -471,10 +485,17 @@ dl.terms dd{margin:0;color:var(--muted)}
         <dt>Разгрузка</dt><dd>Лёгкая неделя для восстановления</dd>
       </dl>
     </div>
-    <div class="row"><button class="btn ghost" id="resetBtn">Очистить мои записи весов</button><span class="hint" id="resetMsg"></span></div>
     <div class="panel rule" id="cycRule" hidden>
       <h3>Главное правило тренировок по циклу</h3>
       <p>Исследования показывают: твои ощущения — боль, усталость, настроение — важнее, чем фаза по календарю. Если по графику фолликулярная фаза, но сил нет из-за недосыпа или стресса — снижай нагрузку без чувства вины. Фазы в программе — ориентир, а не приказ.</p>
+    </div>
+    <div class="panel settings" id="setBox">
+      <h3>Настройки</h3>
+      <div class="row"><button type="button" class="btn ghost" id="setEdit">✎ Изменить данные анкеты</button></div>
+      <div class="row" id="dlRow"><button class="btn" id="dlHtml">Скачать программу (для печати)</button><button class="btn ghost" id="dlCsv">Скачать таблицу (Excel)</button><span class="hint" id="dlMsg"></span></div>
+      <div class="row"><button class="btn ghost" id="copyBtn">Скопировать неделю для тренера</button><span class="hint" id="copyMsg"></span></div>
+      <textarea id="copyArea" hidden readonly></textarea>
+    <div class="row"><button class="btn ghost" id="resetBtn">Очистить мои записи весов</button><span class="hint" id="resetMsg"></span></div>
     </div>
     <div class="alarm" role="note">
       <h3>Важно</h3>
@@ -492,10 +513,13 @@ dl.terms dd{margin:0;color:var(--muted)}
 <script>
 (function(){
 const ROLES=["Основное","Вторичное","Подсобное","Кор/Финишер"];
+const ROLE_WORD={"Основное":"главное","Вторичное":"второе","Подсобное":"дополнительное","Кор/Финишер":"пресс"};
+function tempoLine(tp){if(!tp.length)return"";const q=t=>/^\d-\d-\d|взрыв/.test(t)?` <button type="button" class="qi" data-q="tempo" data-t="${esc(t)}" aria-label="Что такое темп">?</button>`:"";
+ return`<p class="tempo1"><b>Темп:</b> ${tp.length===1?esc(tp[0][0])+q(tp[0][0]):tp.map(x=>`${esc(x[1]||"")} — ${esc(x[0])}${q(x[0])}`).join("; ")}</p>`;}
 const PLATE={"Основное":["var(--plate-red)",""],"Вторичное":["var(--plate-blue)",""],"Подсобное":["var(--plate-yellow)","y"],"Кор/Финишер":["var(--plate-green)",""]};
 const WEEKNAMES=["Вход","Накопление","Пик месяца","Разгрузка"];
 const GOAL_RU={"Жиросжигание":"Похудеть","Набор массы":"Набрать мышцы","Сила":"Стать сильнее"};
-const RPE_TXT={"6":"легко, 4 повтора в запасе","7":"3 повтора в запасе","7-8":"2–3 повтора в запасе","8":"2 повтора в запасе","8-9":"1–2 повтора в запасе","10 (тест)":"максимум — тест"};
+const RPE_TXT={"6":"легко, без напряжения","7":"остановись, когда можешь ещё 3 раза","7-8":"последние 2–3 раза тяжело, но техника не ломается","8":"последние 2 раза тяжело, но техника не ломается","8-9":"последние 1–2 раза тяжело, но техника не ломается","10 (тест)":"максимум — тест"};
 
 /* ---------- rules from the methodology (wave periodization: вход→накопление→пик→разгрузка) ---------- */
 // w=0: 3×12-15 (вход), w=1: 3×10-12 (накопление), w=2: 3×8-10 (пик), w=3: 2×12-15 (разгрузка)
@@ -528,14 +552,14 @@ function st(m,w,d,role){const rpe=["7","8","8-9","6"][w];
  const tr=T[role]||T.Подсобное;
  return{sets:tr.sets[w],reps:tr.reps[w],pct:tr.pct?tr.pct[w]:null,rpe,rest:tr.rest[w],tempo:role!=="Подсобное"?"вверх взрывно":"2-0-1"};}
 const GEN={"Жиросжигание":fl,"Набор массы":hy,"Сила":st};
-const LEVEL_T={"Жиросжигание":{"Новичок":[0,0,"Темп 2-0-1: 2 секунды вниз, взрыв вверх. Отдыхай столько, сколько указано. 3 подхода в каждом упражнении."],"Средний":[1,0,"Два главных упражнения — 4 подхода. Остальные — 3. Следи за техникой в последнем подходе."],"Продвинутый":[1,0,"Добавляй суперсеты в упражнениях 3–4 или 5–6: делай их подряд без отдыха, отдыхай после второго."]},
+const LEVEL_T={"Жиросжигание":{"Новичок":[0,0,"Темп: вниз на счёт 2, вверх спокойно, без рывка. Отдыхай столько, сколько указано. 3 подхода в каждом упражнении."],"Средний":[1,0,"Два главных упражнения — 4 подхода. Остальные — 3. Следи за техникой в последнем подходе."],"Продвинутый":[1,0,"Добавляй суперсеты в упражнениях 3–4 или 5–6: делай их подряд без отдыха, отдыхай после второго."]},
  "Набор массы":{"Новичок":[0,-5,"Обычные подходы. Главное — чувствовать работающую мышцу, а не просто поднимать вес."],"Средний":[1,0,"Два главных — 4 подхода. В последнем подходе останавливайся за 1–2 повтора до отказа."],"Продвинутый":[1,2.5,"Добавляй дроп-сеты в последнем подходе упражнений 3–4: снял 20% веса и продолжил."]},
  "Сила":{"Новичок":[0,-5,"Работаешь на 5–8 повторов. Цель — выучить движение. Каждый повтор одинаково чистый."],"Средний":[1,0,"Два главных — на 1 подход больше. Отдых 3–5 минут. Каждый повтор одинаковый."],"Продвинутый":[1,2.5,"Добавляй скоростные подходы: 50–60% × 3 быстрых подхода × 2–3 повтора после главных."]}};
 const WEEK_METHOD={
  "Жиросжигание":{1:["Вход в режим. Учим технику, подбираем веса. 3 подхода, 12–15 повторов.","Чуть тяжелее: точнее техника, вес растёт. 3 подхода, 10–12.","Пик блока: 8–10 повторов, тяжелее вес. Средний/продвинутый — 4 подхода в главных.","Разгрузка: 2 подхода, легче. В конце — замеры."],
   2:["Второй цикл с теми же упражнениями, но уже привычнее. Веса чуть больше прошлого блока.","Добавляем вес +2,5–5 кг к прошлому циклу.","Пик: 8–10 повторов, максимальный рабочий вес за блок.","Разгрузка. Замеры."],
   3:["Третий цикл — веса выше прошлых блоков. 3 подхода.","Работаем с максимальным объёмом.","Пик всего курса. Максимальный вес за 12 недель.","Итоговые замеры за 3 месяца."]},
- "Набор массы":{1:["Вход: 3 подхода, 10–12 повторов, 2 повтора в запасе. Запоминаем рабочий вес.","Накопление: добавляем вес +2,5–5%. 3 подхода.","Пик блока: средний/продвинутый — 4 подхода в главных, 6–8 повторов.","Разгрузка. Замеры: вес, обхваты, фото."],
+ "Набор массы":{1:["Вход: 3 подхода, 10–12 повторов, последние 2 тяжело. Запоминаем рабочий вес.","Накопление: добавляем вес +2,5–5%. 3 подхода.","Пик блока: средний/продвинутый — 4 подхода в главных, 6–8 повторов.","Разгрузка. Замеры: вес, обхваты, фото."],
   2:["Второй цикл с весами выше прошлого блока. 3 подхода.","Прогрессируем: сделал верх диапазона во всех подходах — добавь вес.","Пик: 4 подхода в главных — тяжелее всего за блок.","Разгрузка. Замеры."],
   3:["Третий цикл — самый тяжёлый. 3 подхода.","Пик объёма. Добавляй дроп-сеты (Продвинутый).","Максимальный пик: 4 подхода, рекордные веса.","Итоговые замеры за 3 месяца."]},
  "Сила":{1:["Техника и базовый объём. 3 подхода × 5 повторов. Строго — каждый повтор одинаковый.","+1 подход в главных для Среднего/Продвинутого. Вес +2,5–5%.","Пик: 4 подхода × 4 повтора в главных. Максимально строгая техника.","Разгрузка. 70% от рабочего."],
@@ -547,7 +571,7 @@ const MACRO={
  "Набор массы":[["Нед. 1–4","Блок 1 · Накопление","3 подхода, 10–12 повторов. Цель — выучить технику и найти свой рабочий вес."],["Нед. 5–8","Блок 2 · Прогрессия","3–4 подхода, 8–10 повторов. Веса растут. База для дальнейшего роста."],["Нед. 9–12","Блок 3 · Пик","3–4 подхода, 6–8 повторов. Максимальные веса за курс. Замеры."],["Нед. 13+","Дальше · Новый круг","Начни программу заново с новыми весами — они уже выше, чем в начале. Если набрал лишнего — 1–2 месяца «Похудеть», потом снова масса."]],
  "Сила":[["Нед. 1–4","Блок 1 · Техника","5 повторов, 75% от максимума. Цель — навык и чистое движение."],["Нед. 5–8","Блок 2 · Объём","3–4 повтора, 80–85%. Прогрессия каждую неделю."],["Нед. 9–12","Блок 3 · Пик","2–3 повтора, 85–90%. В конце — контрольный подход на 3–5 повторов с запасом."],["Нед. 13+","Дальше · Набор мышц","Больше мышц = больше силы в следующем цикле. Поменяй цель на «Набрать мышцы»."]]};
 const RAMP_D=["Ролл бёдер и спины 2 мин → ягодичный мост 2×10, «мёртвый жук» 2×8 → глубокий присед с поворотом 2×5, выпад с наклоном 2×4 на ногу","Ролл грудного отдела 2 мин → тяга резины к груди 2×15, отжимания лопатками 2×10 → «червяк» + выпад с поворотом 2×4, «ангелы» у стены 2×8","Ролл ягодиц и задней поверхности бедра 2 мин → мост на одной ноге 2×8, «птица-собака» 2×6 → наклон с палкой 2×8, боковой выпад 2×5"];
-const RAMP_P={"Жиросжигание":"→ 1 подход первого упражнения с половиной рабочего веса","Набор массы":"→ 2 разминочных подхода первого упражнения: 50%×10, 70%×5","Сила":"→ лесенка в главном: гриф×8, 50%×5, 70%×3, 80%×1"};
+const RAMP_P={"Жиросжигание":"→ 1 подход первого упражнения с половиной рабочего веса","Набор массы":"→ 2 разминочных подхода первого упражнения: 10 раз с половиной веса, потом 5 раз чуть тяжелее","Сила":"→ лесенка в главном: гриф×8, 50%×5, 70%×3, 80%×1"};
 const FLR=["Основное","Основное","Вторичное","Вторичное","Подсобное","Подсобное","Кор/Финишер"],HYR=["Основное","Основное","Вторичное","Вторичное","Подсобное","Подсобное","Кор/Финишер"];
 const FLB=["1","2","3","4","5","6","7"],HYB=["1","2","3","4","5","6","7"];
 // [novice, middle, advanced, link (1RM) for mid, link for adv]
@@ -707,7 +731,7 @@ const RAMP_STEPS=[
  [["Раскатка","ролл бёдер и спины — 2 мин"],["Активация","ягодичный мост 2×10, «мёртвый жук» 2×8"],["Подвижность","глубокий присед с поворотом корпуса 2×5, выпад с наклоном 2×4 на ногу"]],
  [["Раскатка","ролл грудного отдела и широчайших — 2 мин"],["Активация","тяга резины к груди 2×15, отжимания только лопатками 2×10"],["Подвижность","«червяк» + выпад с поворотом 2×4, «ангелы» у стены 2×8"]],
  [["Раскатка","ролл ягодиц и задней поверхности бедра — 2 мин"],["Активация","мост на одной ноге 2×8, «птица-собака» 2×6 на сторону"],["Подвижность","наклон с палкой на спине 2×8, боковой выпад 2×5 на ногу"]]];
-const RAMP_PREP={"Жиросжигание":"1 подход первого упражнения с половиной рабочего веса × 10 повторов","Набор массы":"2 разминочных подхода первого упражнения: 50% веса × 10, 70% × 5","Сила":"лесенка в главном упражнении: пустой гриф × 8, 50% × 5, 70% × 3, 80% × 1"};
+const RAMP_PREP={"Жиросжигание":"1 подход первого упражнения с половиной рабочего веса × 10 повторов","Набор массы":"2 разминочных подхода первого упражнения: 10 раз с половиной веса, потом 5 раз чуть тяжелее","Сила":"лесенка в главном упражнении: пустой гриф × 8, 50% × 5, 70% × 3, 80% × 1"};
 const KEY="tp-constructor-v2"+(window.TP_API&&window.TP_API.uid?"-u"+window.TP_API.uid:"");
 let S={goal:"Жиросжигание",level:"Средний",W:0,pace:1,days:[0,2,4],log:{},injs:[]};
 const FIELDS=["name","sex","age","height","weight","start","fl_kg","fl_mo","fl_mv","rm_sq","rm_bp","rm_dl","rm_ohp","cyc_start","cyc_len","cyc_per"];
@@ -793,6 +817,10 @@ function renderKcal(){
 /* ---------- program over 12 weeks ---------- */
 const N=()=>S.days.length;
 const tplOf=(W,i)=>(W*N()+i)%3;
+function secOf(x){const m=String(x).match(/(\d+(?:[.,]\d+)?)(?:\s*[–-]\s*(\d+(?:[.,]\d+)?))?\s*(мин|с)/);if(!m)return 0;const a=parseFloat(m[1]),b=m[2]?parseFloat(m[2]):a;return (a+b)/2*(m[3]==="мин"?60:1);}
+function gymMin(W,t,i){let sec=0;for(let s=0;s<7;s++){const e=exRow(W,t,s,i);if(/мин/.test(e.reps)){sec+=secOf(e.reps);continue;}
+  const work=/сек/.test(e.reps)?secOf(e.reps):45;sec+=e.sets*work+(e.sets-1)*secOf(e.rest)+60;}
+ return Math.round(sec/60/5)*5+15;}
 function homeMin(W,t,i){const e=homeRow(W,t,0,i),wk=parseInt(e.reps),rs=parseInt(e.rest);return Math.round((7*(wk+rs)*e.sets+60*(e.sets-1))/60);}
 function homeRow(W,t,s,i){
  const lv=S.level==="Новичок"?0:1,H=HOME_LV[lv],b=Math.floor(W/4),w=W%4,dl=w===3;
@@ -802,6 +830,7 @@ function homeRow(W,t,s,i){
  // Дома круги не урезаем автоматически (иначе с разгрузкой выходит 15 минут) — решает самочувствие.
  if(ph&&(ph.key==="mens"||ph.key==="pms"))e.rpeTxt="по самочувствию: тяжело — сделай на 1 круг меньше";
  return e;}
+function injWord(){const w={lumbar:"пояснице",knee:"колену",shoulder:"плечу"};const a=INJ_ORDER.filter(k=>S.injs.includes(k)).map(k=>w[k]).filter(Boolean);return a.length?a.join(" и "):"суставам";}
 function exRow(W,t,s,i){
  if(isHome())return homeRow(W,t,s,i);
  const g=S.goal,lv=S.level,li=LEVELS.indexOf(lv),fat=g==="Жиросжигание",m=Math.floor(W/4)+1,w=W%4;
@@ -819,11 +848,15 @@ function exRow(W,t,s,i){
  if(role!=="Кор/Финишер"&&/Махи|Отведение| \+ /.test(e.name)){const lu=lowUp(e.reps);if(lu[0]&&lu[0]<10)e.reps=w===3?"12-15":"10-12";}
  // Планка — на время, а не на повторы с весом.
  if(role==="Кор/Финишер"&&/планка/i.test(e.name)&&!/сек|мин/.test(e.reps))e.reps="30-45 сек";
+ if(lv==="Новичок"){e.tempo="вниз на счёт 2, вверх спокойно, без рывка";
+  // Вход для новичка: на 1–2 неделе в 5-м и 6-м упражнениях — 2 подхода
+  if(W<2&&(s===4||s===5)&&e.sets>2)e.sets=2;}
+ if(g==="Набор массы"&&lowUp(e.reps)[0]>0&&lowUp(e.reps)[0]<=6&&e.rpeTxt)e.rpeTxt+=" · техника поплыла — стоп";
  if(S.injs.length){const nm=safeNames(t)[s];if(nm!==e.name){e.orig=e.name;e.name=nm;e.rec=null;}
-  if(/тест/.test(e.reps)){e.reps="3-5";e.rpe="7";e.rpeTxt="2–3 повтора в запасе";}
+  if(/тест/.test(e.reps)){e.reps="3-5";e.rpe="7";e.rpeTxt="последние 2–3 раза тяжело, но техника не ломается";}
   {const lu=lowUp(e.reps);if(lu[1]>0&&lu[0]<5){e.reps="5-6";e.rec=null;}}
   if(e.tempo==="вверх взрывно")e.tempo="2-0-1, под контролем";
-  if(["8-9","9","10 (тест)"].includes(e.rpe))e.rpeTxt="2 повтора в запасе — не ближе к отказу";
+  if(["8-9","9","10 (тест)"].includes(e.rpe))e.rpeTxt="последние 2 раза тяжело, но техника не ломается";
  }
  const ph=phaseFor(W,i);e.ph=ph;
  if(ph){
@@ -832,12 +865,16 @@ function exRow(W,t,s,i){
   if(e.rec&&ph.mul<1)e.rec=Math.round(e.rec*ph.mul/2.5)*2.5;
   if((ph.key==="mens"||ph.key==="pms")&&role==="Кор/Финишер"){e.name="Спокойная ходьба или растяжка";e.reps="10-15 мин";e.sets=1;e.rest="—";e.tempo="—";e.rpeTxt="комфортно";}
  }
+ if(/сек|мин/.test(e.reps))e.rpeTxt=""; // упражнения на время — без «запаса»
+ if(lv!=="Новичок")e.rpeTxt=e.rpeTxt.replace("легко, без напряжения","легко, 4 повтора в запасе").replace("остановись, когда можешь ещё 3 раза","3 повтора в запасе").replace(/последние (\S+) раза? тяжело, но техника не ломается/,"$1 повтора в запасе");
+ // Новичку на 1–2 неделе — без суперсетов: оба упражнения обычными подходами
+ if(lv==="Новичок"&&W<2&&/ \+ /.test(e.name))e.noSS=true;
  return e;}
-const PH={mens:{name:"Месячные",mul:0.9,dSets:0,rpe:"2–3 повтора в запасе",col:"var(--plate-red)",adv:"Веса уже чуть легче (−10%). Самочувствие нормальное — работай по плану. Тяжело — снизь ещё на 10%, болит живот или нет сил — замени тренировку прогулкой и растяжкой."},
+const PH={mens:{name:"Месячные",mul:0.9,dSets:0,rpe:"последние 2–3 раза тяжело, но техника не ломается",col:"var(--plate-red)",adv:"Веса уже чуть легче (−10%). Самочувствие нормальное — работай по плану. Тяжело — снизь ещё на 10%, болит живот или нет сил — замени тренировку прогулкой и растяжкой."},
  foll:{name:"Фолликулярная фаза",mul:1,dSets:0,col:"var(--plate-green)",adv:"Работай по плану. Многие девушки в эти дни чувствуют больше энергии — хорошее время прибавлять в весах."},
  ovu:{name:"Овуляторная фаза",mul:1,dSets:0,col:"var(--plate-blue)",adv:"Работай по плану. Хорошо разомнись перед тяжёлыми подходами."},
  lut:{name:"Лютеиновая фаза",mul:1,dSets:0,col:"var(--plate-yellow)",adv:"Работай по плану. Если устаёшь быстрее обычного — не доходи до отказа, оставляй 2–3 повтора в запасе."},
- pms:{name:"Перед месячными (ПМС)",mul:0.9,dSets:0,rpe:"2–3 повтора в запасе",col:"var(--muted)",adv:"Веса уже чуть легче (−10%). Чувствуешь силы — работай по плану. Тяжело — снизь ещё на 10% или замени тренировку прогулкой. Это нормально и временно."}};
+ pms:{name:"Перед месячными (ПМС)",mul:0.9,dSets:0,rpe:"последние 2–3 раза тяжело, но техника не ломается",col:"var(--muted)",adv:"Веса уже чуть легче (−10%). Чувствуешь силы — работай по плану. Тяжело — снизь ещё на 10% или замени тренировку прогулкой. Это нормально и временно."}};
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 function cycleOn(){return $("sex").value==="f"&&$("cyc_on").checked&&!!$("cyc_start").value;}
 function cycLen(){return clamp(Math.round(num("cyc_len"))||28,21,40);}
@@ -854,8 +891,11 @@ function exTon(W,i,s,e){return setVals(W,i,s,e).reduce((a,v)=>a+(v?v.w*v.r:0),0)
 function sessTon(W,i){const t=tplOf(W,i);let x=0;for(let s=0;s<7;s++)x+=exTon(W,i,s,exRow(W,t,s,i));return x;}
 function weekTon(W){let x=0;for(let i=0;i<N();i++)x+=sessTon(W,i);return x;}
 function sessDate(W,i){const st=$("start").value;if(!st)return null;const d0=new Date(st+"T00:00:00");if(isNaN(d0))return null;const mon=new Date(d0);mon.setDate(d0.getDate()-((d0.getDay()+6)%7));
- const dt=new Date(mon);dt.setDate(mon.getDate()+W*7+S.days[i]);return dt;}
-function dateFor(W,i){const dt=sessDate(W,i);if(!dt)return"";return `${DAYN[S.days[i]]}, ${String(dt.getDate()).padStart(2,"0")}.${String(dt.getMonth()+1).padStart(2,"0")}`;}
+ // Первая тренировка — первый выбранный день не раньше даты старта; дальше по кругу (ср, пт, пн, ср…)
+ const n=S.days.length,sd=(d0.getDay()+6)%7;let o=S.days.findIndex(d=>d>=sd),add=0;if(o<0){o=0;add=7;}
+ const k=o+i,j=k%n,wk=W+Math.floor(k/n);
+ const dt=new Date(mon);dt.setDate(mon.getDate()+add+wk*7+S.days[j]);return dt;}
+function dateFor(W,i){const dt=sessDate(W,i);if(!dt)return"";return `${DAYN[(dt.getDay()+6)%7]}, ${String(dt.getDate()).padStart(2,"0")}.${String(dt.getMonth()+1).padStart(2,"0")}`;}
 function idxOf(P){return P.i;}
 // Почти верх: во всех подходах вместе не хватает до верхней границы не больше 2 повторов (15/15/13 при 12–15).
 function topAll(P){if((P.e.ph?.mul||1)<1)return false;const u=lowUp(P.e.reps)[1];return u>0&&P.v.length>=P.e.sets&&P.v.reduce((a,x)=>a+Math.min(x.r,u),0)>=P.e.sets*u-2;}
@@ -864,6 +904,14 @@ function prevDown(w){const st=stp(w-0.01);return Math.max(st,Math.ceil(w/st-1e-9
 function gapWeeks(from,to){let g=0;for(let w=from+1;w<to;w++){if(w%4===3)continue;let any=false;for(let k=0;k<N()&&!any;k++)for(let s=0;s<7&&!any;s++){const L=S.log[lk(w,k,s)];if(L&&(L.done||(L.sets||[]).some(c=>c&&(c.w||c.r))))any=true;}if(!any)g++;}return g;}
 function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
  while(w>=0){if(k<0){w--;k=N()-1;continue;}if(w%4!==3&&tplOf(w,k)===t){const e=exRow(w,t,s,k),v=setVals(w,k,s,e).filter(Boolean);if(v.length)return{W:w,i:k,s,e,v};}k--;}return null;}
+const NOV=()=>S.level==="Новичок";
+function firstTip(W){if(isHome()||W>0)return"";
+ return`<div class="firstw"><b>Как выбрать первый вес.</b> Знаешь, с каким весом делаешь упражнение, — впиши его. Только пришёл в зал — начни с пустого грифа или самой лёгкой гантели, на тренажёре — с самого лёгкого веса. Сделал 15 раз легко — в следующем подходе +5 кг (гантели — на 1–2 кг тяжелее).</div>`;}
+function noviceNote(W,e){if(isHome()||S.level!=="Новичок")return"";const n=[];
+ if(W<2&&/Румынская тяга/.test(e.name))n.push("Первые 2 недели: сначала 1 подход без веса у зеркала, потом гантели 4–6 кг.");
+ if(W<2&&/Выпады|выпады/.test(e.name))n.push("Шатает — держись одной рукой за опору.");
+ 
+ return n.length?`<div class="exnote">${n.join(" ")}</div>`:"";}
 function tip(W,i,s,e){const I=sugInfo(W,i,s,e);if(!I||!I.why)return"";
  return`<span class="tip ${I.cls}">${{up:"▲",down:"▼",same:"="}[I.cls]} ${I.why} → ставь ${dec(I.w)} кг</span>`;}
 // Следующий вес по сетке: до 20 кг шаг 2, дальше 2,5. 15 → 16, 60 → 62,5.
@@ -878,7 +926,7 @@ function blockStart(W,i,s){const t=tplOf(W,i),w0=W-4;for(let k=0;k<N();k++){if(t
 function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
  const b=baseW(P),mu=e.ph?.mul||1,dl=W%4===3,easy=(P.e.ph?.mul||1)<1,[lo,up]=lowUp(P.e.reps),nup=lowUp(e.reps)[1];
  let t=b,why="",cls="same";
- if(dl){why=`Разгрузка: 65% от ${dec(b)} кг — лёгкая неделя для восстановления`;t=b*0.65;}
+ if(dl){why=`Разгрузка: 70% от ${dec(b)} кг — лёгкая неделя для восстановления`;t=b*0.7;}
  else if(W%4===0&&W>=4){const B=blockStart(W,i,s);cls="up";
   if(B){const bb=baseW(B),h=heavier(bb);if(h/bb>1.1&&!topAll(B)){t=bb;cls="same";why=`Новый блок: вес 1-й недели прошлого блока (${dec(bb)} кг) — шаг до ${dec(h)} кг пока велик, прибавь повторы`;}else{t=h;why=`Новый блок: +5% к 1-й неделе прошлого блока (${dec(bb)} кг)`;}}else{t=b*0.8;cls="same";why=`Новый блок: 80% от ${dec(b)} кг — повторов снова больше`;}}
  else if(!up){t=b;}
@@ -897,7 +945,7 @@ function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
   else why=`Отлично, ${dec(b)} кг на ${up}+! Повтори ещё раз — если снова получится, добавим вес`;}
  else why=`Оставь ${dec(b)} кг и добавь по 1 повтору`;
  if(!dl&&gapWeeks(P.W,W)>0){t=t*0.9;cls="down";why=`После перерыва в тренировках −10%: ${why?why.charAt(0).toLowerCase()+why.slice(1):"вес как прошлый раз"}`;}
- if(mu<1){if(dl){if(mu<0.65){t=b*mu;why=`Разгрузка совпала с фазой «${e.ph.name}»: −${Math.round((1-mu)*100)}% от ${dec(b)} кг`;}}
+ if(mu<1){if(dl){if(mu<0.7){t=b*mu;why=`Разгрузка совпала с фазой «${e.ph.name}»: −${Math.round((1-mu)*100)}% от ${dec(b)} кг`;}}
   else{why+=`${why?". ":""}По плану ${dec(rr(t))} кг, по циклу −${Math.round((1-mu)*100)}%`;t=t*mu;cls="same";}}
  return{w:rr(t),why,cls};}
 function sugW(W,i,s,e){const I=sugInfo(W,i,s,e);return I?I.w:null;}
@@ -917,38 +965,38 @@ function payBox(){const tg=window.Telegram?.WebApp;return`<div class="lockov"><d
 document.addEventListener("click",ev=>{const a=ev.target.closest("#payBtn,#botLink");if(!a)return;const tg=window.Telegram?.WebApp;if(!tg)return;ev.preventDefault();
  if(a.id==="botLink"&&tg.openTelegramLink)tg.openTelegramLink(a.href);else if(tg.openLink)tg.openLink(a.href);else location.href=a.href;});
 function renderWeekMap(){const g=S.goal;let h="";
- for(let m=0;m<3;m++){h+=`<div class="blk"><span class="bt"><b>Блок ${m+1}</b> · ${MESO_NAME[g][m]}</span><div class="wk">`;
-  for(let w=0;w<4;w++){const W=m*4+w;h+=`<button type="button" class="${w===3?"dl":""}" aria-pressed="${W===S.W}" data-w="${W}" aria-label="Неделя ${W+1}${w===3?", разгрузка":""}${locked(W)?", закрыта":""}">${locked(W)?"🔒":W+1}</button>`;}
+ for(let m=0;m<3;m++){h+=`<div class="blk"><span class="bt"><b>${["Лёгкий старт","Больше работы","Тяжёлые веса"][m]}</b> · недели ${m*4+1}–${m*4+4}</span><div class="wk">`;
+  for(let w=0;w<4;w++){const W=m*4+w;h+=`<button type="button" class="${w===3?"dl":""}" aria-pressed="${W===S.W}" data-w="${W}" aria-label="Неделя ${W+1}${w===3?", разгрузка":""}${locked(W)?", закрыта":""}">${locked(W)?"🔒":W+1}${w===3?"<small>лёгкая</small>":""}</button>`;}
   h+=`</div></div>`;}
  $("weekMap").innerHTML=h;}
 function renderProgram(){
  const g=S.goal,W=S.W,m=Math.floor(W/4)+1,w=W%4;
  renderWeekMap();renderCycleInfo();renderInj();
- $("weekInfo").innerHTML=isHome()?`<b>Неделя ${W+1} из 12 · блок ${m} «${HOME_MESO[m-1]}» · дома</b><span>${esc(HOME_WEEK[m-1][w])}</span>`:`<b>Неделя ${W+1} из 12 · блок ${m} «${MESO_NAME[g][m-1]}» · ${WEEKNAMES[w].toLowerCase()}</b><span>${esc(WEEK_METHOD[g][m][w])}</span>`;
+ $("weekInfo").innerHTML=isHome()?`<b>Неделя ${W+1} из 12 · блок ${m} «${HOME_MESO[m-1]}» · дома</b><span>${esc(HOME_WEEK[m-1][w])}${W>=4&&S.level==="Новичок"?" Стало легко? Переключись на средний уровень — в анкете «Как у тебя с нагрузкой?» выбери «Средний».":""}</span>`:(S.level==="Новичок"?`<b>Неделя ${W+1} из 12 · ${w===3?"лёгкая неделя, отдыхаем":["привыкаем, учим движения","веса растут","самые тяжёлые веса курса"][m-1]}</b>`:`<b>Неделя ${W+1} из 12 · блок ${m} «${MESO_NAME[g][m-1]}» · ${WEEKNAMES[w].toLowerCase()}</b>`)+`<span>${esc(WEEK_METHOD[g][m][w])}</span>`;
  $("levelOrg").innerHTML=isHome()?`<b>Как делать (${S.level==="Новичок"?"лёгкий":"средний"} уровень):</b> ${S.level==="Новичок"?"Без прыжков и без нагрузки на колени. Держись за стул, если нужно. Должно быть тепло и чуть запыхался — но не задыхаешься.":"Без прыжков, но в быстром темпе. Должно быть жарко, говорить можно короткими фразами."}`:`<b>Как делать (${S.level.toLowerCase()}):</b> ${esc(LEVEL_T[g][S.level][2])}`;
  const endD=(()=>{const st=$("start").value;if(!st)return"";const d=new Date(st+"T00:00:00");if(isNaN(d))return"";d.setDate(d.getDate()+84);return d.toLocaleDateString("ru-RU",{day:"numeric",month:"long"});})();
  $("cycleEnd").innerHTML=`Через 12 недель${endD?` (около ${endD})`:""} вернись с новыми данными: вес, замеры, рабочие веса. Обнови шаг 1 — программа и калории пересчитаются под новые показатели.`;
  if(N()<2){$("daysOut").innerHTML=`<div class="panel"><p>Выбери минимум 2 дня тренировок в шаге 1.</p></div>`;renderBars();return;}
  let html="";
- for(let i=0;i<N();i++){const t=tplOf(W,i);let rows="",tot=0;
+ for(let i=0;i<N();i++){const t=tplOf(W,i);let rows="",tot=0;const tempos=[];
   for(let s=0;s<7;s++){const e=exRow(W,t,s,i),L=S.log[lk(W,i,s)]||{},ton=exTon(W,i,s,e);tot+=ton;
    const [col,cls]=PLATE[e.role],timed=lowUp(e.reps)[1]===0,isPair=false;
-   const meta=[`отдых <b>${esc(e.rest)}</b>`];if(e.rpeTxt)meta.push(e.rpeTxt);if(e.tempo&&e.tempo!=="—")meta.push(`темп ${esc(e.tempo)} <button type="button" class="qi" data-q="tempo" data-t="${esc(e.tempo)}" aria-label="Что такое темп">?</button>`);if(e.rec&&!sugW(W,i,s,e))meta.push(`рабочий вес ≈ <b>${dec(e.rec)} кг</b>`);
+   const meta=[`отдых <b>${esc(e.rest)}</b>`];if(e.rpeTxt)meta.push(e.rpeTxt);if(e.tempo&&e.tempo!=="—"){const k=e.tempo;if(!tempos.some(x=>x[0]===k))tempos.push([k,ROLE_WORD[e.role]]);}if(e.rec&&!sugW(W,i,s,e))meta.push(`рабочий вес ≈ <b>${dec(e.rec)} кг</b>`);
    let body="";
    if(timed){body=`<div class="exfoot"><label class="check"><input type="checkbox" id="c_${i}_${s}" data-k="${lk(W,i,s)}" data-f="done" ${L.done?"checked":""}>Сделано</label></div>`;}
    else{const sv=setVals(W,i,s,e);let cells="";const arr=L.sets||[];const sg=sugW(W,i,s,e);let ph=sg?dec(sg):e.rec?dec(e.rec):"";
     for(let k=0;k<e.sets;k++){const c=arr[k]||{};const done=!!sv[k]&&(c.w||c.r);
-     cells+=`<div class="set ${done?"done":""}" id="set_${i}_${s}_${k}"><span class="n">${k+1}</span><input aria-label="Подход ${k+1}, вес кг" inputmode="decimal" id="w_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="w" value="${esc(c.w??"")}" placeholder="${ph||"кг"}"><em>×</em><input aria-label="Подход ${k+1}, повторы" inputmode="numeric" id="r_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="r" value="${esc(c.r??"")}" placeholder="${lowUp(e.reps)[0]}"></div>`;
+     cells+=`<div class="set ${done?"done":""}" id="set_${i}_${s}_${k}"><span class="n">${k+1}</span><input aria-label="Подход ${k+1}, вес кг" inputmode="decimal" id="w_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="w" value="${esc(c.w??"")}" placeholder="${ph||(W===0&&k===0?"напр. 4":"кг")}"><em>×</em><input aria-label="Подход ${k+1}, повторы" inputmode="numeric" id="r_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="r" value="${esc(c.r??"")}" placeholder="${lowUp(e.reps)[0]}"></div>`;
      if(c.w)ph=c.w;}
-    body=`<div class="sets">${cells}</div><div class="exfoot"><span>Тоннаж <button type="button" class="qi" data-q="ton" aria-label="Что такое тоннаж">?</button>: <span class="ton" id="t_${i}_${s}">${fmt(ton)} кг</span></span>${tip(W,i,s,e)}</div>`;}
-   rows+=`<div class="ex"><span class="plate ${cls}" style="background:${col}">${e.block}</span><div><div class="exname">${esc(e.name)}</div>${EX_NOTE[e.name]?`<div class="exnote">${EX_NOTE[e.name]}</div>`:/ \+ /.test(e.name)?`<div class="exnote">Суперсет: сделай оба упражнения подряд без отдыха, отдых — после второго. Вес пиши по первому упражнению.</div>`:""}${TECH[e.name]?`<button type="button" class="techbtn" data-tech="${esc(e.name)}">▶ Техника</button>`:""}<div class="exmeta">${meta.map(x=>`<span>${x}</span>`).join("")}</div></div>${scheme(e)}
-    ${e.orig?`<div class="swapnote"><b>Вместо «${esc(e.orig)}»</b> — бережнее к пояснице</div>`:""}${isPair?`<div class="pair">${e.block} + ${e.block.replace("1","2")}: делай подряд без отдыха, отдых после второго</div>`:""}${body}</div>`;}
+    body=`<div class="sets">${cells}</div><div class="exfoot"><span>${NOV()?"Всего поднято":"Тоннаж"} <button type="button" class="qi" data-q="ton" aria-label="Что это">?</button>: <span class="ton" id="t_${i}_${s}">${ton||!NOV()?fmt(ton)+" кг":"впиши вес"}</span></span>${tip(W,i,s,e)}</div>`;}
+   rows+=`<div class="ex"><span class="plate ${cls}" style="background:${col}">${e.block}</span><div><div class="exrole" style="color:${col}">${ROLE_WORD[e.role]||""}</div><div class="exname">${esc(e.name)}</div>${EX_NOTE[e.name]?`<div class="exnote">${EX_NOTE[e.name]}</div>`:/ \+ /.test(e.name)?e.noSS?`<div class="exnote">Первые 2 недели — не подряд: сначала все подходы первого упражнения, потом второго. Отдых как обычно.</div>`:`<div class="exnote">Суперсет: сделай оба упражнения подряд без отдыха, отдых — после второго. Вес пиши по первому упражнению.</div>`:""}${noviceNote(W,e)}${TECH[e.name]?`<button type="button" class="techbtn" data-tech="${esc(e.name)}">▶ Техника</button>`:""}<div class="exmeta">${meta.map(x=>`<span>${x}</span>`).join("")}</div></div>${scheme(e)}
+    ${e.orig?`<div class="swapnote"><b>Вместо «${esc(e.orig)}»</b> — бережнее к ${injWord()}</div>`:""}${isPair?`<div class="pair">${e.block} + ${e.block.replace("1","2")}: делай подряд без отдыха, отдых после второго</div>`:""}${body}</div>`;}
   const st=RAMP_STEPS[t],ph=phaseFor(W,i);
   html+=`<article class="panel day"><div class="dayhead"><h3>Тренировка ${i+1} · ${DAYL[t]}</h3><span>${dateFor(W,i)}</span></div>
    ${ph?`<div class="phase" style="--pc:${ph.col}"><span class="pchip">${esc(ph.name)} · ${ph.day}-й день цикла</span><p>${esc(ph.adv)}</p></div>`:""}
    <div class="warm"><h4>Сначала разминка · ${isHome()?"5":ph&&ph.key==="ovu"?"15":"10"} минут. Не пропускай</h4><ol>${warmSteps(t).map(x=>`<li><span><b>${x[0]}:</b> ${esc(x[1])}</span></li>`).join("")}</ol></div>
-   ${isHome()?`<p class="hint" style="margin:0 0 4px"><b>По кругу:</b> упражнения подряд — работа и отдых по таймеру, как написано у каждого. Прошёл все 7 — отдых 1 минута и следующий круг.</p>`:""}<div class="exlist">${rows}</div>
-   <div class="daytot"><span>${isHome()?`Между кругами — 1 минута отдыха. Вся тренировка ≈ ${homeMin(W,t,i)} мин + разминка. Заминка: 3 минуты спокойно походи по дому + растяжка ног, спины и груди.`:"Заминка: 5 минут спокойно на дорожке + растяжка мышц, которые работали."}</span>${isHome()?"":`<span>Тоннаж тренировки: <b id="dt_${i}">${fmt(tot)}</b> кг</span>`}</div></article>`;}
+   ${isHome()?`<p class="hint" style="margin:0 0 4px"><b>По кругу:</b> упражнения подряд — работа и отдых по таймеру, как написано у каждого. Прошёл все 7 — отдых 1 минута и следующий круг.</p>`:""}${firstTip(W)}${tempoLine(tempos)}<div class="exlist">${rows}</div>
+   <div class="daytot"><span>${isHome()?`Между кругами — 1 минута отдыха. Вся тренировка ≈ ${homeMin(W,t,i)} мин + разминка. Заминка: 3 минуты спокойно походи по дому + растяжка ног, спины и груди. Каждый день: 7 000+ шагов.`:`Вся тренировка ≈ ${gymMin(W,t,i)} мин вместе с разминкой и заминкой. Заминка: 5 минут спокойно на дорожке + растяжка мышц, которые работали.`}</span>${isHome()?"":`<span>${NOV()?"Всего поднято за тренировку":"Тоннаж тренировки"}: <b id="dt_${i}">${fmt(tot)}</b> кг</span>`}</div></article>`;}
  $("daysOut").innerHTML=locked(W)?`<div class="lockwrap"><div class="lockblur" aria-hidden="true" inert>${html}</div>${payBox()}</div>`:html;
  $("prevW").disabled=W===0;$("nextW").disabled=W===11;
  renderBars();}
@@ -961,8 +1009,11 @@ function renderChoices(){const hm=isHome();document.querySelectorAll("[data-plac
  {const LB=hm?{"Новичок":["Лёгкий","Только начинаю, давно не двигался"],"Средний":["Средний","Немного двигаюсь, хочу бодрее"]}:{"Новичок":["Новичок","Занимаюсь меньше 6 месяцев или после долгого перерыва"],"Средний":["Средний","Регулярно 6 месяцев – 2 года, знаю технику присед, жим, тяги"]};
   document.querySelectorAll("[data-level]").forEach(b=>{const l=LB[b.dataset.level];b.hidden=hm&&b.dataset.level==="Продвинутый";if(l)b.innerHTML=`<b>${l[0]}</b><span>${l[1]}</span>`;});}
  document.querySelectorAll("[data-goal]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.goal===S.goal));document.querySelectorAll("[data-level]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.level===S.level));$("exTag").hidden=touched;}
-function renderAll(){renderChoices();renderDays();renderKcal();renderProgram();renderTimeline();}
-function markTouched(){if(!touched){touched=true;$("exTag").hidden=true;}}
+function renderMe(){document.body.classList.toggle("done",!!touched);$("meBar").hidden=!touched;
+ $("meTxt").textContent=[$("name").value,($("age").value?$("age").value+" лет":""),($("weight").value?$("weight").value+" кг":""),isHome()?"дома":"зал",GOAL_RU[S.goal]].filter(Boolean).join(" · ");}
+function editMode(on){document.body.classList.toggle("edit",on);(on?$("s1"):$("weekInfo")).scrollIntoView({behavior:"smooth",block:"start"});}
+function renderAll(){renderChoices();renderDays();renderKcal();renderProgram();renderTimeline();renderMe();}
+function markTouched(){if(!touched){touched=true;$("exTag").hidden=true;renderMe();}}
 
 document.addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)return;
  if(b.dataset.place){S.place=b.dataset.place;if(S.place==="home"){S.goal="Жиросжигание";if(S.level==="Продвинутый")S.level="Средний";}markTouched();renderAll();save();}
@@ -976,7 +1027,7 @@ document.addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b
  else if(b.id==="prevW"&&S.W>0){S.W--;renderProgram();renderTimeline();save();$("weekInfo").scrollIntoView({block:"start"});}
  else if(b.id==="nextW"&&S.W<11){S.W++;renderProgram();renderTimeline();save();$("weekInfo").scrollIntoView({block:"start"});}});
 function refreshEx(i,s){const W=S.W,e=exRow(W,tplOf(W,i),s,i),sv=setVals(W,i,s,e),L=S.log[lk(W,i,s)]||{},arr=L.sets||[];
- $("t_"+i+"_"+s).textContent=fmt(exTon(W,i,s,e))+" кг";
+ {const v=exTon(W,i,s,e);$("t_"+i+"_"+s).textContent=v||!NOV()?fmt(v)+" кг":"впиши вес";}
  for(let k=0;k<e.sets;k++){const c=arr[k]||{};const el=$(`set_${i}_${s}_${k}`);if(el)el.classList.toggle("done",!!sv[k]&&!!(c.w||c.r));}
  $("dt_"+i).textContent=fmt(sessTon(W,i));renderBars();}
 document.addEventListener("input",ev=>{const el=ev.target;
@@ -1010,7 +1061,7 @@ function renderCycleInfo(){const fem=$("sex").value==="f";$("cycBox").hidden=!fe
  const rows=[["mens",`1–${P}`,"Энергии меньше, возможны спазмы","Веса −20–30%, на 1 подход меньше, без прыжков и скручиваний. Плохо — прогулка и растяжка"],
   ["foll",`${P+1}–${ov-2}`,"Прилив сил, быстрое восстановление","Работай по плану, прибавляй веса"],
   ["ovu",`${ov-1}–${ov+1}`,"Максимум силы, связки мягче","Тяжёлые базовые по плану, разминка 15 минут, аккуратно с резкими движениями"],
-  ["lut",`${ov+2}–${Ln-4}`,"Усталость, задержка воды","Веса −5%, 2–3 повтора в запасе"],
+  ["lut",`${ov+2}–${Ln-4}`,"Усталость, задержка воды","Веса −5%, не до отказа"],
   ["pms",`${Ln-3}–${Ln}`,"ПМС, тяжёлые веса кажутся неподъёмными","Разгрузка: веса −30–40% или прогулка"]];
  $("cycTable").innerHTML=rows.map(r=>`<div class="pcard" style="--pc:${PH[r[0]].col}"><div class="ph1"><b>${PH[r[0]].name}</b><span>дни ${r[1]}</span></div><p><i>Тело:</i> ${r[2]}</p><p><i>Делаем:</i> ${r[3]}</p></div>`).join("");}
 
@@ -1230,7 +1281,7 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
  info.forEach((r,k)=>{const a=o.getCell(4+k,2),b=o.getCell(4+k,3);a.value=r[0];b.value=r[1];a.font={name:F,bold:true};b.font={name:F};a.fill=fill(GREY);[a,b].forEach(c=>{c.border=box;c.alignment={vertical:"middle",wrapText:true};});});
  const pr=4+info.length,PADDR=`'Обзор'!$C$${pr}`;{const a=o.getCell(pr,2),b=o.getCell(pr,3);a.value="Прирост тоннажа (когда повторы те же)";b.value=0.1;b.numFmt="0%";a.font={name:F,bold:true};b.font={name:F,bold:true,color:{argb:"FF0000FF"}};a.fill=fill(GREY);b.fill=fill(INP);[a,b].forEach(c=>{c.border=box;c.alignment={vertical:"middle",horizontal:"left"};});}
  let r=6+info.length;ot(r,"Как заполнять",{b:true,s:13});r++;
- ["Листы «Блок 1–3» — твои тренировки по неделям.","Жёлтые ячейки — вписываешь вес и сколько раз сделал (в среднем за подход). Тоннаж считается сам.","Голубые ячейки — рекомендация: сколько поднять и сколько раз. Считаются сами от того, что ты вписал в прошлый раз.","Хочешь другое упражнение — поменяй название в 1-й неделе (есть список по типу движения, можно вписать своё). На всех следующих неделях оно поменяется само.","«Рек. вес» со 2-й недели считается от того, что ты вписал. Повторов столько же, сколько в прошлый раз, — цель: тоннаж + прирост из ячейки выше (сначала добавляешь повторы, дошёл до верха — вес вверх). Повторов по плану меньше — вес +5%, тоннаж может быть чуть ниже: так задумано.","4-я неделя каждого блока — разгрузка: 80% веса и меньше подходов.","Перед каждой тренировкой — разминка 10 минут (расписана в начале тренировки)."].forEach(t=>{o.getCell(r,3).value="• "+t;o.getCell(r,3).font={name:F};o.getCell(r,3).alignment={wrapText:true};r++;});
+ ["Листы «Блок 1–3» — твои тренировки по неделям.","Жёлтые ячейки — вписываешь вес и сколько раз сделал (в среднем за подход). Тоннаж считается сам.","Голубые ячейки — рекомендация: сколько поднять и сколько раз. Считаются сами от того, что ты вписал в прошлый раз.","Хочешь другое упражнение — поменяй название в 1-й неделе (есть список по типу движения, можно вписать своё). На всех следующих неделях оно поменяется само.","«Рек. вес» со 2-й недели считается от того, что ты вписал. Повторов столько же, сколько в прошлый раз, — цель: тоннаж + прирост из ячейки выше (сначала добавляешь повторы, дошёл до верха — вес вверх). Повторов по плану меньше — вес +5%, тоннаж может быть чуть ниже: так задумано.","4-я неделя каждого блока — разгрузка: 70% веса и меньше подходов.","Перед каждой тренировкой — разминка 10 минут (расписана в начале тренировки)."].forEach(t=>{o.getCell(r,3).value="• "+t;o.getCell(r,3).font={name:F};o.getCell(r,3).alignment={wrapText:true};r++;});
  r++;ot(r,"Важно",{b:true,s:13,c:"FFB3261E"});r++;
  const warn=["Программа — рекомендация, а не медицинское назначение.","Головокружение, боль или давление в груди, резкая боль в суставе или спине, тошнота, сильная одышка — сразу прекрати тренировку и обратись к врачу."];
  INJ_ORDER.filter(k=>S.injs.includes(k)&&k!=="lumbar").forEach(k=>warn.push(INJ[k].warn));if(S.injs.includes("lumbar"))warn.push("Грыжа: только вне обострения и с разрешения врача. Боль во время — не больше 3 из 10 и не отдаёт в ногу. Онемение в паху, проблемы с мочеиспусканием, слабость в ноге — срочно к врачу.");
@@ -1278,7 +1329,7 @@ async function buildXLSX(){const X=await loadExcel();const wb=new X.Workbook();c
        ws.getCell(row,15).value={formula:`IF(${pre}K${P.row}="","",${pre}K${P.row}/${P.mul})`};
        const cyc=mu<1&&!dl?` · по циклу вес −${Math.round((1-mu)*100)}%`:"";let x,reps,hint;
        const up5=`MAX(FLOOR(${N0},${st})+${st},MROUND(${N0}*1.05,${st}))`;
-       if(dl){const k=Math.min(0.65,mu);x=`${N0}*${k}`;reps=`${lo}`;hint=`"Разгрузка: ${Math.round(k*100)}% от рабочего веса"`;}
+       if(dl){const k=Math.min(0.7,mu);x=`${N0}*${k}`;reps=`${lo}`;hint=`"Разгрузка: ${Math.round(k*100)}% от рабочего веса"`;}
        else if(nb===1){x=`${up5}*${mu}`;reps=`${lo}`;hint=`"Новый блок: +5% к 1-й неделе прошлого блока${cyc}"`;}
        else if(nb===2){x=`${N0}*0.8*${mu}`;reps=`${lo}`;hint=`"Новый блок: 80% от прошлого веса — повторов снова больше${cyc}"`;}
        else if(top<P.top){x=`${up5}*${mu}`;reps=`${lo}`;hint=`"Повторов по плану меньше — вес +5%. Получается легко — делай до ${top}${cyc}"`;}
@@ -1334,16 +1385,17 @@ function obSteps(){const st=[
  if(S.goal==="Жиросжигание")st.push({k:"fl",q:"Сколько хочешь сбросить?",t:"fl"});
  st.push(isHome()?{k:"level",q:"Как у тебя с нагрузкой?",t:"pick",opts:[["Новичок","Лёгкий","Только начинаю, давно не двигался"],["Средний","Средний","Немного двигаюсь, хочу бодрее"]]}:{k:"level",q:"Какой у тебя опыт в зале?",t:"pick",opts:[["Новичок","Новичок","Меньше 6 месяцев или после долгого перерыва"],["Средний","Средний","6 месяцев – 2 года, знаю технику базовых"],["Продвинутый","Продвинутый","Больше 2 лет, большие веса"]]},
   {k:"days",q:"В какие дни будешь тренироваться?",t:"days"},
+  {k:"start",q:"С какого дня начнём?",t:"start"},
   {k:"injs",q:"Есть травмы или ограничения?",t:"injs"});
  if($("sex").value==="f")st.push({k:"cyc",q:"Подстроить тренировки под цикл?",t:"cyc"});
  return st;}
 let obI=0;
-function obOpen(){obI=0;$("ob").hidden=false;document.body.style.overflow="hidden";obRender();}
-function obClose(){$("ob").hidden=true;document.body.style.overflow="";}
+function obOpen(){obI=0;$("ob").hidden=false;document.body.classList.add("obopen");document.body.style.overflow="hidden";obRender();}
+function obClose(){$("ob").hidden=true;document.body.classList.remove("obopen");document.body.classList.remove("edit");document.body.style.overflow="";}
 const OB_SAY={place:"Можно и дома — я подстрою программу 🏠",name:"Привет! Я Гиря. Давай знакомиться 👋",sex:"Чтобы правильно посчитать калории",age:"Обещаю никому не говорить 🤫",height:"Выпрямись! Без обмана 😄",weight:"Это просто точка старта",goal:"Самый важный вопрос!",fl:"Не спеши — так результат останется",level:"Честно — от этого зависят веса",days:"Отдых между тренировками тоже работа",injs:"Береги себя — подберу упражнения",cyc:"Подстрою нагрузку под самочувствие"};
 function kbJump(cls){const k=$("obKb");if(!k)return;k.classList.remove("jump","flex");void k.offsetWidth;k.classList.add(cls||"jump");}
 function obRender(){const st=obSteps(),s=st[obI],b=$("obBody");$("obSay").textContent=OB_SAY[s.k]||"";
- $("obBar").style.width=((obI+1)/st.length*100)+"%";$("obBack").style.visibility=obI?"visible":"hidden";
+ $("obBar").style.width=((obI+1)/st.length*100)+"%";$("obStep").textContent=`Вопрос ${obI+1} из ${st.length}`;$("obBack").style.visibility=obI?"visible":"hidden";
  $("obNext").textContent=obI===st.length-1?"Собрать программу":"Далее";
  let h=`<h2 class="ob-q">${s.q}</h2>`;
  if(s.t==="text")h+=`<input class="ob-in" id="obV" type="text" value="${esc(touched?$("name").value:"")}" placeholder="Имя">`;
@@ -1351,6 +1403,8 @@ function obRender(){const st=obSteps(),s=st[obI],b=$("obBody");$("obSay").textCo
  if(s.t==="pick"){const cur=s.k==="sex"?$("sex").value:S[s.k];h+=`<div class="ob-opts">${s.opts.map(o=>`<button type="button" class="ob-opt" data-v="${o[0]}" aria-pressed="${touched&&o[0]===cur}"><b>${o[1]}</b>${o[2]?`<span>${o[2]}</span>`:""}</button>`).join("")}</div>`;}
  if(s.t==="fl")h+=`<div class="ob-num"><input class="ob-in" id="obV" type="number" inputmode="decimal" min="1" max="80" step="0.5" value="${esc($("fl_kg").value)}"><span>кг</span></div><div class="ob-num"><input class="ob-in" id="obV2" type="number" inputmode="numeric" min="1" max="24" value="${esc($("fl_mo").value)}"><span>месяцев</span></div><p class="hint">Безопасно — до 1% веса в неделю.</p>`;
  if(s.t==="days")h+=`<div class="ob-days">${DAYN.map((d,i)=>`<button type="button" class="ob-day" data-d="${i}" aria-pressed="${S.days.includes(i)}">${d}</button>`).join("")}</div><p class="hint" id="obErr">Отметь 2–5 дней. Между тренировками лучше день отдыха.</p>`;
+ if(s.t==="start"){const td=new Date(),iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  h+=`<input class="ob-in" id="obV" type="date" min="${iso(td)}" value="${esc(touched&&$("start").value>=iso(td)?$("start").value:iso(td))}"><p class="hint" id="obErr">Первая тренировка — в ближайший выбранный день с этой даты.</p>`;}
  if(s.t==="injs")h+=`<div class="ob-opts">${[["none","Нет, всё хорошо"],["lumbar","Поясница: грыжа, протрузия"],["knee","Колено"],["shoulder","Плечо"]].map(o=>`<button type="button" class="ob-opt" data-inj="${o[0]}" aria-pressed="${o[0]==="none"?!S.injs.length:S.injs.includes(o[0])}"><b>${o[1]}</b></button>`).join("")}</div><p class="hint">Можно выбрать несколько.</p>`;
  if(s.t==="cyc")h+=`<div class="ob-opts"><button type="button" class="ob-opt" data-cyc="1" aria-pressed="${$("cyc_on").checked}"><b>Да, учитывать</b><span>Веса и подходы подстроятся под фазу цикла</span></button><button type="button" class="ob-opt" data-cyc="0" aria-pressed="${!$("cyc_on").checked}"><b>Нет</b><span>Нерегулярный цикл, контрацептивы, беременность</span></button></div>
   <div id="obCycD" style="display:${$("cyc_on").checked?"grid":"none"};gap:12px">
@@ -1365,6 +1419,7 @@ async function obNext(){const st=obSteps(),s=st[obI],v=$("obV"),err=t=>{const e=
  if(s.t==="pick"&&!document.querySelector('#obBody .ob-opt[aria-pressed="true"]'))return;
  if(s.t==="fl"){const kg=parseFloat(v.value),mo=parseFloat($("obV2").value);if(!(kg>0&&mo>0))return;$("fl_kg").value=kg;$("fl_mo").value=mo;}
  if(s.t==="days"&&(S.days.length<2||S.days.length>5))return err("Нужно от 2 до 5 дней.");
+ if(s.t==="start"){if(!v.value)return err("Выбери дату");$("start").value=v.value;}
  if(s.t==="cyc"&&$("cyc_on").checked){if(!v.value)return err("Укажи первый день последних месячных");
   const cl=Math.round(+$("obCL").value),cp=Math.round(+$("obCP").value);
   if(!(cl>=21&&cl<=40))return err("Длина цикла — от 21 до 40 дней");
@@ -1375,7 +1430,7 @@ async function obNext(){const st=obSteps(),s=st[obI],v=$("obV"),err=t=>{const e=
  if(!touched)S.log={};touched=true;markTouched();S.W=0;renderAll();save();obClose();
  $("weekInfo").scrollIntoView({behavior:"smooth",block:"start"});}
 document.body.insertAdjacentHTML("beforeend",`<div class="ob" id="ob" hidden role="dialog" aria-modal="true" aria-label="Анкета">
- <div class="ob-card"><div class="ob-prog"><i id="obBar"></i></div>
+ <div class="ob-card"><div class="ob-step" id="obStep"></div><div class="ob-prog"><i id="obBar"></i></div>
  <div class="ob-hero"><svg id="obKb" class="kb" viewBox="0 0 140 140" aria-hidden="true">
   <defs><radialGradient id="kbBody" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#9DB8FF"/><stop offset=".55" stop-color="#5B86FF"/><stop offset="1" stop-color="#2F55D4"/></radialGradient>
    <linearGradient id="kbHandle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FA9F5"/><stop offset="1" stop-color="#3B5BDB"/></linearGradient></defs>
@@ -1398,13 +1453,11 @@ document.body.insertAdjacentHTML("beforeend",`<div class="ob" id="ob" hidden rol
   <path d="M64 113 Q70 120 76 113 Q70 111 64 113 Z" fill="#FF7A90"/>
  </svg><div class="ob-say" id="obSay"></div></div>
  <div id="obBody" class="ob-body"></div>
- <div class="ob-nav"><button type="button" class="ob-back" id="obBack">Назад</button><button type="button" class="ob-next" id="obNext">Далее</button></div>
- <button type="button" class="ob-skip" id="obSkip">Заполню сам в форме</button></div></div>`);
+ <div class="ob-nav"><button type="button" class="ob-back" id="obBack">Назад</button><button type="button" class="ob-next" id="obNext">Далее</button></div></div></div>`);
 $("ob").addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)return;ev.stopPropagation();
  const s=obSteps()[obI];
  if(b.id==="obNext")return obNext();
  if(b.id==="obBack"){if(obI>0){obI--;obRender();}return;}
- if(b.id==="obSkip"){touched=true;markTouched();save();obClose();return;}
  if(b.classList.contains("ob-opt")&&s.t==="pick"){if(s.k==="sex")$("sex").value=b.dataset.v;else S[s.k]=b.dataset.v;if(s.k==="goal")S.pace=1;if(s.k==="place"&&S.place==="home"){S.goal="Жиросжигание";if(S.level==="Продвинутый")S.level="Средний";}
   b.parentElement.querySelectorAll(".ob-opt").forEach(x=>x.setAttribute("aria-pressed",x===b));$("obSay").textContent=["Отличный выбор!","Принято 👍","Записал!"][obI%3];kbJump();return;}
  if(b.dataset.d!=null){const d=+b.dataset.d;if(S.days.includes(d))S.days=S.days.filter(x=>x!==d);else if(S.days.length<5)S.days=[...S.days,d].sort((a,c)=>a-c);obRender();return;}
@@ -1412,6 +1465,8 @@ $("ob").addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)
  if(b.dataset.cyc){$("cyc_on").checked=b.dataset.cyc==="1";obRender();return;}});
 $("ob").addEventListener("keydown",ev=>{if(ev.key==="Enter"&&ev.target.tagName==="INPUT"){ev.preventDefault();obNext();}});
 $("obAgain").addEventListener("click",obOpen);
+$("meEdit").addEventListener("click",()=>editMode(true));$("setEdit").addEventListener("click",()=>editMode(true));$("editDone").addEventListener("click",()=>editMode(false));
+{const lf=document.getElementById("logoutForm");if(lf){lf.removeAttribute("style");const b=lf.querySelector("button");b.removeAttribute("style");b.className="btn ghost";$("setBox").appendChild(lf);}}
 if(!touched)obOpen();
 document.body.insertAdjacentHTML("beforeend",`<div class="tv" id="tv" hidden role="dialog" aria-modal="true" aria-label="Техника упражнения"><button type="button" class="tv-close" id="tvClose" aria-label="Закрыть">✕</button><video id="tvVideo" controls playsinline preload="none"></video></div>`);
 function tvClose(){const v=$("tvVideo");v.pause();v.removeAttribute("src");v.load();$("tv").hidden=true;document.body.style.overflow="";}
