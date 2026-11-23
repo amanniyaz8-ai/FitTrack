@@ -1016,3 +1016,5 @@
 [2026-11-20 15:00:32] testing.WARNING: Telegram getChatMember unavailable: 502  
 [2026-11-20 15:02:17] testing.WARNING: Telegram getChatMember unavailable: 502  
 [2026-11-20 16:52:33] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-23 16:59:50] testing.WARNING: Telegram getChatMember unavailable: 502  
+[2026-11-23 17:12:54] testing.WARNING: Telegram getChatMember unavailable: 502  

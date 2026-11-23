@@ -47,7 +47,7 @@ p{margin:0}
 .step{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--fg);color:var(--bg);font-family:var(--f-data);font-size:15px;flex:none}
 section{display:grid;gap:16px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:16px;min-width:0}
-.hint{color:#4A5262;font-size:15px}
+.hint{color:color-mix(in srgb,var(--fg) 72%,transparent);font-size:15px}
 .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
 label.f{display:grid;gap:6px;font-weight:600;font-size:14px}
 label.f small{font-weight:400;color:var(--muted)}
@@ -95,6 +95,8 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
 .navrow{display:flex;justify-content:space-between;gap:10px}
 /* workout */
 .panel.day{display:grid;gap:0;padding:0;overflow:hidden}
+.panel.day>summary{list-style:none;cursor:pointer}.panel.day>summary::-webkit-details-marker{display:none}
+.panel.day>summary h3::after{content:" ▾";opacity:.7}.panel.day:not([open])>summary h3::after{content:" ▸"}
 .dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:16px 20px;background:var(--fg);color:var(--bg)}
 .dayhead h3{font-size:19px;font-weight:700}
 .dayhead span{font-family:var(--f-data);font-size:14px;opacity:.85}
@@ -168,7 +170,7 @@ dl.terms dd{margin:0;color:var(--muted)}
 .alarm h3{color:var(--bad);text-transform:uppercase}
 .alarm ul{margin:0;padding-left:20px;display:grid;gap:4px}
 .qi{display:inline-grid;place-items:center;width:18px;height:18px;margin-left:4px;padding:0;border:0;border-radius:50%;background:var(--sunk);color:inherit;font:700 11px/1 inherit;cursor:pointer;vertical-align:middle}
-.exnote{font-size:14px;color:#4A5262;margin:2px 0 4px}
+.exnote{font-size:14px;color:color-mix(in srgb,var(--fg) 72%,transparent);margin:2px 0 4px}
 .qibox{position:fixed;left:16px;right:16px;bottom:16px;z-index:1000;max-width:480px;margin:0 auto;padding:16px;border-radius:14px;background:var(--surface);color:var(--fg);border:1px solid var(--line);box-shadow:0 10px 40px rgba(0,0,0,.25);display:grid;gap:12px}
 .qibox[hidden]{display:none}.qibox p{margin:0;line-height:1.45}
 .lockwrap{position:relative;min-height:420px}.lockblur{filter:blur(5px);opacity:.55;pointer-events:none;user-select:none;max-height:640px;overflow:hidden}
@@ -247,7 +249,7 @@ dl.terms dd{margin:0;color:var(--muted)}
 .obopen .wrap{visibility:hidden}
 details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details.howto[open]{display:grid;gap:14px}
 .exrole{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
-.tempo1{font-size:14px;color:#4A5262;margin:0 0 8px}
+.tempo1{font-size:14px;color:color-mix(in srgb,var(--fg) 72%,transparent);margin:0 0 8px}
 .ob-step{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:6px}
 .settings .row{flex-wrap:wrap}#logoutForm{margin:0}#logoutForm button{color:#B3261E}
 .ob-skip{background:none;border:0;color:var(--muted);font:13px var(--f-body);text-decoration:underline;cursor:pointer;justify-self:center}
@@ -301,7 +303,7 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
   </header>
 
   <section aria-labelledby="s1" class="setup">
-    <h2 id="s1"><span class="step">1</span>О тебе</h2>
+    <h2 id="s1">О тебе</h2>
     <div class="panel form">
       <div class="row"><button type="button" class="btn ghost" id="obAgain">Пройти анкету заново</button><span class="example" id="exTag">Пример — впиши свои данные</span></div>
       <div class="grid">
@@ -368,7 +370,7 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
   </section>
 
   <section aria-labelledby="s2" class="setup">
-    <h2 id="s2"><span class="step">2</span>Где и зачем тренируешься</h2>
+    <h2 id="s2">Где и зачем тренируешься</h2>
     <div class="choices" id="placeChoices" role="group" aria-label="Где тренируешься" style="margin-bottom:14px">
       <button class="choice" data-place="gym"><b>В зале</b><span>Штанга, гантели, тренажёры — программа по технике и весам</span></button>
       <button class="choice" data-place="home"><b>Дома, без инвентаря</b><span>Только свой вес, по кругу на время, без прыжков. Для тех, кто только начинает</span></button>
@@ -382,46 +384,8 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
   </section>
 
 
-  <section aria-labelledby="s4">
-    <h2 id="s4"><span class="step">3</span>Программа на 12 недель</h2>
-    <div class="panel">
-      <div class="weekinfo" id="weekInfo"></div>
-      <div id="injInfo" style="display:grid;gap:12px" hidden></div>
-      <details class="howto"><summary>Как устроена программа?</summary>
-      <div class="cycle">
-        <b class="big">12 недель = 3 блока по 4 недели</b>
-        <p>Каждый блок решает свою задачу: сначала тело привыкает, потом нагрузка растёт, в конце — пик. Внутри блока недели идут по кругу: <b>вход → накопление → пик → разгрузка</b>. Разгрузка — лёгкая неделя, в неё тело восстанавливается и растёт.</p>
-        <p class="hint" id="cycleEnd"></p>
-      </div>
-      <div class="note"><b>Перед каждой тренировкой — разминка 10 минут.</b> Она расписана в начале каждой тренировки. Холодные мышцы и суставы — главная причина травм в зале.</div>
-      <div class="note" id="levelOrg"></div>
-      
-      <div class="cycinfo" id="cycInfo" hidden>
-        <b class="big">Программа подстроена под твой цикл</b>
-        <p>У каждой тренировки указана фаза. Веса, подходы и подсказки уже пересчитаны под неё.</p>
-        <div class="tablewrap" id="cycTable"></div>
-      </div>
-      <div class="legend">
-        <span><span class="dot" style="background:var(--plate-red)"></span>Главное упражнение</span>
-        <span><span class="dot" style="background:var(--plate-blue)"></span>Второе по важности</span>
-        <span><span class="dot" style="background:var(--plate-yellow)"></span>Дополнительное</span>
-        <span><span class="dot" style="background:var(--plate-green)"></span>Пресс / финишер</span>
-      </div>
-      <p class="hint">В каждом подходе впиши вес и сколько раз сделал. Тоннаж (сколько килограммов ты поднял всего) посчитается сам. Со второй тренировки появится подсказка, добавлять ли вес.</p>
-</details>
-    </div>
-    <div id="daysOut" style="display:grid;gap:32px"></div>
-    <div class="navrow"><button class="btn ghost" id="prevW">← Прошлая неделя</button><button class="btn" id="nextW">Следующая неделя →</button></div>
-    <div class="panel"><div style="display:grid;gap:8px"><b>Выбери неделю</b><div class="weekmap" id="weekMap"></div><p class="hint">Лёгкая неделя — меньше веса, тело восстанавливается и растёт.</p></div></div>
-    <div class="panel">
-      <h3>Тоннаж по неделям, кг</h3>
-      <div class="bars" id="bars"></div>
-      <p class="hint">Так и должно быть: внутри блока недели 2–3 выше 1-й, неделя разгрузки (серая) ниже на 30–50%.</p>
-    </div>
-  </section>
-
   <section aria-labelledby="s3">
-    <h2 id="s3"><span class="step">4</span>Сколько есть</h2>
+    <h2 id="s3">Сколько есть</h2>
     <div class="panel">
       <p class="hint" id="coefLine"></p>
       <div id="paceBox"><b id="paceLabel">Темп</b><div class="seg" id="paceSeg" style="margin-top:8px"></div></div>
@@ -459,8 +423,47 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
     </div>
   </section>
 
+  <section aria-labelledby="s4">
+    <h2 id="s4">Программа на 12 недель</h2>
+    <div class="panel">
+      <div class="weekinfo" id="weekInfo"></div>
+      <div id="injInfo" style="display:grid;gap:12px" hidden></div>
+      <details class="howto"><summary>Как устроена программа?</summary>
+      <div class="cycle">
+        <b class="big">12 недель = 3 блока по 4 недели</b>
+        <p>Каждый блок решает свою задачу: сначала тело привыкает, потом нагрузка растёт, в конце — пик. Внутри блока недели идут по кругу: <b>вход → накопление → пик → разгрузка</b>. Разгрузка — лёгкая неделя, в неё тело восстанавливается и растёт.</p>
+        <p class="hint" id="cycleEnd"></p>
+      </div>
+      <div class="note"><b>Перед каждой тренировкой — разминка 10 минут.</b> Она расписана в начале каждой тренировки. Холодные мышцы и суставы — главная причина травм в зале.</div>
+      <div class="note" id="levelOrg"></div>
+      
+      <div class="cycinfo" id="cycInfo" hidden>
+        <b class="big">Программа подстроена под твой цикл</b>
+        <p>У каждой тренировки указана фаза. Веса, подходы и подсказки уже пересчитаны под неё.</p>
+        <div class="tablewrap" id="cycTable"></div>
+      </div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--plate-red)"></span>Главное упражнение</span>
+        <span><span class="dot" style="background:var(--plate-blue)"></span>Второе по важности</span>
+        <span><span class="dot" style="background:var(--plate-yellow)"></span>Дополнительное</span>
+        <span><span class="dot" style="background:var(--plate-green)"></span>Пресс / финишер</span>
+      </div>
+      <p class="hint">В каждом подходе впиши вес и сколько раз сделал. Тоннаж (сколько килограммов ты поднял всего) посчитается сам. Со второй тренировки появится подсказка, добавлять ли вес.</p>
+</details>
+    </div>
+    <div id="daysOut" style="display:grid;gap:32px"></div>
+    <div class="navrow"><button class="btn ghost" id="prevW">← Прошлая неделя</button><button class="btn" id="nextW">Следующая неделя →</button></div>
+    <div class="panel"><div style="display:grid;gap:8px"><b>Выбери неделю</b><div class="weekmap" id="weekMap"></div><p class="hint">Лёгкая неделя — меньше веса, тело восстанавливается и растёт.</p></div></div>
+    <div class="panel">
+      <h3>Тоннаж по неделям, кг</h3>
+      <div class="bars" id="bars"></div>
+      <p class="hint">Так и должно быть: внутри блока недели 2–3 выше 1-й, неделя разгрузки (серая) ниже на 30–50%.</p>
+    </div>
+  </section>
+
+
   <section aria-labelledby="s5">
-    <h2 id="s5"><span class="step">5</span>Что дальше</h2>
+    <h2 id="s5">Что дальше</h2>
     <p class="lead">Три блока — полный цикл. Потом меняем цель, чтобы тело не привыкало.</p>
     <div class="timeline" id="timeline"></div>
     <div class="panel">
@@ -774,12 +777,12 @@ function renderKcal(){
  if(!fat){$("paceLabel").textContent=g==="Набор массы"?"Насколько быстро набираем":"Калории для силы";
   $("paceSeg").innerHTML=opts.map((o,i)=>`<button type="button" aria-pressed="${i===S.pace}" data-pace="${i}">${o[0]} · ${o[1]>0?"+":""}${Math.round(o[1]*100)}%</button>`).join("");}
  const nd=N(),coef=isHome()?1.375:nd>=4?1.465:1.375;
- $("coefLine").textContent=`Коэффициент активности ${dec(coef)} — ${nd>=4?"4–5":"1–3"} ${plural(nd,"тренировка","тренировки","тренировок")} в неделю (из шага 1). Тренировки уже внутри нормы — второй раз их не прибавляем.`;
+ $("coefLine").textContent=`Коэффициент активности ${dec(coef)} — ${nd>=4?"4–5":"1–3"} ${plural(nd,"тренировка","тренировки","тренировок")} в неделю . Тренировки уже внутри нормы — второй раз их не прибавляем.`;
  $("k_hint").textContent=fat?"Считаем по формуле Миффлина — Сан Жеора. Формула ошибается до 10%, поэтому раз в 2–3 недели сверяйся с весами: вес стоит — убери ещё 100–150 ккал; уходит быстрее 1% веса в неделю — добавь немного еды."
   :"Считаем по формуле Миффлина — Сан Жеора. Это точка старта: смотри средний вес за неделю. Вес стоит 2–3 недели — добавь 150–200 ккал; растёт заметно быстрее плана вместе с талией — убери 150–200.";
  const sex=$("sex").value,a=num("age"),h=num("height"),w=num("weight");
  const blank=m=>{["k_tdee","k_target","k_fc","m_p","m_f","m_c"].forEach(i=>$(i).textContent="—");$("k_note").textContent=m;$("splitBox").innerHTML="";};
- if(!(a>0&&h>0&&w>0))return blank("Впиши возраст, рост и вес в шаге 1.");
+ if(!(a>0&&h>0&&w>0))return blank("Впиши возраст, рост и вес в анкете (кнопка «Изменить»).");
  const bmr=10*w+6.25*h-5*a+(sex==="m"?5:-161),tdee=bmr*coef;
  let target,p,pTxt,f,fBase,note,floored=false;
  $("k_tdee").textContent=fmt(tdee);
@@ -905,6 +908,11 @@ function gapWeeks(from,to){let g=0;for(let w=from+1;w<to;w++){if(w%4===3)continu
 function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
  while(w>=0){if(k<0){w--;k=N()-1;continue;}if(w%4!==3&&tplOf(w,k)===t){const e=exRow(w,t,s,k),v=setVals(w,k,s,e).filter(Boolean);if(v.length)return{W:w,i:k,s,e,v};}k--;}return null;}
 const NOV=()=>S.level==="Новичок";
+// Какие тренировки раскрыты: по умолчанию первая несделанная на неделе; выбор человека запоминается до смены недели
+let openDays=null,openW=-1;
+function dayDone(W,i){for(let s=0;s<7;s++){const L=S.log[lk(W,i,s)];if(L&&(L.done||(L.sets||[]).some(c=>c&&(c.w||c.r))))return true;}return false;}
+function dayOpen(W,i){if(openW!==W||!openDays){openW=W;let f=0;while(f<N()-1&&dayDone(W,f))f++;openDays=new Set([f]);}return openDays.has(i);}
+document.addEventListener("toggle",ev=>{const d=ev.target;if(!d.classList||!d.classList.contains("day")||!openDays)return;const i=+d.dataset.i;d.open?openDays.add(i):openDays.delete(i);},true);
 function firstTip(W){if(isHome()||W>0)return"";
  return`<div class="firstw"><b>Как выбрать первый вес.</b> Знаешь, с каким весом делаешь упражнение, — впиши его. Только пришёл в зал — начни с пустого грифа или самой лёгкой гантели, на тренажёре — с самого лёгкого веса. Сделал 15 раз легко — в следующем подходе +5 кг (гантели — на 1–2 кг тяжелее).</div>`;}
 function noviceNote(W,e){if(isHome()||S.level!=="Новичок")return"";const n=[];
@@ -975,8 +983,8 @@ function renderProgram(){
  $("weekInfo").innerHTML=isHome()?`<b>Неделя ${W+1} из 12 · блок ${m} «${HOME_MESO[m-1]}» · дома</b><span>${esc(HOME_WEEK[m-1][w])}${W>=4&&S.level==="Новичок"?" Стало легко? Переключись на средний уровень — в анкете «Как у тебя с нагрузкой?» выбери «Средний».":""}</span>`:(S.level==="Новичок"?`<b>Неделя ${W+1} из 12 · ${w===3?"лёгкая неделя, отдыхаем":["привыкаем, учим движения","веса растут","самые тяжёлые веса курса"][m-1]}</b>`:`<b>Неделя ${W+1} из 12 · блок ${m} «${MESO_NAME[g][m-1]}» · ${WEEKNAMES[w].toLowerCase()}</b>`)+`<span>${esc(WEEK_METHOD[g][m][w])}</span>`;
  $("levelOrg").innerHTML=isHome()?`<b>Как делать (${S.level==="Новичок"?"лёгкий":"средний"} уровень):</b> ${S.level==="Новичок"?"Без прыжков и без нагрузки на колени. Держись за стул, если нужно. Должно быть тепло и чуть запыхался — но не задыхаешься.":"Без прыжков, но в быстром темпе. Должно быть жарко, говорить можно короткими фразами."}`:`<b>Как делать (${S.level.toLowerCase()}):</b> ${esc(LEVEL_T[g][S.level][2])}`;
  const endD=(()=>{const st=$("start").value;if(!st)return"";const d=new Date(st+"T00:00:00");if(isNaN(d))return"";d.setDate(d.getDate()+84);return d.toLocaleDateString("ru-RU",{day:"numeric",month:"long"});})();
- $("cycleEnd").innerHTML=`Через 12 недель${endD?` (около ${endD})`:""} вернись с новыми данными: вес, замеры, рабочие веса. Обнови шаг 1 — программа и калории пересчитаются под новые показатели.`;
- if(N()<2){$("daysOut").innerHTML=`<div class="panel"><p>Выбери минимум 2 дня тренировок в шаге 1.</p></div>`;renderBars();return;}
+ $("cycleEnd").innerHTML=`Через 12 недель${endD?` (около ${endD})`:""} вернись с новыми данными: вес, замеры, рабочие веса. Обнови данные анкеты — программа и калории пересчитаются под новые показатели.`;
+ if(N()<2){$("daysOut").innerHTML=`<div class="panel"><p>Выбери минимум 2 дня тренировок в анкете (кнопка «Изменить»).</p></div>`;renderBars();return;}
  let html="";
  for(let i=0;i<N();i++){const t=tplOf(W,i);let rows="",tot=0;const tempos=[];
   for(let s=0;s<7;s++){const e=exRow(W,t,s,i),L=S.log[lk(W,i,s)]||{},ton=exTon(W,i,s,e);tot+=ton;
@@ -986,17 +994,17 @@ function renderProgram(){
    if(timed){body=`<div class="exfoot"><label class="check"><input type="checkbox" id="c_${i}_${s}" data-k="${lk(W,i,s)}" data-f="done" ${L.done?"checked":""}>Сделано</label></div>`;}
    else{const sv=setVals(W,i,s,e);let cells="";const arr=L.sets||[];const sg=sugW(W,i,s,e);let ph=sg?dec(sg):e.rec?dec(e.rec):"";
     for(let k=0;k<e.sets;k++){const c=arr[k]||{};const done=!!sv[k]&&(c.w||c.r);
-     cells+=`<div class="set ${done?"done":""}" id="set_${i}_${s}_${k}"><span class="n">${k+1}</span><input aria-label="Подход ${k+1}, вес кг" inputmode="decimal" id="w_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="w" value="${esc(c.w??"")}" placeholder="${ph||(W===0&&k===0?"напр. 4":"кг")}"><em>×</em><input aria-label="Подход ${k+1}, повторы" inputmode="numeric" id="r_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="r" value="${esc(c.r??"")}" placeholder="${lowUp(e.reps)[0]}"></div>`;
+     cells+=`<div class="set ${done?"done":""}" id="set_${i}_${s}_${k}"><span class="n">${k+1}</span><input aria-label="Подход ${k+1}, вес кг" inputmode="decimal" id="w_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="w" value="${esc(c.w??"")}" placeholder="${ph||(W===0&&k===0?"4 кг":"кг")}"><em>×</em><input aria-label="Подход ${k+1}, повторы" inputmode="numeric" id="r_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="r" value="${esc(c.r??"")}" placeholder="${lowUp(e.reps)[0]}"></div>`;
      if(c.w)ph=c.w;}
     body=`<div class="sets">${cells}</div><div class="exfoot"><span>${NOV()?"Всего поднято":"Тоннаж"} <button type="button" class="qi" data-q="ton" aria-label="Что это">?</button>: <span class="ton" id="t_${i}_${s}">${ton||!NOV()?fmt(ton)+" кг":"впиши вес"}</span></span>${tip(W,i,s,e)}</div>`;}
    rows+=`<div class="ex"><span class="plate ${cls}" style="background:${col}">${e.block}</span><div><div class="exrole" style="color:${col}">${ROLE_WORD[e.role]||""}</div><div class="exname">${esc(e.name)}</div>${EX_NOTE[e.name]?`<div class="exnote">${EX_NOTE[e.name]}</div>`:/ \+ /.test(e.name)?e.noSS?`<div class="exnote">Первые 2 недели — не подряд: сначала все подходы первого упражнения, потом второго. Отдых как обычно.</div>`:`<div class="exnote">Суперсет: сделай оба упражнения подряд без отдыха, отдых — после второго. Вес пиши по первому упражнению.</div>`:""}${noviceNote(W,e)}${TECH[e.name]?`<button type="button" class="techbtn" data-tech="${esc(e.name)}">▶ Техника</button>`:""}<div class="exmeta">${meta.map(x=>`<span>${x}</span>`).join("")}</div></div>${scheme(e)}
     ${e.orig?`<div class="swapnote"><b>Вместо «${esc(e.orig)}»</b> — бережнее к ${injWord()}</div>`:""}${isPair?`<div class="pair">${e.block} + ${e.block.replace("1","2")}: делай подряд без отдыха, отдых после второго</div>`:""}${body}</div>`;}
   const st=RAMP_STEPS[t],ph=phaseFor(W,i);
-  html+=`<article class="panel day"><div class="dayhead"><h3>Тренировка ${i+1} · ${DAYL[t]}</h3><span>${dateFor(W,i)}</span></div>
+  html+=`<details class="panel day" data-i="${i}" ${dayOpen(W,i)?"open":""}><summary class="dayhead"><h3>Тренировка ${i+1} · ${DAYL[t]}</h3><span>${dateFor(W,i)}</span></summary>
    ${ph?`<div class="phase" style="--pc:${ph.col}"><span class="pchip">${esc(ph.name)} · ${ph.day}-й день цикла</span><p>${esc(ph.adv)}</p></div>`:""}
    <div class="warm"><h4>Сначала разминка · ${isHome()?"5":ph&&ph.key==="ovu"?"15":"10"} минут. Не пропускай</h4><ol>${warmSteps(t).map(x=>`<li><span><b>${x[0]}:</b> ${esc(x[1])}</span></li>`).join("")}</ol></div>
    ${isHome()?`<p class="hint" style="margin:0 0 4px"><b>По кругу:</b> упражнения подряд — работа и отдых по таймеру, как написано у каждого. Прошёл все 7 — отдых 1 минута и следующий круг.</p>`:""}${firstTip(W)}${tempoLine(tempos)}<div class="exlist">${rows}</div>
-   <div class="daytot"><span>${isHome()?`Между кругами — 1 минута отдыха. Вся тренировка ≈ ${homeMin(W,t,i)} мин + разминка. Заминка: 3 минуты спокойно походи по дому + растяжка ног, спины и груди. Каждый день: 7 000+ шагов.`:`Вся тренировка ≈ ${gymMin(W,t,i)} мин вместе с разминкой и заминкой. Заминка: 5 минут спокойно на дорожке + растяжка мышц, которые работали.`}</span>${isHome()?"":`<span>${NOV()?"Всего поднято за тренировку":"Тоннаж тренировки"}: <b id="dt_${i}">${fmt(tot)}</b> кг</span>`}</div></article>`;}
+   <div class="daytot"><span>${isHome()?`Между кругами — 1 минута отдыха. Вся тренировка ≈ ${homeMin(W,t,i)} мин + разминка. Заминка: 3 минуты спокойно походи по дому + растяжка ног, спины и груди. Каждый день: 7 000+ шагов.`:`Вся тренировка ≈ ${gymMin(W,t,i)} мин вместе с разминкой и заминкой. Заминка: 5 минут спокойно на дорожке + растяжка мышц, которые работали.`}</span>${isHome()?"":`<span>${NOV()?"Всего поднято за тренировку":"Тоннаж тренировки"}: <b id="dt_${i}">${fmt(tot)}</b> кг</span>`}</div></details>`;}
  $("daysOut").innerHTML=locked(W)?`<div class="lockwrap"><div class="lockblur" aria-hidden="true" inert>${html}</div>${payBox()}</div>`:html;
  $("prevW").disabled=W===0;$("nextW").disabled=W===11;
  renderBars();}
@@ -1240,7 +1248,7 @@ function renderInjQuick(act){$("injQuick").hidden=!act.length;
   <div class="iqg"><div class="iqc ok"><h4>Что делаем</h4><ul>${I.do.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
   <div class="iqc no"><h4>Чего не делаем</h4><ul>${I.dont.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
   <div class="iqc sw"><h4>Что заменили в твоей программе</h4>${pr.size?`<ul>${[...pr].map(([a,b])=>`<li><s>${esc(a)}</s><br>→ <b>${esc(b)}</b></li>`).join("")}</ul>`:`<p class="hint">Для твоей цели и уровня таких упражнений нет — программа подходит как есть.</p>`}</div></div>
-  <p class="hint">${esc(I.alert)} Правило боли и стоп-сигналы — в шаге 4.</p></div>`;}).join("");}
+  <p class="hint">${esc(I.alert)} Правило боли и стоп-сигналы — в разделе «Программа».</p></div>`;}).join("");}
 function renderInj(){document.querySelectorAll("[data-inj]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.inj==="none"?S.injs.length===0:S.injs.includes(b.dataset.inj)));
  const act=INJ_ORDER.filter(k=>S.injs.includes(k));renderInjQuick(act);$("injInfo").hidden=!act.length;if(!act.length){$("injInfo").innerHTML="";return;}
  const li=LEVELS.indexOf(S.level),pairs=new Map();
