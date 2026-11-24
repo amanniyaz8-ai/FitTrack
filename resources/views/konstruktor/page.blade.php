@@ -250,6 +250,7 @@ dl.terms dd{margin:0;color:var(--muted)}
 .me{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:600}
 .done .setup,.done .intro{display:none}.done.edit .setup{display:block}
 .obopen .wrap{visibility:hidden}
+.home .gymonly{display:none}
 details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details.howto[open]{display:grid;gap:14px}
 .exrole{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
 .tempo1{font-size:14px;color:color-mix(in srgb,var(--fg) 72%,transparent);margin:0 0 8px}
@@ -399,9 +400,9 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
           <label class="f">За сколько месяцев<input id="fl_mo" type="number" inputmode="numeric" min="1" max="24" value="5"></label>
           <label class="f">Новое движение в день
             <select id="fl_mv">
-              <option value="0">Не добавлю</option>
+              <option value="0" selected>Не добавлю</option>
               <option value="2500">+2 500 шагов</option>
-              <option value="5000" selected>+5 000 шагов</option>
+              <option value="5000">+5 000 шагов</option>
               <option value="7500">+7 500 шагов</option>
             </select>
             <small>Сверх твоего обычного дня: прогулка, пешком до работы, лестница</small>
@@ -459,7 +460,7 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
     <div id="daysOut" style="display:grid;gap:32px"></div>
     <div class="navrow"><button class="btn ghost" id="prevW">← Прошлая неделя</button><button class="btn" id="nextW">Следующая неделя →</button></div>
     <div class="panel"><div style="display:grid;gap:8px"><b>Выбери неделю</b><div class="weekmap" id="weekMap"></div><p class="hint">Лёгкая неделя — меньше веса, тело восстанавливается и растёт.</p></div></div>
-    <div class="panel">
+    <div class="panel gymonly">
       <h3>Тоннаж по неделям, кг</h3>
       <div class="bars" id="bars"></div>
       <p class="hint">Так и должно быть: внутри блока недели 2–3 выше 1-й, неделя разгрузки (серая) ниже на 30–50%.</p>
@@ -471,7 +472,7 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
     <h2 id="s5">Что дальше</h2>
     <p class="lead">Три блока — полный цикл. Потом меняем цель, чтобы тело не привыкало.</p>
     <div class="timeline" id="timeline"></div>
-    <div class="panel">
+    <div class="panel gymonly">
       <h3>Как расти каждую неделю</h3>
       <ol class="rules">
         <li>Сначала добавляй повторы. Сделал верхнюю границу во всех подходах (например, 12 из «10–12») — в следующий раз +2,5–5% веса.</li>
@@ -481,7 +482,7 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
         <li>В конце каждого блока — замеры: вес, талия, фото в одной и той же одежде и свете.</li>
       </ol>
     </div>
-    <div class="panel">
+    <div class="panel gymonly">
       <h3>Словарик</h3>
       <dl class="terms">
         <dt>4 × 10–12</dt><dd>4 подхода, в каждом 10–12 повторений</dd>
@@ -832,9 +833,14 @@ function gymMin(W,t,i){let sec=0;for(let s=0;s<7;s++){const e=exRow(W,t,s,i);if(
   const work=/сек/.test(e.reps)?secOf(e.reps):45;sec+=e.sets*work+(e.sets-1)*secOf(e.rest)+60;}
  return Math.round(sec/60/5)*5+15;}
 function homeMin(W,t,i){const e=homeRow(W,t,0,i),wk=parseInt(e.reps),rs=parseInt(e.rest);return Math.round((7*(wk+rs)*e.sets+60*(e.sets-1))/60);}
+// Дома при травмах — замены (грыжа: без прогиба в пояснице; колено: без выпадов и глубоких приседов; плечо: без упора на прямые руки)
+const HOME_INJ={lumbar:{"«Лодочка» лёжа на животе":"«Птица-собака»","«Лодочка» с разведением рук":"«Мёртвый жук»","«Скалолаз» в медленном темпе":"«Птица-собака»"},
+ knee:{"Выпад назад с опорой о стул":"Степ-тап: касание носком ступеньки","Выпады назад поочерёдно":"Шаги вперёд-назад с хлопком над головой","Боковые выпады":"Отведение ноги в сторону стоя","Приседания":"Присед к стулу","Присед с паузой внизу":"Присед к стулу с паузой","Присед с подъёмом на носки":"Присед к стулу","«Конькобежец» шагом, без прыжка":"Подъём на носки стоя"},
+ shoulder:{"Отжимания от края дивана":"Отжимания от стены","Отжимания с колен":"Отжимания от стены","Планка с касанием плеч":"Планка с колен","Боковая планка":"Боковая планка с колен"}};
+function homeName(n){for(const k of INJ_ORDER)if(S.injs.includes(k)&&HOME_INJ[k][n])n=HOME_INJ[k][n];return n;}
 function homeRow(W,t,s,i){
- const lv=S.level==="Новичок"?0:1,H=HOME_LV[lv],b=Math.floor(W/4),w=W%4,dl=w===3;
- const e={role:HOME_ROLE[s],block:String(s+1),name:HOME_TPL[t][s][lv],sets:Math.max(1,H.rounds[b]-(dl?1:0)),reps:`${H.work[b]-(dl?5:0)} сек`,rest:`${H.rest[b]+(dl?5:0)} с`,tempo:"—",rec:null,rpe:"",
+ const lv=S.level==="Новичок"?0:1,H=HOME_LV[lv],b=Math.floor(W/4),w=W%4,dl=w===3,up=dl?-5:w*5; // 7. рост каждую неделю: +5 сек работы
+ const e={role:HOME_ROLE[s],block:String(s+1),name:homeName(HOME_TPL[t][s][lv]),sets:Math.max(1,H.rounds[b]-(dl?1:0)),reps:`${Math.min(55,H.work[b]+up)} сек`,rest:`${Math.max(10,H.rest[b]-up)} с`,tempo:"—",rec:null,rpe:"",
   rpeTxt:lv?"бодро, но можешь говорить":"спокойно, дыхание ровное"};
  const ph=phaseFor(W,i);e.ph=ph;
  // Дома круги не урезаем автоматически (иначе с разгрузкой выходит 15 минут) — решает самочувствие.
@@ -847,6 +853,7 @@ function exRow(W,t,s,i){
  const role=(fat?FLR:HYR)[s],block=(fat?FLB:HYB)[s],tp=tplSet()[t][s];
  const p=GEN[g](m,w,t,role),[dSets,dPct]=LEVEL_T[g][lv];
  let reps=(lv==="Новичок"&&p.nov)?p.nov:p.reps;
+ if(lv==="Новичок"&&m===1&&w<3&&role!=="Кор/Финишер")reps=GEN[g](1,0,t,role).reps; // новичок: весь 1-й блок один диапазон
  if(lv==="Новичок"){const lu=lowUp(reps);if(lu[1]>0&&lu[0]<5)reps="5-6";}
  const sets=p.sets+(role==="Основное"?dSets:0);
  const pct=p.pct!=null?p.pct+dPct:null;
@@ -909,19 +916,21 @@ function dateFor(W,i){const dt=sessDate(W,i);if(!dt)return"";return `${DAYN[(dt.
 function idxOf(P){return P.i;}
 // Почти верх: во всех подходах вместе не хватает до верхней границы не больше 2 повторов (15/15/13 при 12–15).
 function topAll(P){if((P.e.ph?.mul||1)<1)return false;const u=lowUp(P.e.reps)[1];return u>0&&P.v.length>=P.e.sets&&P.v.reduce((a,x)=>a+Math.min(x.r,u),0)>=P.e.sets*u-2;}
+function breakDays(P,W,i){const a=sessDate(P.W,P.i),b=sessDate(W,i);return a&&b?(b-a)/864e5:99;}
 function prevDown(w){const st=stp(w-0.01);return Math.max(st,Math.ceil(w/st-1e-9)*st-st);}
 // Сколько обычных (не разгрузочных) недель между прошлой записью и текущей прошли совсем без тренировок
 function gapWeeks(from,to){let g=0;for(let w=from+1;w<to;w++){if(w%4===3)continue;let any=false;for(let k=0;k<N()&&!any;k++)for(let s=0;s<7&&!any;s++){const L=S.log[lk(w,k,s)];if(L&&(L.done||(L.sets||[]).some(c=>c&&(c.w||c.r))))any=true;}if(!any)g++;}return g;}
 function findPrev(W,i,s){const t=tplOf(W,i);let w=W,k=i-1;
  while(w>=0){if(k<0){w--;k=N()-1;continue;}if(w%4!==3&&tplOf(w,k)===t){const e=exRow(w,t,s,k),v=setVals(w,k,s,e).filter(Boolean);if(v.length)return{W:w,i:k,s,e,v};}k--;}return null;}
 const NOV=()=>S.level==="Новичок";
+const G=(m,f)=>$("sex").value==="f"?f:m;
 // Какие тренировки раскрыты: по умолчанию первая несделанная на неделе; выбор человека запоминается до смены недели
 let openDays=null,openW=-1;
 function dayDone(W,i){for(let s=0;s<7;s++){const L=S.log[lk(W,i,s)];if(L&&(L.done||(L.sets||[]).some(c=>c&&(c.w||c.r))))return true;}return false;}
 function dayOpen(W,i){if(openW!==W||!openDays){openW=W;let f=0;while(f<N()-1&&dayDone(W,f))f++;openDays=new Set([f]);}return openDays.has(i);}
 document.addEventListener("toggle",ev=>{const d=ev.target;if(!d.classList||!d.classList.contains("day")||!openDays)return;const i=+d.dataset.i;d.open?openDays.add(i):openDays.delete(i);},true);
 function firstTip(W){if(isHome()||W>0)return"";
- return`<div class="firstw"><b>Как выбрать первый вес.</b> Знаешь, с каким весом делаешь упражнение, — впиши его. Только пришёл в зал — начни с пустого грифа или самой лёгкой гантели, на тренажёре — с самого лёгкого веса. Сделал 15 раз легко — в следующем подходе +5 кг (гантели — на 1–2 кг тяжелее).</div>`;}
+ return`<div class="firstw"><b>Как выбрать первый вес.</b> Знаешь, с каким весом делаешь упражнение, — впиши его. Только ${G("пришёл","пришла")} в зал — начни с пустого грифа или самой лёгкой гантели, на тренажёре — с самого лёгкого веса. ${G("Сделал","Сделала")} 15 раз легко — в следующем подходе +5 кг (гантели — на 1–2 кг тяжелее).</div>`;}
 function noviceNote(W,e){if(isHome()||S.level!=="Новичок")return"";const n=[];
  if(W<2&&/Румынская тяга/.test(e.name))n.push("Первые 2 недели: сначала 1 подход без веса у зеркала, потом гантели 4–6 кг.");
  if(W<2&&/Выпады|выпады/.test(e.name))n.push("Шатает — держись одной рукой за опору.");
@@ -943,25 +952,25 @@ function sugInfo(W,i,s,e){const P=findPrev(W,i,s);if(!P)return null;
  let t=b,why="",cls="same";
  if(dl){why=`Разгрузка: 70% от ${dec(b)} кг — лёгкая неделя для восстановления`;t=b*0.7;}
  else if(W%4===0&&W>=4){const B=blockStart(W,i,s);cls="up";
-  if(B){const bb=baseW(B),h=heavier(bb);if(h/bb>1.1&&!topAll(B)){t=bb;cls="same";why=`Новый блок: вес 1-й недели прошлого блока (${dec(bb)} кг) — шаг до ${dec(h)} кг пока велик, прибавь повторы`;}else{t=h;why=`Новый блок: +5% к 1-й неделе прошлого блока (${dec(bb)} кг)`;}}else{t=b*0.8;cls="same";why=`Новый блок: 80% от ${dec(b)} кг — повторов снова больше`;}}
+  if(B){const bb=baseW(B),h=heavier(bb);if(h/bb>1.1&&!topAll(B)){t=bb;cls="same";why=`Новый блок: вес 1-й недели прошлого блока (${dec(bb)} кг) — шаг до ${dec(h)} кг пока велик, прибавь повторы`;}else{t=h;why=`Новый блок: на шаг тяжелее, чем в начале прошлого блока (${dec(bb)} кг)`;}}else{t=b*0.9;cls="same";why=`Новый блок: повторов снова больше — на 10% легче, чем прошлый раз (${dec(b)} кг)`;}}
  else if(!up){t=b;}
  else if(!easy&&P.v.some(x=>x.r<lo)){cls="down";
-  const Q=findPrev(P.W,idxOf(P),s),qlo=Q?lowUp(Q.e.reps)[0]:0,again=Q&&(Q.e.ph?.mul||1)>=1&&Math.max(...Q.v.map(x=>x.w))>=b&&Q.v.some(x=>x.r<qlo);
+  const Q=findPrev(P.W,idxOf(P),s),qlo=Q?lowUp(Q.e.reps)[0]:0,again=Q&&Q.W>=P.W-1&&Math.floor(Q.W/4)===Math.floor(P.W/4)&&Q.e.reps===P.e.reps&&(Q.e.ph?.mul||1)>=1&&Math.max(...Q.v.map(x=>x.w))>=b&&Q.v.some(x=>x.r<qlo);
   if(again&&b>2){t=prevDown(b);why=`${dec(b)} кг два раза подряд было тяжело — сними до ${dec(t)} кг, доберёшь повторы и вернёшься`;}
   else why=`Прошлый раз ${dec(b)} кг было тяжело — оставь этот вес и добери повторы`;}
  else if(easy){why=`Прошлая тренировка была облегчена по циклу — возвращаемся к рабочему весу ${dec(b)} кг`;}
  else if(nup&&nup<up){const h=heavier(b);
   if(h/b>1.1&&!topAll(P)){why=`Повторов по плану меньше. Шаг до ${dec(h)} кг слишком большой — оставь ${dec(b)} кг и делай повторы до верха`;}
-  else{t=h;cls="up";why=`Повторов меньше, чем прошлый раз — вес больше (было ${dec(b)} кг)`;}}
+  else{t=h;cls="up";why=`Новая неделя: повторов по плану меньше — поэтому вес на шаг больше (было ${dec(b)} кг)`;}}
  else if(P.v.length>=P.e.sets&&P.v.every(x=>x.r>=up)){
   // При 4–5 тренировках в неделю вес растёт, только если верх повторов взят 2 раза подряд — иначе прибавка была бы почти каждую тренировку.
   const Q=N()>=4?findPrev(P.W,idxOf(P),s):null,twice=N()<4||!!Q&&(Q.e.reps===P.e.reps&&Math.max(...Q.v.map(x=>x.w))>=b&&Q.v.length>=Q.e.sets&&Q.v.every(x=>x.r>=up));
   if(twice){t=nextUp(b);cls="up";why=`Прошлый раз ${dec(b)} кг на ${up}+ во всех подходах`;}
   else why=`Отлично, ${dec(b)} кг на ${up}+! Повтори ещё раз — если снова получится, добавим вес`;}
  else why=`Оставь ${dec(b)} кг и добавь по 1 повтору`;
- if(!dl&&gapWeeks(P.W,W)>0){t=t*0.9;cls="down";why=`После перерыва в тренировках −10%: ${why?why.charAt(0).toLowerCase()+why.slice(1):"вес как прошлый раз"}`;}
+ if(!dl&&gapWeeks(P.W,W)>0&&breakDays(P,W,i)>10){t=b*0.9;cls="down";why=`Был перерыв больше 10 дней — начни на 10% легче прошлого раза (${dec(b)} кг)`;}
  if(mu<1){if(dl){if(mu<0.7){t=b*mu;why=`Разгрузка совпала с фазой «${e.ph.name}»: −${Math.round((1-mu)*100)}% от ${dec(b)} кг`;}}
-  else{why+=`${why?". ":""}По плану ${dec(rr(t))} кг, по циклу −${Math.round((1-mu)*100)}%`;t=t*mu;cls="same";}}
+  else{why+=`${why?". ":""}По плану ${dec(rr(t))} кг, по циклу −${Math.round((1-mu)*100)}%`;t=t<b?Math.min(t,b*mu):t*mu;cls="same";}} // скидки не перемножаем
  return{w:rr(t),why,cls};}
 function sugW(W,i,s,e){const I=sugInfo(W,i,s,e);return I?I.w:null;}
 function scheme(e){const lu=lowUp(e.reps);
@@ -979,15 +988,21 @@ function payBox(){const tg=window.Telegram?.WebApp;return`<div class="lockov"><d
  <p class="hint">Оплатил в Kaspi? Пришли чек боту — <a href="${esc(API.bot||"#")}" id="botLink" target="_blank" rel="noopener">открыть бота</a>. После проверки откроется всё, твои веса сохранятся.</p></div></div>`;}
 document.addEventListener("click",ev=>{const a=ev.target.closest("#payBtn,#botLink");if(!a)return;const tg=window.Telegram?.WebApp;if(!tg)return;ev.preventDefault();
  if(a.id==="botLink"&&tg.openTelegramLink)tg.openTelegramLink(a.href);else if(tg.openLink)tg.openLink(a.href);else location.href=a.href;});
+function weekText(W){const w=W%4,m=Math.floor(W/4)+1,t=tplOf(W,0),a=exRow(W,t,0,0),o=exRow(W,t,2,0);
+ const sch=x=>`${x.sets} ${plural(x.sets,"подход","подхода","подходов")} × ${dash(x.reps)}`;
+ const plan=a.sets===o.sets&&a.reps===o.reps?sch(a):`Главные — ${sch(a)}, остальные — ${sch(o)}`;
+ const say=isHome()?["Привыкаем к кругу. Работай спокойно, дыхание ровное.","Работаем чуть дольше, отдыхаем чуть меньше.","Самая бодрая неделя блока.","Лёгкая неделя: на круг меньше, восстанавливаемся."][w]
+  :["Учим технику, запоминаем рабочие веса.",`Вес растёт: ${G("сделал","сделала")} верх повторов во всех подходах — добавь шаг веса.`,NOV()&&m===1?"Тот же диапазон повторов — добавляй повтор или шаг веса.":"Самая тяжёлая неделя блока.","Лёгкая неделя: веса 70%, меньше подходов. В конце — замеры."][w];
+ return isHome()?say:`${say} ${plan}.`;}
 function renderWeekMap(){const g=S.goal;let h="";
- for(let m=0;m<3;m++){h+=`<div class="blk"><span class="bt"><b>${["Лёгкий старт","Больше работы","Тяжёлые веса"][m]}</b> · недели ${m*4+1}–${m*4+4}</span><div class="wk">`;
+ for(let m=0;m<3;m++){h+=`<div class="blk"><span class="bt"><b>${(isHome()?["Привыкаем","Дольше работаем","Самый бодрый блок"]:["Лёгкий старт","Больше работы","Тяжёлые веса"])[m]}</b> · недели ${m*4+1}–${m*4+4}</span><div class="wk">`;
   for(let w=0;w<4;w++){const W=m*4+w;h+=`<button type="button" class="${w===3?"dl":""}" aria-pressed="${W===S.W}" data-w="${W}" aria-label="Неделя ${W+1}${w===3?", разгрузка":""}${locked(W)?", закрыта":""}">${locked(W)?"🔒":W+1}${w===3?"<small>лёгкая</small>":""}</button>`;}
   h+=`</div></div>`;}
  $("weekMap").innerHTML=h;}
 function renderProgram(){
  const g=S.goal,W=S.W,m=Math.floor(W/4)+1,w=W%4;
  renderWeekMap();renderCycleInfo();renderInj();
- $("weekInfo").innerHTML=isHome()?`<b>Неделя ${W+1} из 12 · блок ${m} «${HOME_MESO[m-1]}» · дома</b><span>${esc(HOME_WEEK[m-1][w])}${W>=4&&S.level==="Новичок"?" Стало легко? Переключись на средний уровень — в анкете «Как у тебя с нагрузкой?» выбери «Средний».":""}</span>`:(S.level==="Новичок"?`<b>Неделя ${W+1} из 12 · ${w===3?"лёгкая неделя, отдыхаем":["привыкаем, учим движения","веса растут","самые тяжёлые веса курса"][m-1]}</b>`:`<b>Неделя ${W+1} из 12 · блок ${m} «${MESO_NAME[g][m-1]}» · ${WEEKNAMES[w].toLowerCase()}</b>`)+`<span>${esc(WEEK_METHOD[g][m][w])}</span>`;
+ $("weekInfo").innerHTML=isHome()?`<b>Неделя ${W+1} из 12 · блок ${m} «${HOME_MESO[m-1]}» · дома</b><span>${esc(weekText(W))}${W>=4&&S.level==="Новичок"?" Стало легко? Переключись на средний уровень — в анкете «Как у тебя с нагрузкой?» выбери «Средний».":""}</span>`:(S.level==="Новичок"?`<b>Неделя ${W+1} из 12 · ${w===3?"лёгкая неделя, отдыхаем":["привыкаем, учим движения","веса растут","самые тяжёлые веса курса"][m-1]}</b>`:`<b>Неделя ${W+1} из 12 · блок ${m} «${MESO_NAME[g][m-1]}» · ${WEEKNAMES[w].toLowerCase()}</b>`)+`<span>${esc(weekText(W))}</span>`;
  $("levelOrg").innerHTML=isHome()?`<b>Как делать (${S.level==="Новичок"?"лёгкий":"средний"} уровень):</b> ${S.level==="Новичок"?"Без прыжков и без нагрузки на колени. Держись за стул, если нужно. Должно быть тепло и чуть запыхался — но не задыхаешься.":"Без прыжков, но в быстром темпе. Должно быть жарко, говорить можно короткими фразами."}`:`<b>Как делать (${S.level.toLowerCase()}):</b> ${esc(LEVEL_T[g][S.level][2])}`;
  const endD=(()=>{const st=$("start").value;if(!st)return"";const d=new Date(st+"T00:00:00");if(isNaN(d))return"";d.setDate(d.getDate()+84);return d.toLocaleDateString("ru-RU",{day:"numeric",month:"long"});})();
  $("cycleEnd").innerHTML=`Через 12 недель${endD?` (около ${endD})`:""} вернись с новыми данными: вес, замеры, рабочие веса. Обнови данные анкеты — программа и калории пересчитаются под новые показатели.`;
@@ -1010,21 +1025,21 @@ function renderProgram(){
   html+=`<details class="panel day" data-i="${i}" ${dayOpen(W,i)?"open":""}><summary class="dayhead"><h3>Тренировка ${i+1} · ${DAYL[t]}</h3><span>${dateFor(W,i)}</span></summary>
    ${ph?`<div class="phase" style="--pc:${ph.col}"><span class="pchip">${esc(ph.name)} · ${ph.day}-й день цикла</span><p>${esc(ph.adv)}</p></div>`:""}
    <div class="warm"><h4>Сначала разминка · ${isHome()?"5":ph&&ph.key==="ovu"?"15":"10"} минут. Не пропускай</h4><ol>${warmSteps(t).map(x=>`<li><span><b>${x[0]}:</b> ${esc(x[1])}</span></li>`).join("")}</ol></div>
-   ${isHome()?`<p class="hint" style="margin:0 0 4px"><b>По кругу:</b> упражнения подряд — работа и отдых по таймеру, как написано у каждого. Прошёл все 7 — отдых 1 минута и следующий круг.</p>`:""}${firstTip(W)}${tempoLine(tempos)}<div class="exlist">${rows}</div>
+   ${isHome()?`<p class="hint" style="margin:0 0 4px"><b>По кругу:</b> упражнения подряд — работа и отдых по таймеру, как написано у каждого. ${G("Прошёл","Прошла")} все 7 — отдых 1 минута и следующий круг.</p>`:""}${firstTip(W)}${tempoLine(tempos)}<div class="exlist">${rows}</div>
    <div class="daytot"><span>${isHome()?`Между кругами — 1 минута отдыха. Вся тренировка ≈ ${homeMin(W,t,i)} мин + разминка. Заминка: 3 минуты спокойно походи по дому + растяжка ног, спины и груди. Каждый день: 7 000+ шагов.`:`Вся тренировка ≈ ${gymMin(W,t,i)} мин вместе с разминкой и заминкой. Заминка: 5 минут спокойно на дорожке + растяжка мышц, которые работали.`}</span>${isHome()?"":`<span>${NOV()?"Всего поднято за тренировку":"Тоннаж тренировки"}: <b id="dt_${i}">${fmt(tot)}</b> кг</span>`}</div></details>`;}
  $("daysOut").innerHTML=locked(W)?`<div class="lockwrap"><div class="lockblur" aria-hidden="true" inert>${html}</div>${payBox()}</div>`:html;
  $("prevW").disabled=W===0;$("nextW").disabled=W===11;
  renderBars();}
 function renderBars(){const t=[...Array(12)].map((_,W)=>N()>=2?weekTon(W):0),mx=Math.max(...t,1);
  $("bars").innerHTML=t.map((v,W)=>`<div class="bar ${W===S.W?"cur":W%4===3?"dl":""}" title="Неделя ${W+1}: ${fmt(v)} кг"><i style="height:${Math.max(2,v/mx*100)}px"></i><span>${W+1}</span></div>`).join("");}
-function renderTimeline(){const g=S.goal,cur=Math.floor(S.W/4);$("timeline").innerHTML=(isHome()?HOME_MACRO:MACRO[g]).map((r,i)=>`<div class="tl ${i===cur?"cur":""}"><span class="w">${r[0]}</span><h3>${esc(r[1].replace("Месяц","Блок"))}${i===cur?" · ты здесь":""}</h3><p>${esc(i===3?r[2]+" Вернись сюда с новыми показателями — пересчитаем.":r[2])}</p></div>`).join("");}
+function renderTimeline(){const g=S.goal,cur=Math.floor(S.W/4);$("timeline").innerHTML=(isHome()?HOME_MACRO:MACRO[g]).map((r,i)=>`<div class="tl ${i===cur?"cur":""}"><span class="w">${r[0]}</span><h3>${esc(r[1].replace("Месяц","Блок"))}${i===cur?" · ты здесь":""}</h3><p>${esc((i===3?r[2]+" Вернись сюда с новыми показателями — пересчитаем.":r[2]).replace("Если набрал",G("Если набрал","Если набрала")))}</p></div>`).join("");}
 function renderDays(){$("dayPick").innerHTML=DAYN.map((d,i)=>`<button type="button" aria-pressed="${S.days.includes(i)}" data-day="${i}">${d}</button>`).join("");
  const n=N();$("dayMsg").textContent=n<2?"Отметь хотя бы 2 дня.":`${n} ${plural(n,"тренировка","тренировки","тренировок")} в неделю. Тренировки A, B, C идут по очереди${n!==3?" и переходят на следующую неделю":""}.`;}
 function renderChoices(){const hm=isHome();document.querySelectorAll("[data-place]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.place===(S.place||"gym")));$("goalChoices").hidden=hm;$("homeGoal").hidden=!hm;
  {const LB=hm?{"Новичок":["Лёгкий","Только начинаю, давно не двигался"],"Средний":["Средний","Немного двигаюсь, хочу бодрее"]}:{"Новичок":["Новичок","Занимаюсь меньше 6 месяцев или после долгого перерыва"],"Средний":["Средний","Регулярно 6 месяцев – 2 года, знаю технику присед, жим, тяги"]};
   document.querySelectorAll("[data-level]").forEach(b=>{const l=LB[b.dataset.level];b.hidden=hm&&b.dataset.level==="Продвинутый";if(l)b.innerHTML=`<b>${l[0]}</b><span>${l[1]}</span>`;});}
  document.querySelectorAll("[data-goal]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.goal===S.goal));document.querySelectorAll("[data-level]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.level===S.level));$("exTag").hidden=touched;}
-function renderMe(){document.body.classList.toggle("done",!!touched);$("meBar").hidden=!touched;
+function renderMe(){document.body.classList.toggle("done",!!touched);document.body.classList.toggle("home",isHome());$("meBar").hidden=!touched;
  $("meTxt").textContent=[$("name").value,($("age").value?$("age").value+" лет":""),($("weight").value?$("weight").value+" кг":""),isHome()?"дома":"зал",GOAL_RU[S.goal]].filter(Boolean).join(" · ");}
 function editMode(on){document.body.classList.toggle("edit",on);(on?$("s1"):$("weekInfo")).scrollIntoView({behavior:"smooth",block:"start"});}
 function renderAll(){renderChoices();renderDays();renderKcal();renderProgram();renderTimeline();renderMe();}
@@ -1071,7 +1086,7 @@ if(!_loaded){
  const ex={0:[[40,15],[42.5,13],[42.5,12]],2:[[50,12],[50,12],[50,11]],4:[[12,15],[12,15]],5:[[10,15],[10,14]]};
  Object.entries(ex).forEach(([s,arr])=>{S.log[`Жиросжигание|Средний|024|0|0|${s}`]={sets:arr.map(([w,r])=>({w:String(w),r:String(r)}))};});}
 
-function renderCycleInfo(){const fem=$("sex").value==="f";$("cycBox").hidden=!fem;$("cycRule").hidden=!fem;
+function renderCycleInfo(){const fem=$("sex").value==="f";$("cycBox").hidden=!fem;$("cycRule").hidden=!(fem&&$("cyc_on").checked);
  const on=cycleOn();$("cycInfo").hidden=!on;$("cycFields").hidden=!$("cyc_on").checked;
  if(!on)return;const Ln=cycLen(),P=cycPer(),ov=Ln-14;
  const rows=[["mens",`1–${P}`,"Энергии меньше, возможны спазмы","Веса −20–30%, на 1 подход меньше, без прыжков и скручиваний. Плохо — прогулка и растяжка"],
@@ -1095,7 +1110,7 @@ function buildCSV(){const head=["Неделя","Блок","Фаза недели
 function buildHTML(){const g=S.goal,nm=$("name").value||"Клиент";
  const k=id=>$(id).textContent;let b="";
  for(let W=0;W<12;W++){if(W%4===0)b+=`<h2>Блок ${Math.floor(W/4)+1} · ${MESO_NAME[g][Math.floor(W/4)]}</h2>`;
-  b+=`<h3>Неделя ${W+1} · ${WEEKNAMES[W%4]}</h3><p class="m">${esc(WEEK_METHOD[g][Math.floor(W/4)+1][W%4])}</p>`;
+  b+=`<h3>Неделя ${W+1} · ${WEEKNAMES[W%4]}</h3><p class="m">${esc(weekText(W))}</p>`;
   for(let i=0;i<N();i++){const t=tplOf(W,i),ph=phaseFor(W,i);
    b+=`<div class="s"><h4>Тренировка ${i+1} · ${DAYL[t]} — ${dateFor(W,i)}${ph?` · ${esc(ph.name)}`:""}</h4>${ph?`<p class="ph">${esc(ph.adv)}</p>`:""}<p class="w">Разминка ${ph&&ph.key==="ovu"?15:10} мин: ${warmSteps(t).map(x=>esc(x[0]+": "+x[1])).join(" · ")}</p>
    <table><tr><th>№</th><th>Упражнение</th><th>Подходы</th><th>Повторы</th><th>Отдых</th><th>Запас</th><th>Рекомендация</th><th>Вес × повторы (сделано)</th><th>Тоннаж</th></tr>`;
@@ -1420,7 +1435,7 @@ function obRender(){const st=obSteps(),s=st[obI],b=$("obBody");$("obSay").textCo
  if(s.t==="pick"){const cur=s.k==="sex"?$("sex").value:S[s.k];h+=`<div class="ob-opts">${s.opts.map(o=>`<button type="button" class="ob-opt" data-v="${o[0]}" aria-pressed="${touched&&o[0]===cur}"><b>${o[1]}</b>${o[2]?`<span>${o[2]}</span>`:""}</button>`).join("")}</div>`;}
  if(s.t==="fl")h+=`<div class="ob-num"><input class="ob-in" id="obV" type="number" inputmode="decimal" min="1" max="80" step="0.5" value="${esc($("fl_kg").value)}"><span>кг</span></div><div class="ob-num"><input class="ob-in" id="obV2" type="number" inputmode="numeric" min="1" max="24" value="${esc($("fl_mo").value)}"><span>месяцев</span></div><p class="hint">Безопасно — до 1% веса в неделю.</p>`;
  if(s.t==="days")h+=`<div class="ob-days">${DAYN.map((d,i)=>`<button type="button" class="ob-day" data-d="${i}" aria-pressed="${S.days.includes(i)}">${d}</button>`).join("")}</div><p class="hint" id="obErr">Отметь 2–5 дней. Между тренировками лучше день отдыха.</p>`;
- if(s.t==="act")h+=`<div class="ob-opts">${ACT.map((o,i)=>`<button type="button" class="ob-opt" data-act="${i}" aria-pressed="${touched&&(S.act|0)===i}"><b>${o[0]}</b><span>${o[1]}</span></button>`).join("")}</div><p class="hint">Шаги можно посмотреть в телефоне — среднее за неделю. Не уверен — выбери вариант пониже.</p>`;
+ if(s.t==="act")h+=`<div class="ob-opts">${ACT.map((o,i)=>`<button type="button" class="ob-opt" data-act="${i}" aria-pressed="${touched&&(S.act|0)===i}"><b>${o[0]}</b><span>${o[1]}</span></button>`).join("")}</div><p class="hint">Шаги можно посмотреть в телефоне — среднее за неделю. Не ${G("уверен","уверена")} — выбери вариант пониже.</p>`;
  if(s.t==="start"){const td=new Date(),iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   h+=`<input class="ob-in" id="obV" type="date" min="${iso(td)}" value="${esc(touched&&$("start").value>=iso(td)?$("start").value:iso(td))}"><p class="hint" id="obErr">Первая тренировка — в ближайший выбранный день с этой даты.</p>`;}
  if(s.t==="injs")h+=`<div class="ob-opts">${[["none","Нет, всё хорошо"],["lumbar","Поясница: грыжа, протрузия"],["knee","Колено"],["shoulder","Плечо"]].map(o=>`<button type="button" class="ob-opt" data-inj="${o[0]}" aria-pressed="${o[0]==="none"?!S.injs.length:S.injs.includes(o[0])}"><b>${o[1]}</b></button>`).join("")}</div><p class="hint">Можно выбрать несколько.</p>`;
