@@ -114,6 +114,8 @@ details.kbox>summary h2::after{content:" ▸";opacity:.6}details.kbox[open]>summ
 .plate{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-data);font-weight:800;font-size:13px;color:#fff;border:3px solid rgba(0,0,0,.18)}
 .plate.y{color:#1A1F29}
 .exname{font-weight:800;font-size:17px;line-height:1.25}
+select.expick{appearance:none;-webkit-appearance:none;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23888' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 4px center;color:inherit;border:0;border-bottom:1px dashed color-mix(in srgb,var(--fg) 40%,transparent);padding:0 22px 2px 0;font-family:inherit;max-width:100%;cursor:pointer;white-space:normal}
+select.expick option{color:#111;font-weight:500}
 .exmeta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--muted);margin-top:4px}
 .exmeta b{color:var(--fg);font-weight:700}
 .scheme{display:flex;align-items:stretch;border:2px solid var(--fg);border-radius:12px;overflow:hidden;font-family:var(--f-data);min-width:0}
@@ -831,6 +833,9 @@ function renderKcal(){
 /* ---------- program over 12 weeks ---------- */
 const N=()=>S.days.length;
 const tplOf=(W,i)=>(W*N()+i)%3;
+function pickKey(t,s){return `${patSet()[t][s]}|${t}|${s}`;}
+function pickSel(t,s,name){const pat=patSet()[t][s],L=(typeof PAT_LIST!=="undefined"&&PAT_LIST[pat])||[];const opts=L.includes(name)?L:[name,...L];
+ return `<select class="exname expick" data-pk="${pickKey(t,s)}" aria-label="Выбрать упражнение">${opts.map(o=>`<option${o===name?" selected":""}>${esc(o)}</option>`).join("")}</select>`;}
 function secOf(x){const m=String(x).match(/(\d+(?:[.,]\d+)?)(?:\s*[–-]\s*(\d+(?:[.,]\d+)?))?\s*(мин|с)/);if(!m)return 0;const a=parseFloat(m[1]),b=m[2]?parseFloat(m[2]):a;return (a+b)/2*(m[3]==="мин"?60:1);}
 function gymMin(W,t,i){let sec=0;for(let s=0;s<7;s++){const e=exRow(W,t,s,i);if(/мин/.test(e.reps)){sec+=secOf(e.reps);continue;}
   const work=/сек/.test(e.reps)?secOf(e.reps):45;sec+=e.sets*work+(e.sets-1)*secOf(e.rest)+60;}
@@ -866,6 +871,8 @@ function exRow(W,t,s,i){
  const rm=link?num("rm_"+link):NaN;
  const rec=(pct&&rm>0)?Math.round(rm*pct/100/2.5)*2.5:null;
  const e={role,block,name:tp[li],sets,reps,rpe:p.rpe,rest:p.rest,tempo:p.tempo,rec,rpeTxt:RPE_TXT[p.rpe]||""};
+ // Свой выбор упражнения: действует на этот слот этой тренировки во всех неделях
+ {const pk=pickKey(t,s),v=(S.pick||{})[pk];if(v&&v!==e.name){e.name=v;e.pick=true;e.rec=null;}}
  // Изоляция (махи, руки, отведения) не уходит в 6–8 повторов — там только травмы и провалы.
  if(role!=="Кор/Финишер"&&/Махи|Отведение| \+ /.test(e.name)){const lu=lowUp(e.reps);if(lu[0]&&lu[0]<10)e.reps=w===3?"12-15":"10-12";}
  // Планка — на время, а не на повторы с весом.
@@ -874,7 +881,7 @@ function exRow(W,t,s,i){
   // Вход для новичка: на 1–2 неделе в 5-м и 6-м упражнениях — 2 подхода
   if(W<2&&(s===4||s===5)&&e.sets>2)e.sets=2;}
  if(g==="Набор массы"&&lowUp(e.reps)[0]>0&&lowUp(e.reps)[0]<=6&&e.rpeTxt)e.rpeTxt+=" · техника поплыла — стоп";
- if(S.injs.length){const nm=safeNames(t)[s];if(nm!==e.name){e.orig=e.name;e.name=nm;e.rec=null;}
+ if(S.injs.length){const nm=safeNames(t)[s];if(!e.pick&&nm!==e.name){e.orig=e.name;e.name=nm;e.rec=null;}
   if(/тест/.test(e.reps)){e.reps="3-5";e.rpe="7";e.rpeTxt="последние 2–3 раза тяжело, но техника не ломается";}
   {const lu=lowUp(e.reps);if(lu[1]>0&&lu[0]<5){e.reps="5-6";e.rec=null;}}
   if(e.tempo==="вверх взрывно")e.tempo="2-0-1, под контролем";
@@ -1024,7 +1031,7 @@ function renderProgram(){
      cells+=`<div class="set ${done?"done":""}" id="set_${i}_${s}_${k}"><span class="n">${k+1}</span><input aria-label="Подход ${k+1}, вес кг" inputmode="decimal" id="w_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="w" value="${esc(c.w??"")}" placeholder="${ph||(W===0&&k===0?"4 кг":"кг")}"><em>×</em><input aria-label="Подход ${k+1}, повторы" inputmode="numeric" id="r_${i}_${s}_${k}" data-k="${lk(W,i,s)}" data-set="${k}" data-f="r" value="${esc(c.r??"")}" placeholder="${lowUp(e.reps)[0]}"></div>`;
      if(c.w)ph=c.w;}
     body=`<div class="sets">${cells}</div><div class="exfoot"><span>${NOV()?"Всего поднято":"Тоннаж"} <button type="button" class="qi" data-q="ton" aria-label="Что это">?</button>: <span class="ton" id="t_${i}_${s}">${ton||!NOV()?fmt(ton)+" кг":"впиши вес"}</span></span>${tip(W,i,s,e)}</div>`;}
-   rows+=`<div class="ex"><span class="plate ${cls}" style="background:${col}">${e.block}</span><div><div class="exrole" style="color:${col}">${ROLE_WORD[e.role]||""}</div><div class="exname">${esc(e.name)}</div>${EX_NOTE[e.name]?`<div class="exnote">${EX_NOTE[e.name]}</div>`:/ \+ /.test(e.name)?e.noSS?`<div class="exnote">Первые 2 недели — не подряд: сначала все подходы первого упражнения, потом второго. Отдых как обычно.</div>`:`<div class="exnote">Суперсет: сделай оба упражнения подряд без отдыха, отдых — после второго. Вес пиши по первому упражнению.</div>`:""}${noviceNote(W,e)}${TECH[e.name]?`<button type="button" class="techbtn" data-tech="${esc(e.name)}">▶ Техника</button>`:""}<div class="exmeta">${meta.map(x=>`<span>${x}</span>`).join("")}</div></div>${scheme(e)}
+   rows+=`<div class="ex"><span class="plate ${cls}" style="background:${col}">${e.block}</span><div><div class="exrole" style="color:${col}">${ROLE_WORD[e.role]||""}</div>${isHome()||e.name==="Спокойная ходьба или растяжка"?`<div class="exname">${esc(e.name)}</div>`:pickSel(t,s,e.name)}${EX_NOTE[e.name]?`<div class="exnote">${EX_NOTE[e.name]}</div>`:/ \+ /.test(e.name)?e.noSS?`<div class="exnote">Первые 2 недели — не подряд: сначала все подходы первого упражнения, потом второго. Отдых как обычно.</div>`:`<div class="exnote">Суперсет: сделай оба упражнения подряд без отдыха, отдых — после второго. Вес пиши по первому упражнению.</div>`:""}${noviceNote(W,e)}${TECH[e.name]?`<button type="button" class="techbtn" data-tech="${esc(e.name)}">▶ Техника</button>`:""}<div class="exmeta">${meta.map(x=>`<span>${x}</span>`).join("")}</div></div>${scheme(e)}
     ${e.orig?`<div class="swapnote"><b>Вместо «${esc(e.orig)}»</b> — бережнее к ${injWord()}</div>`:""}${isPair?`<div class="pair">${e.block} + ${e.block.replace("1","2")}: делай подряд без отдыха, отдых после второго</div>`:""}${body}</div>`;}
   const st=RAMP_STEPS[t],ph=phaseFor(W,i);
   html+=`<details class="panel day" data-i="${i}" ${dayOpen(W,i)?"open":""}><summary class="dayhead"><h3>Тренировка ${i+1} · ${DAYL[t]}</h3><span>${dateFor(W,i)}</span></summary>
@@ -1050,6 +1057,7 @@ function editMode(on){document.body.classList.toggle("edit",on);(on?$("s1"):$("w
 function renderAll(){renderChoices();renderDays();renderKcal();renderProgram();renderTimeline();renderMe();}
 function markTouched(){if(!touched){touched=true;$("exTag").hidden=true;renderMe();}}
 
+document.addEventListener("change",ev=>{const x=ev.target.closest&&ev.target.closest("select.expick");if(!x)return;S.pick=S.pick||{};S.pick[x.dataset.pk]=x.value;renderProgram();save();});
 document.addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)return;
  if(b.dataset.place){S.place=b.dataset.place;if(S.place==="home"){S.goal="Жиросжигание";if(S.level==="Продвинутый")S.level="Средний";}markTouched();renderAll();save();}
  else if(b.dataset.goal){S.goal=b.dataset.goal;S.pace=1;renderAll();save();}
