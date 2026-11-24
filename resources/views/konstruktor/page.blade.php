@@ -792,6 +792,9 @@ function renderKcal(){
  const blank=m=>{["k_tdee","k_target","k_fc","m_p","m_f","m_c"].forEach(i=>$(i).textContent="—");$("k_note").textContent=m;$("splitBox").innerHTML="";};
  if(!(a>0&&h>0&&w>0))return blank("Впиши возраст, рост и вес в анкете (кнопка «Изменить»).");
  const bmr=10*w+6.25*h-5*a+(sex==="m"?5:-161),tdee=bmr*coef+(S.kadj|0);
+ // Белок — от «сухой» массы (вес без жира), оценка по формуле Боера из роста и веса. Калории — по-прежнему Миффлин.
+ const lbm=Math.round(sex==="m"?0.407*w+0.267*h-19.2:0.252*w+0.473*h-48.3);
+ const protTxt=k=>`г · ${dec(k)} г × ${lbm} кг сухой массы (вес без жира — оценка по росту и весу)`;
  let target,p,pTxt,f,fBase,note,floored=false;
  $("k_tdee").textContent=fmt(tdee);
  if(fat){const kg=num("fl_kg"),mo=num("fl_mo");
@@ -800,7 +803,7 @@ function renderKcal(){
   const need=kg*7700/(mo*30.4),steps=+$("fl_mv").value,mvK=Math.round(steps*0.0005*w/10)*10;
   const needR=Math.round(need);let foodReal=Math.max(0,needR-mvK);target=Math.round(tdee)-foodReal;if(target<bmr){target=Math.round(bmr);floored=true;foodReal=Math.round(tdee)-target;}
   const pctWeek=need*7/7700/w*100,maxDaily=w*0.01*7700/7,minMo=Math.ceil(kg*7700/(maxDaily*30.4));
-  const desired=w-kg,pk=S.level==="Продвинутый"?2.2:1.8,fk=sex==="f"?0.9:0.8;p=Math.round(desired*pk);pTxt=`г · ${dec(pk)} г × желаемый вес ${dec(Math.round(desired*10)/10)} кг`;
+  const desired=w-kg,pk=S.level==="Продвинутый"?2.8:2.4,fk=sex==="f"?0.9:0.8;p=Math.round(lbm*pk);pTxt=protTxt(pk);
   fBase=desired;f=Math.round(desired*fk);
   $("k_target_lab").textContent="Ешь в день";$("k_diff").textContent=`ккал — минус ${fmt(foodReal)} к норме из еды`;
   const end=(()=>{const st=$("start").value;if(!st)return"";const d=new Date(st+"T00:00:00");if(isNaN(d))return"";d.setMonth(d.getMonth()+Math.round(mo));return d.toLocaleDateString("ru-RU");})();
@@ -810,8 +813,8 @@ function renderKcal(){
    <p class="hint">${steps?"Новое движение — то, чего в твоём дне сейчас нет. 1 000 шагов ≈ "+Math.round(1000*0.0005*w)+" ккал при твоём весе.":"Без нового движения весь дефицит ложится на еду — держаться так тяжелее, голод накапливается."}</p>
    ${pctWeek>1?`<p class="warnline">Слишком быстро: это ${dec(pctWeek.toFixed(1))}% веса в неделю, а безопасно — до 1%. Поставь хотя бы ${minMo} ${plural(minMo,"месяц","месяца","месяцев")}.</p>`:""}
    ${floored?`<p class="warnline">Еда упёрлась в базовый обмен (${fmt(bmr)} ккал) — ниже не опускаемся, чтобы не терять мышцы. Добавь движение или месяцы.</p>`:""}`;
-  note=`Белок считаем от желаемого веса: ${p} г в день. Так уходит жир, а не мышцы. Это примерно ${Math.round(p/25)} порций по 100–120 г мяса, рыбы или творога.`;}
- else{const adj=opts[S.pace][1];target=Math.round(tdee*(1+adj)/10)*10;const ref=Math.min(w,Math.round(25*(h/100)**2));p=Math.round(ref*1.8);pTxt=ref<w?`г · 1,8 г × ${ref} кг (вес без лишнего жира для твоего роста)`:`г · 1,8 г на кг веса`;fBase=ref;f=Math.round(ref*1.0);
+  note=`Белок считаем от сухой массы (мышцы, кости, органы — без жира): ${p} г в день. Так уходит жир, а не мышцы. Это примерно ${Math.round(p/25)} порций по 100–120 г мяса, рыбы или творога.`;}
+ else{const adj=opts[S.pace][1];target=Math.round(tdee*(1+adj)/10)*10;const ref=Math.min(w,Math.round(25*(h/100)**2));p=Math.round(lbm*2.4);pTxt=protTxt(2.4);fBase=ref;f=Math.round(ref*1.0);
   const diff=Math.round(target-tdee);$("k_target_lab").textContent=g==="Набор массы"?"Ешь в день (профицит)":"Ешь в день";
   $("k_diff").textContent=diff===0?"ккал — ровно норма":`ккал — это +${fmt(diff)} к норме`;
   if(g==="Набор массы"){const lo=Math.round(w*0.01*10)/10,hi=Math.round(w*0.015*10)/10,lv={"Новичок":[lo,hi],"Средний":[Math.round(lo*5)/10,Math.round(hi*5)/10],"Продвинутый":[Math.round(lo*2.5)/10,Math.round(hi*2.5)/10]}[S.level];
