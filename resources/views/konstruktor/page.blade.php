@@ -800,8 +800,8 @@ function renderKcal(){
   const need=kg*7700/(mo*30.4),steps=+$("fl_mv").value,mvK=Math.round(steps*0.0005*w/10)*10;
   const needR=Math.round(need);let foodReal=Math.max(0,needR-mvK);target=Math.round(tdee)-foodReal;if(target<bmr){target=Math.round(bmr);floored=true;foodReal=Math.round(tdee)-target;}
   const pctWeek=need*7/7700/w*100,maxDaily=w*0.01*7700/7,minMo=Math.ceil(kg*7700/(maxDaily*30.4));
-  const desired=w-kg;p=Math.round(desired*1.8);pTxt=`г · 1,6–2 г × желаемый вес ${dec(Math.round(desired*10)/10)} кг = ${Math.round(desired*1.6)}–${Math.round(desired*2)} г`;
-  fBase=desired;f=Math.round(desired*0.8);
+  const desired=w-kg,pk=S.level==="Продвинутый"?2.2:1.8,fk=sex==="f"?0.9:0.8;p=Math.round(desired*pk);pTxt=`г · ${dec(pk)} г × желаемый вес ${dec(Math.round(desired*10)/10)} кг`;
+  fBase=desired;f=Math.round(desired*fk);
   $("k_target_lab").textContent="Ешь в день";$("k_diff").textContent=`ккал — минус ${fmt(foodReal)} к норме из еды`;
   const end=(()=>{const st=$("start").value;if(!st)return"";const d=new Date(st+"T00:00:00");if(isNaN(d))return"";d.setMonth(d.getMonth()+Math.round(mo));return d.toLocaleDateString("ru-RU");})();
   $("k_fc").textContent=`−${dec(kg)} кг`;$("k_fc_sub").textContent=`≈ −${dec((need*7/7700).toFixed(2))} кг в неделю · ${dec(Math.round(desired*10)/10)} кг${end?` к ${end}`:""}`;
@@ -811,7 +811,7 @@ function renderKcal(){
    ${pctWeek>1?`<p class="warnline">Слишком быстро: это ${dec(pctWeek.toFixed(1))}% веса в неделю, а безопасно — до 1%. Поставь хотя бы ${minMo} ${plural(minMo,"месяц","месяца","месяцев")}.</p>`:""}
    ${floored?`<p class="warnline">Еда упёрлась в базовый обмен (${fmt(bmr)} ккал) — ниже не опускаемся, чтобы не терять мышцы. Добавь движение или месяцы.</p>`:""}`;
   note=`Белок считаем от желаемого веса: ${p} г в день. Так уходит жир, а не мышцы. Это примерно ${Math.round(p/25)} порций по 100–120 г мяса, рыбы или творога.`;}
- else{const adj=opts[S.pace][1];target=Math.round(tdee*(1+adj)/10)*10;p=Math.round(w*1.8);pTxt=`г · 1,8 г на кг веса`;fBase=w;f=Math.round(w*1.0);
+ else{const adj=opts[S.pace][1];target=Math.round(tdee*(1+adj)/10)*10;const ref=Math.min(w,Math.round(25*(h/100)**2));p=Math.round(ref*1.8);pTxt=ref<w?`г · 1,8 г × ${ref} кг (вес без лишнего жира для твоего роста)`:`г · 1,8 г на кг веса`;fBase=ref;f=Math.round(ref*1.0);
   const diff=Math.round(target-tdee);$("k_target_lab").textContent=g==="Набор массы"?"Ешь в день (профицит)":"Ешь в день";
   $("k_diff").textContent=diff===0?"ккал — ровно норма":`ккал — это +${fmt(diff)} к норме`;
   if(g==="Набор массы"){const lo=Math.round(w*0.01*10)/10,hi=Math.round(w*0.015*10)/10,lv={"Новичок":[lo,hi],"Средний":[Math.round(lo*5)/10,Math.round(hi*5)/10],"Продвинутый":[Math.round(lo*2.5)/10,Math.round(hi*2.5)/10]}[S.level];
@@ -821,7 +821,7 @@ function renderKcal(){
    note=`Для силы калории в норме или чуть выше. Углеводы — топливо для тяжёлых подходов, не урезай их.`;}}
  const c=Math.max(0,Math.round((target-p*4-f*9)/4));
  $("k_target").textContent=fmt(target);$("m_p").textContent=p;$("m_f").textContent=f;$("m_c").textContent=c;
- $("m_p_s").textContent=`${pTxt} · ${fmt(p*4)} ккал`;$("m_f_s").textContent=`г · ${dec(fat?0.8:1)} г на кг${fat?" желаемого":""} веса · ${fmt(f*9)} ккал`;$("m_c_s").textContent=`г · остаток · ${fmt(c*4)} ккал`;
+ $("m_p_s").textContent=`${pTxt} · ${fmt(p*4)} ккал`;$("m_f_s").textContent=`г · ${dec(Math.round(f/fBase*10)/10)} г на кг${fat?" желаемого":""} веса · ${fmt(f*9)} ккал`;$("m_c_s").textContent=`г · остаток · ${fmt(c*4)} ккал`;
  const tot=p*4+f*9+c*4||1;$("b_p").style.width=(p*4/tot*100)+"%";$("b_f").style.width=(f*9/tot*100)+"%";$("b_c").style.width=(c*4/tot*100)+"%";
  $("k_note").textContent=note;$("kSum").textContent=`Ешь ${fmt(target)} ккал в день · белки ${p} · жиры ${f} · углеводы ${c} г`;}
 
@@ -856,7 +856,9 @@ function exRow(W,t,s,i){
  if(lv==="Новичок"&&m===1&&w<3&&role!=="Кор/Финишер")reps=GEN[g](1,0,t,role).reps; // новичок: весь 1-й блок один диапазон
  if(lv==="Новичок"){const lu=lowUp(reps);if(lu[1]>0&&lu[0]<5)reps="5-6";}
  const sets=p.sets+(role==="Основное"?dSets:0);
- const pct=p.pct!=null?p.pct+dPct:null;
+ const RIR={"6":4,"7":3,"7-8":2.5,"8":2,"8-9":1.5}[p.rpe]??2,top=lowUp(p.reps)[1]||lowUp(p.reps)[0];
+ const pctOf=(tp,rir)=>100/(1+(tp+rir)/30);
+ const pct=p.pct==null?null:w===3?pctOf(lowUp(GEN[g](m,0,t,role).reps)[1],3)*0.75:pctOf(top,RIR);
  const link=li===1?tp[3]:li===2?tp[4]:"";
  const rm=link?num("rm_"+link):NaN;
  const rec=(pct&&rm>0)?Math.round(rm*pct/100/2.5)*2.5:null;
@@ -929,7 +931,7 @@ let openDays=null,openW=-1;
 function dayDone(W,i){for(let s=0;s<7;s++){const L=S.log[lk(W,i,s)];if(L&&(L.done||(L.sets||[]).some(c=>c&&(c.w||c.r))))return true;}return false;}
 function dayOpen(W,i){if(openW!==W||!openDays){openW=W;let f=0;while(f<N()-1&&dayDone(W,f))f++;openDays=new Set([f]);}return openDays.has(i);}
 document.addEventListener("toggle",ev=>{const d=ev.target;if(!d.classList||!d.classList.contains("day")||!openDays)return;const i=+d.dataset.i;d.open?openDays.add(i):openDays.delete(i);},true);
-function firstTip(W){if(isHome()||W>0)return"";
+function firstTip(W){if(isHome()||W>0||!NOV())return"";
  return`<div class="firstw"><b>Как выбрать первый вес.</b> Знаешь, с каким весом делаешь упражнение, — впиши его. Только ${G("пришёл","пришла")} в зал — начни с пустого грифа или самой лёгкой гантели, на тренажёре — с самого лёгкого веса. ${G("Сделал","Сделала")} 15 раз легко — в следующем подходе +5 кг (гантели — на 1–2 кг тяжелее).</div>`;}
 function noviceNote(W,e){if(isHome()||S.level!=="Новичок")return"";const n=[];
  if(W<2&&/Румынская тяга/.test(e.name))n.push("Первые 2 недели: сначала 1 подход без веса у зеркала, потом гантели 4–6 кг.");
