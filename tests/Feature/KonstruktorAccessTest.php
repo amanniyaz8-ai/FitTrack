@@ -404,4 +404,29 @@ class KonstruktorAccessTest extends TestCase
         $this->hook($this->msg(7003, ['text' => '71']))->assertNoContent();
         $this->assertNull(Student::where('telegram_id', 7003)->first());
     }
+
+    public function test_trainer_keeps_clients_separately(): void
+    {
+        $t = Student::create(['telegram_id' => self::ADMIN, 'membership_checked_at' => now()]);
+        $this->withSession(['konstruktor_student_id' => $t->id]);
+        $this->post('/konstruktor/profiles', ['name' => 'Айгерим'])->assertRedirect();
+        $p = $t->profiles()->first();
+        $this->assertSame('Айгерим', $p->name);
+        $this->get('/konstruktor?p='.$p->id)->assertOk()->assertSee('Чья программа')->assertSee('Удалить клиента');
+        $this->putJson('/konstruktor/state?p='.$p->id, ['S' => ['goal' => 'Жиросжигание'], 'savedAt' => 5])->assertNoContent();
+        $this->assertSame('Жиросжигание', $p->fresh()->state['S']['goal']);
+        $this->assertNull($t->fresh()->state);
+
+        // обычный ученик: ни выбора клиентов, ни доступа к чужому профилю
+        $u = Student::create(['telegram_id' => 77, 'membership_checked_at' => now()]);
+        $this->withSession(['konstruktor_student_id' => $u->id]);
+        $this->get('/konstruktor')->assertOk()->assertDontSee('Чья программа');
+        $this->post('/konstruktor/profiles', ['name' => 'X'])->assertForbidden();
+        $this->putJson('/konstruktor/state?p='.$p->id, ['S' => ['goal' => 'Набор массы']])->assertStatus(404);
+        $this->assertSame('Жиросжигание', $p->fresh()->state['S']['goal']);
+
+        $this->withSession(['konstruktor_student_id' => $t->id]);
+        $this->delete('/konstruktor/profiles/'.$p->id)->assertRedirect();
+        $this->assertSame(0, $t->profiles()->count());
+    }
 }

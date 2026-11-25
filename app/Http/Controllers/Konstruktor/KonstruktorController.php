@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Konstruktor;
 
+use App\Models\KonstruktorProfile;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureStudent;
 use App\Models\Student;
@@ -20,7 +21,16 @@ class KonstruktorController extends Controller
             $this->mark($student, ['first_open_at' => now()]);
         }
 
-        return view('konstruktor.page', ['student' => $student]);
+        $profile = $this->profileFrom($request, $student);
+        if ($request->filled('p') && ! $profile) {
+            return redirect()->route('konstruktor.show');
+        }
+
+        return view('konstruktor.page', [
+            'student' => $student,
+            'profile' => $profile,
+            'profiles' => $student->isTrainer() ? $student->profiles()->get(['id', 'name']) : collect(),
+        ]);
     }
 
     /** Одноразовая ссылка, чтобы открыть конструктор во внешнем браузере уже вошедшим (из Telegram там нельзя скачивать файлы). */
@@ -112,6 +122,10 @@ class KonstruktorController extends Controller
     public function saveState(Request $request)
     {
         $student = $request->attributes->get('student');
+        $profile = $this->profileFrom($request, $student);
+        if ($request->filled('p') && ! $profile) {
+            return response()->json(['error' => 'no_profile'], 404);
+        }
         $raw = $request->getContent();
 
         if (strlen($raw) > 1_000_000) {
@@ -124,10 +138,16 @@ class KonstruktorController extends Controller
         }
 
         // Старая копия (другое устройство, старая вкладка) не затирает более свежую.
-        $old = is_array($student->state) ? (int) ($student->state['savedAt'] ?? 0) : 0;
+        $owner = $profile ?? $student;
+        $old = is_array($owner->state) ? (int) ($owner->state['savedAt'] ?? 0) : 0;
         $new = (int) ($data['savedAt'] ?? 0);
         if ($old && $new && $new < $old) {
-            return response()->json(['error' => 'stale', 'state' => $student->state], 409);
+            return response()->json(['error' => 'stale', 'state' => $owner->state], 409);
+        }
+        if ($profile) {
+            $profile->update(['state' => $data]);
+
+            return response()->noContent();
         }
 
         $marks = [];
@@ -229,5 +249,37 @@ class KonstruktorController extends Controller
         Cookie::queue(Cookie::forget(EnsureStudent::COOKIE));
 
         return redirect()->route('konstruktor.login');
+    }
+
+    /** Клиент тренера по ?p=ID — только свой и только в режиме тренера. */
+    private function profileFrom(Request $request, Student $student): ?KonstruktorProfile
+    {
+        if (! $request->filled('p') || ! $student->isTrainer()) {
+            return null;
+        }
+
+        return $student->profiles()->whereKey((int) $request->input('p'))->first();
+    }
+
+    public function addProfile(Request $request)
+    {
+        $student = $request->attributes->get('student');
+        abort_unless($student->isTrainer(), 403);
+        $name = trim((string) $request->input('name'));
+        if ($name === '' || mb_strlen($name) > 60 || $student->profiles()->count() >= 200) {
+            return redirect()->route('konstruktor.show');
+        }
+        $p = $student->profiles()->create(['name' => $name]);
+
+        return redirect()->route('konstruktor.show', ['p' => $p->id]);
+    }
+
+    public function deleteProfile(Request $request, int $id)
+    {
+        $student = $request->attributes->get('student');
+        abort_unless($student->isTrainer(), 403);
+        $student->profiles()->whereKey($id)->delete();
+
+        return redirect()->route('konstruktor.show');
     }
 }

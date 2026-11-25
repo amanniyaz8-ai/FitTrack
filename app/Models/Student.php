@@ -8,9 +8,10 @@ use Illuminate\Support\Str;
 
 class Student extends Model
 {
-    protected $fillable = ['telegram_id', 'telegram_username', 'first_name', 'state', 'membership_checked_at', 'last_login_at', 'first_open_at', 'onboarded_at', 'downloaded_at', 'last_log_at', 'paid_at', 'week1_nudged_at', 'weigh_asked_at', 'weigh_at', 'weigh_kg'];
+    protected $fillable = ['telegram_id', 'telegram_username', 'first_name', 'state', 'membership_checked_at', 'last_login_at', 'first_open_at', 'onboarded_at', 'downloaded_at', 'last_log_at', 'paid_at', 'week1_nudged_at', 'weigh_asked_at', 'weigh_at', 'weigh_kg', 'is_trainer'];
 
     protected $casts = [
+        'is_trainer' => 'boolean',
         'state' => 'array',
         'membership_checked_at' => 'datetime',
         'last_login_at' => 'datetime',
@@ -45,5 +46,18 @@ class Student extends Model
         ]);
 
         return $plain;
+    }
+
+    /** Режим тренера: свои клиенты в конструкторе. Админ бота — всегда. */
+    public function isTrainer(): bool
+    {
+        $admin = (int) config('telegram.admin_id');
+
+        return (bool) $this->is_trainer || ($admin && (int) $this->telegram_id === $admin);
+    }
+
+    public function profiles()
+    {
+        return $this->hasMany(KonstruktorProfile::class)->orderBy('name');
     }
 }

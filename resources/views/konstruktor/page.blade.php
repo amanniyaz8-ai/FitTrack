@@ -286,11 +286,35 @@ details.howto>summary{cursor:pointer;font-weight:700;color:var(--accent)}details
 </head><body>
 @endverbatim
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>window.TP_API = {!! json_encode(['state' => $student->state, 'uid' => $student->id, 'saveUrl' => route('konstruktor.state'), 'csrfUrl' => route('konstruktor.csrf'), 'dlMark' => route('konstruktor.downloaded'), 'browserLink' => route('konstruktor.browserLink'), 'sendFile' => route('konstruktor.sendFile'), 'csrf' => csrf_token(), 'paid' => $student->isPaid(), 'price' => \App\Services\CoursePrice::text(), 'priceLine' => \App\Services\CoursePrice::line(), 'payUrl' => \App\Services\CoursePrice::payUrl(), 'bot' => 'https://t.me/'.ltrim((string) (config('telegram.bot_username') ?: 'samsebetrener_kz_bot'), '@')], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
+<script>window.TP_API = {!! json_encode(['state' => $profile ? $profile->state : $student->state, 'uid' => $student->id.($profile ? '-p'.$profile->id : ''), 'saveUrl' => route('konstruktor.state', $profile ? ['p' => $profile->id] : []), 'client' => $profile?->name, 'csrfUrl' => route('konstruktor.csrf'), 'dlMark' => route('konstruktor.downloaded'), 'browserLink' => route('konstruktor.browserLink'), 'sendFile' => route('konstruktor.sendFile'), 'csrf' => csrf_token(), 'paid' => $student->isPaid(), 'price' => \App\Services\CoursePrice::text(), 'priceLine' => \App\Services\CoursePrice::line(), 'payUrl' => \App\Services\CoursePrice::payUrl(), 'bot' => 'https://t.me/'.ltrim((string) (config('telegram.bot_username') ?: 'samsebetrener_kz_bot'), '@')], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
 <form id="logoutForm" method="POST" action="{{ route('konstruktor.logout') }}" style="position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:20;margin:0">
     @csrf
     <button type="submit" style="font:600 12px system-ui,sans-serif;padding:6px 12px;border-radius:999px;border:1px solid #D3D8E1;background:#fff;color:#5B6474;cursor:pointer">Выйти{{ $student->first_name ? ' · '.e($student->first_name) : '' }}</button>
 </form>
+@if($student->isTrainer())
+<div class="cbar">
+  <form method="GET" action="{{ route('konstruktor.show') }}" class="cpick">
+    <label for="cSel">Чья программа</label>
+    <select id="cSel" name="p" onchange="if(this.value==='new'){document.getElementById('cAdd').hidden=false;document.getElementById('cName').focus();}else{this.form.submit();}">
+      <option value="">Я ({{ $student->first_name ?: 'мой аккаунт' }})</option>
+      @foreach($profiles as $pr)<option value="{{ $pr->id }}" @selected($profile && $profile->id === $pr->id)>{{ $pr->name }}</option>@endforeach
+      <option value="new">+ Новый клиент</option>
+    </select>
+  </form>
+  <form method="POST" action="{{ route('konstruktor.profiles.add') }}" id="cAdd" class="cadd" hidden>@csrf
+    <input id="cName" name="name" maxlength="60" placeholder="Имя клиента" required><button type="submit">Добавить</button>
+  </form>
+  @if($profile)
+  <form method="POST" action="{{ route('konstruktor.profiles.delete', $profile->id) }}" onsubmit="return confirm('Удалить клиента «{{ $profile->name }}» со всеми записями? Вернуть будет нельзя.')">@csrf @method('DELETE')
+    <button type="submit" class="cdel">Удалить клиента</button>
+  </form>
+  @endif
+</div>
+<style>.cbar{max-width:880px;margin:10px auto 0;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--surface,#fff);border:2px solid #1E4FD8;border-radius:14px;font:600 14px system-ui,sans-serif;color:var(--fg,#111)}
+.cpick{display:flex;gap:8px;align-items:center;flex:1 1 240px}.cbar select,.cbar input{font:600 15px system-ui,sans-serif;padding:8px 10px;border-radius:10px;border:1px solid #9aa3b2;background:transparent;color:inherit;flex:1;min-width:0}
+.cbar select option{color:#111}.cadd{display:flex;gap:8px;flex:1 1 240px}.cbar button{font:600 14px system-ui,sans-serif;padding:8px 12px;border-radius:10px;border:0;background:#1E4FD8;color:#fff;cursor:pointer}.cbar .cdel{background:transparent;color:#B3261E;border:1px solid #B3261E}
+@media (max-width:520px){.cbar{margin:8px 12px 0}}</style>
+@endif
 @verbatim
 
 <div class="wrap">
@@ -1095,6 +1119,7 @@ $("resetBtn").addEventListener("click",()=>{if(!resetArmed){resetArmed=true;$("r
  S.log={};resetArmed=false;$("resetBtn").textContent="Очистить мои записи весов";$("resetMsg").textContent="Записи очищены";renderProgram();renderBars();save();});
 
 const _loaded=load();if(_loaded&&_dirty)setTimeout(save,0);
+if(API&&API.client&&!$("name").value)$("name").value=API.client;
 if(!_loaded){
  const ex={0:[[40,15],[42.5,13],[42.5,12]],2:[[50,12],[50,12],[50,11]],4:[[12,15],[12,15]],5:[[10,15],[10,14]]};
  Object.entries(ex).forEach(([s,arr])=>{S.log[`Жиросжигание|Средний|024|0|0|${s}`]={sets:arr.map(([w,r])=>({w:String(w),r:String(r)}))};});}
